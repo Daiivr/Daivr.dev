@@ -1,0 +1,236 @@
+
+/* Backdrop oscuro con glow suave que hace match con el fondo de la web */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.18), transparent 60%),
+    rgba(2, 6, 23, 0.86);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  z-index: 2000;
+}
+
+/* Tarjeta tipo glass con borde degradado como las section-card */
+.modal-card {
+  position: relative;
+  width: min(100%, 26rem);
+  border-radius: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  color: #e5e7eb;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.20), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.18), transparent 55%),
+    rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.95),
+    0 0 0 1px rgba(15, 23, 42, 1);
+  overflow: hidden;
+  animation: modal-pop 0.18s ease-out;
+}
+
+/* Borde glow degradado */
+.modal-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.9),
+    rgba(94, 234, 212, 0.8),
+    rgba(244, 114, 182, 0.95)
+  );
+  -webkit-mask: 
+    linear-gradient(#000 0 0) content-box, 
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Contenido real encima del borde decorativo */
+.modal-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Título y texto del modal */
+.modal-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #f9fafb;
+}
+
+.modal-text {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #9ca3af;
+}
+
+/* Inputs / textareas dentro del modal: mismos vibes que los inputs del sitio */
+.modal-input,
+.modal-card input[type="text"],
+.modal-card input[type="url"],
+.modal-card textarea {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(51, 65, 85, 0.9);
+  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 1));
+  padding: 0.5rem 0.85rem;
+  font-size: 0.8rem;
+  color: #e5e7eb;
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 1);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.modal-input::placeholder,
+.modal-card input::placeholder,
+.modal-card textarea::placeholder {
+  color: #64748b;
+}
+
+.modal-input:focus,
+.modal-card input:focus,
+.modal-card textarea:focus {
+  border-color: #38bdf8;
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.8),
+    0 0 18px rgba(56, 189, 248, 0.35);
+}
+
+/* Separación vertical suave entre campos */
+.modal-card .space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+/* Barra de acciones alineada a la derecha */
+.modal-actions {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+/* Botones base */
+.modal-btn-cancel,
+.modal-btn-save,
+.modal-btn-danger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 1.05rem;
+  border-radius: 9999px;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease;
+  white-space: nowrap;
+}
+
+/* Cancelar: gris azulado */
+.modal-btn-cancel {
+  background: rgba(51, 65, 85, 0.95);
+  color: #e5e7eb;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 1);
+}
+
+.modal-btn-cancel:hover:not(:disabled) {
+  background: rgba(71, 85, 105, 1);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 1), 0 12px 24px rgba(15, 23, 42, 0.8);
+  transform: translateY(-1px);
+}
+
+/* Guardar: degradado celeste/fucsia */
+.modal-btn-save {
+  background: linear-gradient(
+    135deg,
+    #38bdf8,
+    #22d3ee,
+    #e879f9
+  );
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(56, 189, 248, 0.6);
+}
+
+.modal-btn-save:hover:not(:disabled) {
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 1),
+    0 16px 40px rgba(129, 140, 248, 0.8);
+  transform: translateY(-1px);
+}
+
+/* Eliminar / danger */
+.modal-btn-danger {
+  background: linear-gradient(
+    135deg,
+    #fb7185,
+    #f97316
+  );
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(248, 113, 113, 0.55);
+}
+
+.modal-btn-danger:hover:not(:disabled) {
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 1),
+    0 16px 40px rgba(248, 113, 113, 0.85);
+  transform: translateY(-1px);
+}
+
+.modal-btn-cancel:disabled,
+.modal-btn-save:disabled,
+.modal-btn-danger:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Animación de aparición */
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsivo: en pantallas muy pequeñas reducimos padding */
+@media (max-width: 480px) {
+  .modal-card {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .modal-title {
+    font-size: 0.9rem;
+  }
+
+  .modal-text {
+    font-size: 0.76rem;
+  }
+}

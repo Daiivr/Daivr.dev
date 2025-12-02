@@ -1,0 +1,307 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-slate-950 text-slate-50;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-image:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.10), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.10), transparent 55%);
+  background-attachment: fixed;
+}
+
+/* Glass card base */
+.glass {
+  @apply bg-slate-900/70 border border-slate-700/70 backdrop-blur-xl;
+}
+
+/* Shared section shell */
+.section-shell {
+  @apply mx-auto max-w-6xl px-4 py-10;
+}
+
+/* Shared pretty card shell */
+.section-card {
+  position: relative;
+  @apply glass rounded-3xl p-6 shadow-[0_24px_80px_rgba(15,23,42,0.9)];
+  overflow: hidden;
+}
+
+/* Aura y borde suave tipo hero */
+.section-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.35), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.40), transparent 60%);
+  opacity: 0.9;
+  z-index: -1;
+}
+
+.section-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at top, rgba(248, 250, 252, 0.06), transparent 65%),
+    radial-gradient(circle at bottom, rgba(15, 23, 42, 0.65), transparent 70%);
+  mix-blend-mode: screen;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Subtle animated glow circles (used in hero & discord) */
+.pulse-orb {
+  @apply rounded-full blur-3xl;
+  animation: orb-pulse 10s ease-in-out infinite alternate;
+}
+
+@keyframes orb-pulse {
+  0% { transform: translate3d(0,0,0) scale(1); opacity: 0.6; }
+  100% { transform: translate3d(12px,-10px,0) scale(1.15); opacity: 0.9; }
+}
+
+/* Gradient border utility for special cards */
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 1.5rem;
+  background: conic-gradient(
+    from 120deg,
+    #38bdf8,
+    #a855f7,
+    #f97316,
+    #22c55e,
+    #38bdf8
+  );
+  opacity: 0.9;
+  filter: blur(6px);
+  z-index: -1;
+}
+
+
+/* Links: floating icon on hover */
+.link-card {
+  position: relative;
+}
+
+.link-icon-float {
+  opacity: 0;
+  transform: translateY(6px) scale(0.9);
+  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+}
+
+.link-card:hover .link-icon-float {
+  opacity: 1;
+  transform: translateY(-6px) scale(1);
+}
+
+/* Slime morphing logo shape */
+.slime-shape {
+  position: relative;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.9), transparent 55%),
+    radial-gradient(circle at 100% 0%, rgba(244, 114, 182, 0.9), transparent 55%),
+    radial-gradient(circle at 50% 100%, rgba(250, 204, 21, 0.9), transparent 55%);
+  background-size: 200% 200%;
+  animation: slime-morph 8s cubic-bezier(.68,-0.55,.27,1.55) infinite, slime-colors 7s ease-in-out infinite;
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.7);
+}
+
+@keyframes slime-colors {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+@keyframes slime-morph {
+  0% {
+    clip-path: circle(50% at 50% 50%);
+  }
+  20% {
+    /* triangle */
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+  40% {
+    /* square */
+    clip-path: polygon(10% 10%, 90% 10%, 90% 90%, 10% 90%);
+  }
+  60% {
+    /* oval */
+    clip-path: ellipse(50% 40% at 50% 50%);
+  }
+  80% {
+    /* hexagon */
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  }
+  100% {
+    clip-path: circle(50% at 50% 50%);
+  }
+}
+
+
+/* Blob slime animation */
+.slime-wrapper { width: 2rem; height:2rem; }
+.slime-blob { width:100%; height:100%; }
+.slime-path { fill:#ff3b94; animation: slimeMorph 8s ease-in-out infinite; }
+
+@keyframes slimeMorph {
+  0% { d: path("M50 5 Q80 20 95 50 Q80 80 50 95 Q20 80 5 50 Q20 20 50 5 Z"); }
+  25% { d: path("M50 10 Q85 25 90 50 Q85 75 50 90 Q15 75 10 50 Q15 25 50 10 Z"); }
+  50% { d: path("M50 5 Q75 20 95 45 Q80 80 50 95 Q15 85 5 50 Q20 20 50 5 Z"); }
+  75% { d: path("M50 10 Q85 30 90 50 Q80 80 50 90 Q20 80 10 50 Q15 25 50 10 Z"); }
+  100% { d: path("M50 5 Q80 20 95 50 Q80 80 50 95 Q20 80 5 50 Q20 20 50 5 Z"); }
+}
+
+.logo-wrapper { width:2.2rem; height:2.2rem; display:flex; align-items:center; justify-content:center; }
+.logo-svg { width:100%; height:100%; animation: logoPulse 4s ease-in-out infinite; }
+@keyframes logoPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* === Dai logo blob nueva === */
+.logo-blob {
+  position: absolute;
+  inset: 0;
+  border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+  background:
+    conic-gradient(from 160deg at 30% 20%, #22d3ee, #a855f7, #f97316, #22c55e, #38bdf8, #ec4899, #22d3ee);
+  animation: logoBlobMorph 9s ease-in-out infinite alternate,
+    logoBlobRotate 18s linear infinite;
+  opacity: 0.95;
+  filter: blur(2px);
+}
+
+@keyframes logoBlobMorph {
+  0% {
+    border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  25% {
+    border-radius: 40% 60% 45% 55% / 60% 45% 55% 40%;
+    transform: translate3d(-2px, 1px, 0) scale(1.03);
+  }
+  50% {
+    border-radius: 55% 45% 60% 40% / 45% 55% 40% 60%;
+    transform: translate3d(2px, -2px, 0) scale(1.05);
+  }
+  75% {
+    border-radius: 45% 55% 40% 60% / 60% 40% 60% 40%;
+    transform: translate3d(-1px, -1px, 0) scale(1.02);
+  }
+  100% {
+    border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+    transform: translate3d(0, 0, 0) scale(1.04);
+  }
+}
+
+@keyframes logoBlobRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Chip pequeña para tags en hero */
+.tag-chip {
+  @apply rounded-full border border-slate-700/70 bg-slate-900/80 px-3 py-1 text-slate-200;
+  box-shadow: 0 0 18px rgba(15, 23, 42, 0.85);
+}
+
+/* Orb interior para estado Discord en hero */
+.status-orb-inner {
+  position: absolute;
+  inset: 3px;
+  border-radius: 9999px;
+}
+
+.footer-heart {
+  animation: footerHeartBeat 1.4s ease-in-out infinite;
+  text-shadow:
+    0 0 4px rgba(248, 113, 113, 0.85),
+    0 0 10px rgba(251, 113, 133, 0.7),
+    0 0 18px rgba(244, 63, 94, 0.65);
+  transform-origin: center;
+}
+
+@keyframes footerHeartBeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.18);
+  }
+  20% {
+    transform: scale(0.94);
+  }
+  30% {
+    transform: scale(1.12);
+  }
+  40% {
+    transform: scale(0.98);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+/* Scrollbar personalizada para el textarea de comentarios */
+.comment-textarea {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.7) transparent; /* thumb slate-400 */
+}
+
+.comment-textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comment-textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.comment-textarea::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.7); /* slate-400 */
+  border-radius: 9999px;
+}
+
+.comment-textarea::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(226, 232, 240, 0.9); /* slate-200 */
+}
+
+/* RGB animated text for mini card */
+.rgb-text {
+  background-image: linear-gradient(90deg, #22d3ee, #a855f7, #f97316, #22d3ee);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rgb-shift 4s linear infinite;
+}
+
+@keyframes rgb-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

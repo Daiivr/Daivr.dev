@@ -1,0 +1,122 @@
+require('dotenv').config()
+const express = require('express')
+const cors = require('cors')
+const cookieParser = require('cookie-parser')
+const path = require('path')
+const axios = require('axios')
+
+const { router: authRouter } = require('./routes/auth')
+const { router: commentsRouter } = require('./routes/comments')
+const { router: galleryRouter } = require('./routes/gallery')
+const { router: linksRouter } = require('./routes/links')
+const { getUserFromRequest } = require('./utils/session')
+
+const app = express()
+const PORT = process.env.PORT || 4000
+
+
+const STEAMGRID_API_KEY = process.env.STEAMGRID_API_KEY || null
+const steamGridCache = new Map()
+
+async function getGameImageFromSteamGrid(gameName) {
+  if (!STEAMGRID_API_KEY) return null
+  if (!gameName) return null
+
+  const key = gameName.toLowerCase()
+
+  if (steamGridCache.has(key)) {
+    return steamGridCache.get(key)
+  }
+
+  try {
+    const searchRes = await axios.get(
+      `https://www.steamgriddb.com/api/v2/search/autocomplete/${encodeURIComponent(gameName)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${STEAMGRID_API_KEY}`,
+        },
+      }
+    )
+
+    const games = searchRes.data && searchRes.data.data
+    if (!games || !games.length) {
+      steamGridCache.set(key, null)
+      return null
+    }
+
+    const gameId = games[0].id
+
+    // Fetch logos instead of hero/grid images
+    const logosRes = await axios.get(
+      `https://www.steamgriddb.com/api/v2/icons/game/${gameId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${STEAMGRID_API_KEY}`,
+        },
+      }
+    )
+
+    let logos = logosRes.data && logosRes.data.data
+    if (!logos || !logos.length) {
+      steamGridCache.set(key, null)
+      return null
+    }
+
+    // Prefer highest score if available, otherwise first logo
+    logos = Array.isArray(logos) ? logos.slice().sort((a, b) => (b.score || 0) - (a.score || 0)) : []
+    const best = logos[0]
+    const url = best ? best.url : null
+
+    steamGridCache.set(key, url || null)
+    return url || null
+  } catch (err) {
+    console.error('SteamGridDB error', err.message || err)
+    steamGridCache.set(key, null)
+    return null
+  }
+}
+
+
+
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  })
+)
+
+app.use(express.json())
+app.use(cookieParser())
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
+
+app.use('/auth/discord', authRouter)
+app.use('/api/comments', commentsRouter)
+app.use('/api/gallery', galleryRouter)
+app.use('/api/links', linksRouter)
+
+
+app.get('/api/game-image', async (req, res) => {
+  const name = req.query.name
+  if (!name) {
+    return res.status(400).json({ error: 'Missing name parameter' })
+  }
+
+  try {
+    const url = await getGameImageFromSteamGrid(name)
+    res.json({ url })
+  } catch (error) {
+    console.error('Error in /api/game-image', error.message || error)
+    res.status(500).json({ error: 'Failed to fetch game image' })
+  }
+})
+
+
+
+app.get('/api/me', (req, res) => {
+  const user = getUserFromRequest(req)
+  res.json({ user })
+})
+
+app.listen(PORT, () => {
+  console.log('API server running on http://localhost:' + PORT)
+})

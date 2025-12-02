@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1764460584388,
+    "label": "Discord",
+    "href": "https://discordapp.com/users/271701484922601472",
+    "iconUrl": "https://i.imgur.com/PIWUkTm.png",
+    "createdAt": "2025-11-29T23:56:24.388Z",
+    "createdBy": {
+      "id": "271701484922601472",
+      "username": "daivr#0"
+    }
+  },
+  {
+    "id": 1764651443800,
+    "label": "Github",
+    "href": "https://github.com/Daiivr",
+    "iconUrl": "https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png",
+    "createdAt": "2025-12-02T04:57:23.800Z",
+    "createdBy": {
+      "id": "271701484922601472",
+      "username": "daivr#0"
+    }
+  },
+  {
+    "id": 1764651495729,
+    "label": "Steam ",
+    "href": "https://steamcommunity.com/id/Daivr",
+    "iconUrl": "https://images.icon-icons.com/112/PNG/512/steam_blue_18899.png",
+    "createdAt": "2025-12-02T04:58:15.729Z",
+    "createdBy": {
+      "id": "271701484922601472",
+      "username": "daivr#0"
+    }
+  },
+  {
+    "id": 1764655127840,
+    "label": "Twitch",
+    "href": "https://www.twitch.tv/daiivr",
+    "iconUrl": "https://images.icon-icons.com/2992/PNG/512/twitch_logo_icon_187308.png"
+  }
+]
