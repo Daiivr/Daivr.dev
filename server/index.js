@@ -46,9 +46,8 @@ async function getGameImageFromSteamGrid(gameName) {
 
     const gameId = games[0].id
 
-    // Fetch logos instead of hero/grid images
-    const logosRes = await axios.get(
-      `https://www.steamgriddb.com/api/v2/icons/game/${gameId}`,
+    const heroRes = await axios.get(
+      `https://www.steamgriddb.com/api/v2/heroes/game/${gameId}`,
       {
         headers: {
           Authorization: `Bearer ${STEAMGRID_API_KEY}`,
@@ -56,16 +55,8 @@ async function getGameImageFromSteamGrid(gameName) {
       }
     )
 
-    let logos = logosRes.data && logosRes.data.data
-    if (!logos || !logos.length) {
-      steamGridCache.set(key, null)
-      return null
-    }
-
-    // Prefer highest score if available, otherwise first logo
-    logos = Array.isArray(logos) ? logos.slice().sort((a, b) => (b.score || 0) - (a.score || 0)) : []
-    const best = logos[0]
-    const url = best ? best.url : null
+    const heroes = heroRes.data && heroRes.data.data
+    const url = heroes && heroes.length ? heroes[0].url : null
 
     steamGridCache.set(key, url || null)
     return url || null
@@ -77,10 +68,9 @@ async function getGameImageFromSteamGrid(gameName) {
 }
 
 
-
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: true,
     credentials: true,
   })
 )
@@ -115,6 +105,16 @@ app.get('/api/game-image', async (req, res) => {
 app.get('/api/me', (req, res) => {
   const user = getUserFromRequest(req)
   res.json({ user })
+})
+
+
+// Serve Vite build in production
+const distPath = path.join(__dirname, '..', 'dist')
+app.use(express.static(distPath))
+
+// Fallback for SPA routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'))
 })
 
 app.listen(PORT, () => {
