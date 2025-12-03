@@ -47,7 +47,7 @@ async function getGameImageFromSteamGrid(gameName) {
     const gameId = games[0].id
 
     const heroRes = await axios.get(
-      `https://www.steamgriddb.com/api/v2/heroes/game/${gameId}`,
+      `https://www.steamgriddb.com/api/v2/icons/game/${gameId}`,
       {
         headers: {
           Authorization: `Bearer ${STEAMGRID_API_KEY}`,
