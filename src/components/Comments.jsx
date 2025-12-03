@@ -379,7 +379,7 @@ export default function Comments() {
                           setEditText(e.target.value.slice(0, MAX_COMMENT_LENGTH))
                         }
                         rows={3}
-                        className="w-full rounded-2xl border border-slate-800/80 bg-slate-950/60 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
+                        className="comment-textarea w-full rounded-2xl border border-slate-800/80 bg-slate-950/60 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
                       />
                       <div className="flex items-center justify-between text-[10px] text-slate-500">
                         <span>
