@@ -8,6 +8,8 @@ const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET
 const DISCORD_REDIRECT_URI =
   process.env.DISCORD_REDIRECT_URI || 'http://localhost:4000/auth/discord/callback'
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173'
+
 
 router.get('/login', (req, res) => {
   if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
@@ -80,7 +82,7 @@ router.get('/callback', async (req, res) => {
     }
 
     createSession(res, userRes.data)
-    return res.redirect('http://localhost:5173/#comments')
+    return res.redirect(`${FRONTEND_URL}/#comments`)
   } catch (e) {
     console.error('[OAuth] excepción no controlada:', e.message)
     return res.status(500).send('Error inesperado en OAuth de Discord.')
@@ -89,7 +91,7 @@ router.get('/callback', async (req, res) => {
 
 router.get('/logout', (req, res) => {
   destroySession(res)
-  return res.redirect('http://localhost:5173/')
+  return res.redirect(`${FRONTEND_URL}/`)
 })
 
 module.exports = { router }
