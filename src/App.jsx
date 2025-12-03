@@ -9,11 +9,17 @@ import Comments from './components/Comments'
 import Splash from './components/Splash'
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true)
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return !window.localStorage.getItem('splashSeen')
+  })
   const [playAudio, setPlayAudio] = useState(false)
 
   const handleEnter = () => {
     setPlayAudio(true)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('splashSeen', '1')
+    }
     setTimeout(() => {
       setShowSplash(false)
     }, 450)
