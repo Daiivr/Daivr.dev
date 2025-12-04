@@ -72,7 +72,7 @@ export default function Navbar() {
             </div>
           </div>
           <span className="truncate text-sm font-semibold tracking-tight text-slate-100">
-            dai<span className="text-sky-400">.dev</span>
+            daivr<span className="text-sky-400">.dev</span>
           </span>
         </div>
 
