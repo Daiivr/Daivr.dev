@@ -62,9 +62,10 @@ function listFiles() {
 
   const meta = readMeta()
   const entries = fs.readdirSync(UPLOAD_DIR)
+  const metaName = path.basename(META_FILE)
 
   return entries
-    .filter((f) => !f.startsWith('.'))
+    .filter((f) => !f.startsWith('.') && f !== metaName)
     .map((filename) => {
       const fullPath = path.join(UPLOAD_DIR, filename)
       const stat = fs.statSync(fullPath)
