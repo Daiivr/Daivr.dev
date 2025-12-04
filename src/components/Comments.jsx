@@ -44,6 +44,9 @@ export default function Comments() {
   // edición inline
   const [editingId, setEditingId] = useState(null)
   const [editText, setEditText] = useState('')
+  const [replyingToId, setReplyingToId] = useState(null)
+  const [replyText, setReplyText] = useState('')
+
 
   // confirmación de borrado
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
@@ -187,6 +190,29 @@ export default function Comments() {
     }
   }
 
+  const sendReply = async (commentId) => {
+    const trimmed = replyText.trim()
+    if (!trimmed) return
+    if (trimmed.length > MAX_COMMENT_LENGTH) {
+      alert(`La respuesta es demasiado larga (máximo ${MAX_COMMENT_LENGTH} caracteres).`)
+      return
+    }
+    try {
+      const res = await axios.post(`/api/comments/${commentId}/replies`, {
+        text: trimmed,
+      })
+      const updated = res.data.comment
+      if (updated) {
+        setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)))
+      }
+      setReplyText('')
+      setReplyingToId(null)
+    } catch (e) {
+      console.error(e)
+      alert(e.response?.data?.error ?? 'Error enviando respuesta')
+    }
+  }
+
   const remainingNew = MAX_COMMENT_LENGTH - text.length
   const remainingEdit = MAX_COMMENT_LENGTH - editText.length
 
@@ -289,6 +315,8 @@ export default function Comments() {
           )}
 
           {visibleComments.map((c) => {
+            const replies = Array.isArray(c.replies) ? c.replies : []
+            const isReplying = replyingToId === c.id
             const isAuthor = me && String(c.author.id) === String(me.id)
             const canDelete = isAuthor || isAdmin
             const canEdit = isAuthor
@@ -361,6 +389,23 @@ export default function Comments() {
                             🗑
                           </button>
                         )}
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (replyingToId === c.id) {
+                              setReplyingToId(null)
+                              setReplyText('')
+                            } else {
+                              setReplyingToId(c.id)
+                              setReplyText('')
+                            }
+                          }}
+                          className="rounded-full bg-emerald-600/80 px-3 py-0.5 text-[10px] text-slate-50 hover:bg-emerald-500 transition"
+                        >
+                          Responder
+                        </button>
+                      )}
                       </div>
                     )}
                   </header>
@@ -414,6 +459,99 @@ export default function Comments() {
                         </button>
                       </div>
                     </div>
+                  )}
+                  {replies.length > 0 && (
+                    <div className="mt-3 space-y-2 border-l border-slate-800/80 pl-3">
+                      {replies.map((r) => {
+                        const replyDate = r.createdAt ? new Date(r.createdAt) : null
+                        const replyFullDate =
+                          replyDate && !Number.isNaN(replyDate.getTime())
+                            ? replyDate.toLocaleString('es-ES', {
+                                dateStyle: 'full',
+                                timeStyle: 'short',
+                              })
+                            : ''
+
+                        return (
+                          <div
+                            key={r.id}
+                            className="flex gap-2 text-[11px] text-slate-200"
+                          >
+                            <img
+                              src={r.author?.avatarUrl}
+                              alt={formatUsername(r.author?.username)}
+                              className="mt-0.5 h-5 w-5 rounded-full"
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium text-slate-100">
+                                  {formatUsername(r.author?.username)}
+                                </span>
+                                {r.author?.isAdmin && (
+                                  <span className="rounded-full bg-amber-500/90 px-2 py-0.5 text-[9px] font-semibold text-slate-900">
+                                    Admin
+                                  </span>
+                                )}
+                                {r.createdAt && (
+                                  <span
+                                    className="group relative cursor-default text-[10px] text-slate-500"
+                                    title={replyFullDate}
+                                  >
+                                    {formatDiscordTimestamp(r.createdAt)}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-0.5 whitespace-pre-wrap text-slate-200">
+                                {r.text}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {isAdmin && isReplying && (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        sendReply(c.id)
+                      }}
+                      className="mt-3 space-y-1"
+                    >
+                      <textarea
+                        value={replyText}
+                        onChange={(e) =>
+                          setReplyText(e.target.value.slice(0, MAX_COMMENT_LENGTH))
+                        }
+                        rows={2}
+                        className="comment-textarea w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-[11px] text-slate-100 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none"
+                        placeholder="Escribe una respuesta como admin…"
+                      />
+                      <div className="flex items-center justify-between text-[10px] text-slate-500">
+                        <span>
+                          {replyText.length}/{MAX_COMMENT_LENGTH} caracteres
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReplyingToId(null)
+                              setReplyText('')
+                            }}
+                            className="rounded-full bg-slate-800 px-3 py-1 text-[10px] text-slate-200 hover:bg-slate-700"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="submit"
+                            className="rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-semibold text-slate-900 hover:bg-emerald-400"
+                          >
+                            Responder
+                          </button>
+                        </div>
+                      </div>
+                    </form>
                   )}
                 </div>
               </article>
