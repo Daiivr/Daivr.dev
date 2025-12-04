@@ -3,7 +3,8 @@ import peachCard from '../assets/dai-peach-card.png'
 
 const DISCORD_ID = import.meta.env.VITE_DISCORD_ID || '271701484922601472'
 
-const TAGLINE_TEXT = 'SysBot enjoyer · VRChat lover · wanderer de Fallout. Me gusta construir bots raros para Discord, webs kawaii y pequeños rincones caóticos pero cozy en Internet.'
+const TAGLINE_TEXT =
+  'SysBot enjoyer · VRChat lover · wanderer de Fallout.\nProgramo bots y automatizaciones para juegos y vivo rotando entre VRChat, Minecraft, ARK y otros mundos digitales con lofi y anime de fondo. 🎮🌙✨';
 
 const STATUS_MAP = {
   online: {

@@ -7,6 +7,7 @@ import Gallery from './components/Gallery'
 import DiscordCard from './components/DiscordCard'
 import Comments from './components/Comments'
 import Splash from './components/Splash'
+import Fireflies from './components/Fireflies'
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true)
@@ -22,6 +23,7 @@ export default function App() {
   return (
     <div className="min-h-screen text-slate-50">
       <BackgroundAudio play={playAudio} />
+      <Fireflies />
       {showSplash && <Splash onEnter={handleEnter} />}
       <Navbar />
       <main className="pb-16 space-y-4">
