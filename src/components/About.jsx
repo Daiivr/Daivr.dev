@@ -30,7 +30,7 @@ export default function About() {
               <dt className="text-[10px] uppercase tracking-wide text-slate-400">
                 Ubicación
               </dt>
-              <dd className="text-sm font-medium text-slate-100">
+              <dd className="text-[12px] font-medium text-slate-100">
                 Alaska · nieve + <span className="rgb-text">RGB</span>
               </dd>
             </div>
@@ -40,7 +40,7 @@ export default function About() {
               <dt className="text-[10px] uppercase tracking-wide text-slate-400">
                 Rol
               </dt>
-              <dd className="text-sm font-medium text-slate-100">
+              <dd className="text-[12px] font-medium text-slate-100">
                 💻 Dev · 🎮 Gaming
               </dd>
             </div>
@@ -50,7 +50,7 @@ export default function About() {
               <dt className="text-[10px] uppercase tracking-wide text-slate-400">
                 Stack favorito
               </dt>
-              <dd className="text-sm font-medium text-slate-100">
+              <dd className="text-[12px] font-medium text-slate-100">
                 TypeScript · React · C# · Unity · Discord / SysBot
               </dd>
             </div>
@@ -60,7 +60,7 @@ export default function About() {
               <dt className="text-[10px] uppercase tracking-wide text-slate-400">
                 Mood
               </dt>
-              <dd className="text-sm font-medium text-slate-100">
+              <dd className="text-[12px] font-medium text-slate-100">
                 ✨ Cozy chaos · 🎮 Grinding XP
               </dd>
             </div>
