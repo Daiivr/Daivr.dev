@@ -8,11 +8,11 @@ export default function About() {
         <div className="section-card">
           <h2 className="text-sm font-semibold text-slate-100">Sobre mí</h2>
           <p className="mt-3 text-sm text-slate-300 leading-relaxed">
-            Soy <span className="text-sky-300">Dai</span>, un gremlin digital exiliado en Alaska, siempre con un café frío al lado y demasiadas pestañas abiertas.
-            Fan enfermizo de Fallout, Zelda y Pokémon; me encanta romper cosas con código y luego arreglarlas mejor: bots para Discord, webs mimadas y herramientas para automatizar juegos y consolas.
+            Soy <span className="text-sky-300">Dai</span>, una gremlin digital exiliado en Alaska, siempre con un café frío al lado y demasiadas pestañas abiertas.
+            Fan enfermiza de Fallout, Zelda y Pokémon; me encanta romper cosas con código y luego arreglarlas mejor: bots para Discord, webs mimadas y herramientas para automatizar juegos y consolas.
           </p>
           <p className="mt-2 text-sm text-slate-300 leading-relaxed">
-            Hablo inglés y español, vivo grindando XP en Visual Studio entre anime y música lofi, casi siempre perdido en mundos como Fallout, Minecraft, VRChat o DBD.
+            Hablo inglés y español, vivo grindando XP en Visual Studio entre anime y música lofi, casi siempre perdida en mundos como Fallout, Minecraft, VRChat o DBD.
             Colecciono más juegos de los que puedo jugar y gasto dinero en cosas que no necesito pero me hacen feliz. Esta página es mi pequeño hub personal: proyectos, links, screenshots y un panel en tiempo real de lo que estoy tramando en Discord.
             Si algo de todo esto te hace ruido bonito en el cerebro, siéntete en casa. 🎮❄️
           </p>
