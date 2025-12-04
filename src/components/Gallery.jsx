@@ -217,7 +217,7 @@ export default function Gallery() {
                   </button>
                   <figcaption className="flex items-center justify-between px-3 py-1.5 text-[10px] text-slate-400">
                     <span className="truncate">{label}</span>
-                    <span>{(f.size / 1024).toFixed(0)}kb</span>
+                    <span>{((f.size ?? (f.sizeKB != null ? f.sizeKB * 1024 : 0)) / 1024).toFixed(0)}kb</span>
                   </figcaption>
                   {isOwner && (
                     <button
