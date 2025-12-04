@@ -29,6 +29,124 @@ const STATUS_MAP = {
   },
 }
 
+
+const RANDOM_CHARS = 'asdfghjklqwertyuiopzxcvbnm1234567890?!';
+
+function buildTypingFrames(text) {
+  const frames = []
+  let current = ''
+
+  // Separar el texto en tokens (palabras + espacios/newlines)
+  const tokens = []
+  let buffer = ''
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (ch === ' ' || ch === '\n') {
+      if (buffer) {
+        tokens.push(buffer)
+        buffer = ''
+      }
+      tokens.push(ch)
+    } else {
+      buffer += ch
+    }
+  }
+  if (buffer) tokens.push(buffer)
+
+  // Elegir algunas palabras aleatorias donde cometer errores
+  const candidateWordIndexes = tokens
+    .map((tok, idx) => ({ tok, idx }))
+    .filter(
+      (t) =>
+        t.tok !== ' ' &&
+        t.tok !== '\n' &&
+        t.tok.length > 3 // palabras un poco largas
+    )
+    .map((t) => t.idx)
+
+  const maxMistakes = 3
+  const mistakesCount = Math.min(
+    maxMistakes,
+    Math.max(0, candidateWordIndexes.length > 0 ? 2 : 0)
+  )
+
+  const mistakeIndexes = new Set()
+  while (mistakeIndexes.size < mistakesCount && candidateWordIndexes.length) {
+    const rnd = Math.floor(Math.random() * candidateWordIndexes.length)
+    const [picked] = candidateWordIndexes.splice(rnd, 1)
+    mistakeIndexes.add(picked)
+  }
+
+  function typeToken(token) {
+    for (let i = 0; i < token.length; i++) {
+      current += token[i]
+      frames.push(current)
+    }
+  }
+
+  function makeMistake(word) {
+    if (word.length <= 2) {
+      return word.split('').reverse().join('')
+    }
+
+    let result = word
+    let attempts = 0
+
+    while (result === word && attempts < 5) {
+      const chars = word.split('')
+      const swaps = Math.min(2, Math.max(1, Math.floor(word.length / 3)))
+
+      for (let s = 0; s < swaps; s++) {
+        const i = Math.floor(Math.random() * chars.length)
+        let j = Math.floor(Math.random() * chars.length)
+        if (j === i) {
+          j = (j + 1) % chars.length
+        }
+        const tmp = chars[i]
+        chars[i] = chars[j]
+        chars[j] = tmp
+      }
+
+      result = chars.join('')
+      attempts++
+    }
+
+    return result
+  }
+
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i]
+
+    // si es un espacio o salto de línea, solo escribimos normal
+    if (token === ' ' || token === '\n') {
+      typeToken(token)
+      continue
+    }
+
+    if (mistakeIndexes.has(i)) {
+      // escribir una palabra equivocada completa
+      const wrong = makeMistake(token)
+      typeToken(wrong)
+
+      // retroceder palabra equivocada (backspace)
+      for (let j = 0; j < wrong.length; j++) {
+        current = current.slice(0, -1)
+        frames.push(current)
+      }
+
+      // ahora escribir la palabra correcta
+      typeToken(token)
+    } else {
+      // escribir palabra normal
+      typeToken(token)
+    }
+  }
+
+  if (frames.length === 0) frames.push('')
+  return frames
+}
+
 export default function Hero({ startTyping }) {
   const [presence, setPresence] = useState(null)
   const [tagline, setTagline] = useState('')
@@ -59,15 +177,18 @@ export default function Hero({ startTyping }) {
   useEffect(() => {
     if (!startTyping || hasTyped) return
 
-    let i = 0
+    const frames = buildTypingFrames(TAGLINE_TEXT)
+    let step = 0
+
     const interval = setInterval(() => {
-      i += 1
-      setTagline(TAGLINE_TEXT.slice(0, i))
-      if (i >= TAGLINE_TEXT.length) {
+      setTagline(frames[step])
+      step += 1
+
+      if (step >= frames.length) {
         clearInterval(interval)
         setHasTyped(true)
       }
-    }, 25)
+    }, 60)
 
     return () => clearInterval(interval)
   }, [startTyping, hasTyped])
