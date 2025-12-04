@@ -4,7 +4,9 @@ const path = require('path')
 const { getUserFromRequest } = require('../utils/session')
 
 const router = express.Router()
-const DATA_DIR = path.join(__dirname, '..', '..', 'data')
+const DATA_DIR =
+  process.env.COMMENTS_DATA_DIR ||
+  path.join(__dirname, '..', '..', 'data')
 const FILE = path.join(DATA_DIR, 'comments.json')
 const ADMIN_IDS = (process.env.ADMIN_IDS || '')
   .split(',')
