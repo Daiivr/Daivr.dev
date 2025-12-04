@@ -4,23 +4,41 @@ const path = require('path')
 const { getUserFromRequest } = require('../utils/session')
 
 const router = express.Router()
+
+// Usar disco persistente si está configurado, si no, caer en /data local (útil en dev)
 const DATA_DIR =
   process.env.COMMENTS_DATA_DIR ||
   path.join(__dirname, '..', '..', 'data')
+
 const FILE = path.join(DATA_DIR, 'comments.json')
+
+// IDs de admins (separados por coma en la env var)
 const ADMIN_IDS = (process.env.ADMIN_IDS || '')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean)
 
-
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true })
-if (!fs.existsSync(FILE)) fs.writeFileSync(FILE, JSON.stringify([]), 'utf8')
+// Aseguramos que la carpeta y el archivo existan
+function ensureStorage() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true })
+    }
+    if (!fs.existsSync(FILE)) {
+      fs.writeFileSync(FILE, JSON.stringify([], null, 2), 'utf8')
+    }
+  } catch (err) {
+    console.error('Error creando storage de comentarios', err)
+  }
+}
 
 function readComments() {
+  ensureStorage()
   try {
     const raw = fs.readFileSync(FILE, 'utf8')
-    return JSON.parse(raw)
+    const data = JSON.parse(raw || '[]')
+    if (!Array.isArray(data)) return []
+    return data
   } catch (e) {
     console.error('Error leyendo comments.json', e)
     return []
@@ -28,6 +46,7 @@ function readComments() {
 }
 
 function writeComments(list) {
+  ensureStorage()
   try {
     fs.writeFileSync(FILE, JSON.stringify(list, null, 2), 'utf8')
   } catch (e) {
@@ -43,7 +62,9 @@ router.get('/', (req, res) => {
       ...c,
       author: {
         ...c.author,
-        isAdmin: ADMIN_IDS.includes(String(c.author?.id)),
+        isAdmin:
+          c.author?.isAdmin ||
+          ADMIN_IDS.includes(String(c.author?.id || '')),
       },
     }))
 
@@ -64,7 +85,7 @@ router.post('/', (req, res) => {
   const comments = readComments()
   const comment = {
     id: Date.now(),
-    text: text.trim().slice(0, 1000),
+    text: text.trim().slice(0, 2000),
     createdAt: new Date().toISOString(),
     author: {
       id: user.id,
@@ -75,21 +96,21 @@ router.post('/', (req, res) => {
   }
   comments.push(comment)
   writeComments(comments)
-  res.status(201).json({ comment })
+  res.json({ comment })
 })
 
-// PUT edit comment (author or admin)
+// PUT update (author or admin)
 router.put('/:id', (req, res) => {
   const user = getUserFromRequest(req)
   if (!user)
     return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
 
+  const id = Number(req.params.id)
   const { text } = req.body || {}
   if (!text || !text.trim()) {
     return res.status(400).json({ error: 'Comentario vacío' })
   }
 
-  const id = Number(req.params.id)
   const comments = readComments()
   const index = comments.findIndex((c) => c.id === id)
 
@@ -99,13 +120,13 @@ router.put('/:id', (req, res) => {
 
   const comment = comments[index]
   const isAuthor = String(comment.author.id) === String(user.id)
-  const isAdmin = !!user.isAdmin
+  const isAdmin = ADMIN_IDS.includes(String(user.id))
 
   if (!isAuthor && !isAdmin) {
     return res.status(403).json({ error: 'No tienes permiso para editar' })
   }
 
-  comment.text = text.trim().slice(0, 1000)
+  comment.text = text.trim().slice(0, 2000)
   comment.updatedAt = new Date().toISOString()
   comments[index] = comment
   writeComments(comments)
@@ -128,7 +149,7 @@ router.delete('/:id', (req, res) => {
 
   const comment = comments[index]
   const isAuthor = String(comment.author.id) === String(user.id)
-  const isAdmin = !!user.isAdmin
+  const isAdmin = ADMIN_IDS.includes(String(user.id))
 
   if (!isAuthor && !isAdmin) {
     return res.status(403).json({ error: 'No tienes permiso para eliminar' })
