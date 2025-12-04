@@ -241,4 +241,82 @@ router.post('/:id/replies', (req, res) => {
   res.json({ comment: withAdminFlags(baseComment) })
 })
 
+// PUT reply (editar respuesta del admin)
+router.put('/:commentId/replies/:replyId', (req, res) => {
+  const user = getUserFromRequest(req)
+  if (!user)
+    return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
+
+  const isAdmin = !!user.isAdmin || ADMIN_IDS.includes(String(user.id))
+  if (!isAdmin) {
+    return res
+      .status(403)
+      .json({ error: 'Solo el admin puede editar respuestas' })
+  }
+
+  const { text } = req.body || {}
+  if (!text || !text.trim()) {
+    return res.status(400).json({ error: 'Respuesta vacía' })
+  }
+
+  const commentId = Number(req.params.commentId)
+  const replyId = Number(req.params.replyId)
+
+  const comments = readComments()
+  const index = comments.findIndex((c) => c.id === commentId)
+  if (index === -1) {
+    return res.status(404).json({ error: 'Comentario no encontrado' })
+  }
+
+  const baseComment = comments[index]
+  const replies = Array.isArray(baseComment.replies) ? baseComment.replies : []
+  const replyIndex = replies.findIndex((r) => r.id === replyId)
+
+  if (replyIndex === -1) {
+    return res.status(404).json({ error: 'Respuesta no encontrada' })
+  }
+
+  replies[replyIndex].text = text.trim().slice(0, 1000)
+  replies[replyIndex].updatedAt = new Date().toISOString()
+
+  baseComment.replies = replies
+  comments[index] = baseComment
+  writeComments(comments)
+
+  res.json({ comment: withAdminFlags(baseComment) })
+})
+
+// DELETE reply (eliminar respuesta del admin)
+router.delete('/:commentId/replies/:replyId', (req, res) => {
+  const user = getUserFromRequest(req)
+  if (!user)
+    return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
+
+  const isAdmin = !!user.isAdmin || ADMIN_IDS.includes(String(user.id))
+  if (!isAdmin) {
+    return res
+      .status(403)
+      .json({ error: 'Solo el admin puede eliminar respuestas' })
+  }
+
+  const commentId = Number(req.params.commentId)
+  const replyId = Number(req.params.replyId)
+
+  const comments = readComments()
+  const index = comments.findIndex((c) => c.id === commentId)
+  if (index === -1) {
+    return res.status(404).json({ error: 'Comentario no encontrado' })
+  }
+
+  const baseComment = comments[index]
+  const replies = Array.isArray(baseComment.replies) ? baseComment.replies : []
+  const filteredReplies = replies.filter((r) => r.id !== replyId)
+
+  baseComment.replies = filteredReplies
+  comments[index] = baseComment
+  writeComments(comments)
+
+  res.json({ comment: withAdminFlags(baseComment) })
+})
+
 module.exports = { router }

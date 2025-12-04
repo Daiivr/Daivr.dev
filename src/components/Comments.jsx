@@ -46,7 +46,8 @@ export default function Comments() {
   const [editText, setEditText] = useState('')
   const [replyingToId, setReplyingToId] = useState(null)
   const [replyText, setReplyText] = useState('')
-
+  const [editingReplyId, setEditingReplyId] = useState(null)
+  const [replyEditText, setReplyEditText] = useState('')
 
   // confirmación de borrado
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
@@ -213,6 +214,58 @@ export default function Comments() {
     }
   }
 
+  const startEditReply = (reply) => {
+    setEditingReplyId(reply.id)
+    setReplyEditText(reply.text)
+  }
+
+  const cancelEditReply = () => {
+    setEditingReplyId(null)
+    setReplyEditText('')
+  }
+
+  const saveEditReply = async (commentId) => {
+    if (!editingReplyId) return
+    const trimmed = replyEditText.trim()
+    if (!trimmed) return
+    if (trimmed.length > MAX_COMMENT_LENGTH) {
+      alert(`La respuesta editada es demasiado larga (máximo ${MAX_COMMENT_LENGTH} caracteres).`)
+      return
+    }
+    try {
+      const res = await axios.put(
+        `/api/comments/${commentId}/replies/${editingReplyId}`,
+        { text: trimmed }
+      )
+      const updated = res.data.comment
+      if (updated) {
+        setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)))
+      }
+      setEditingReplyId(null)
+      setReplyEditText('')
+    } catch (e) {
+      console.error(e)
+      alert(e.response?.data?.error ?? 'Error editando respuesta')
+    }
+  }
+
+  const deleteReply = async (commentId, replyId) => {
+    const ok = window.confirm('¿Eliminar esta respuesta?')
+    if (!ok) return
+    try {
+      const res = await axios.delete(
+        `/api/comments/${commentId}/replies/${replyId}`
+      )
+      const updated = res.data.comment
+      if (updated) {
+        setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)))
+      }
+    } catch (e) {
+      console.error(e)
+      alert(e.response?.data?.error ?? 'Error eliminando respuesta')
+    }
+  }
+
   const remainingNew = MAX_COMMENT_LENGTH - text.length
   const remainingEdit = MAX_COMMENT_LENGTH - editText.length
 
@@ -348,7 +401,7 @@ export default function Comments() {
                         {formatUsername(c.author.username)}
                       </span>
                       {isAuthorAdmin && (
-                        <span className="rounded-full border border-fuchsia-400/70 bg-fuchsia-500/10 px-2 py-[2px] text-[9px] font-semibold uppercase tracking-wide text-fuchsia-200 shadow-sm shadow-fuchsia-500/30">
+                        <span className="rounded-full border border-emerald-400/70 bg-emerald-500/15 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-200 shadow-sm shadow-emerald-500/30">
                           Admin
                         </span>
                       )}
@@ -472,6 +525,8 @@ export default function Comments() {
                               })
                             : ''
 
+                        const isEditingReply = editingReplyId === r.id
+
                         return (
                           <div
                             key={r.id}
@@ -483,34 +538,89 @@ export default function Comments() {
                               className="mt-0.5 h-5 w-5 rounded-full"
                             />
                             <div className="flex-1">
-                              <div className="flex items-center gap-1">
-                                <span className="font-medium text-slate-100">
-                                  {formatUsername(r.author?.username)}
-                                </span>
-                                {r.author?.isAdmin && (
-                                  <span className="rounded-full bg-amber-500/90 px-2 py-0.5 text-[9px] font-semibold text-slate-900">
-                                    Admin
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-center gap-1">
+                                  <span className="font-medium text-slate-100">
+                                    {formatUsername(r.author?.username)}
                                   </span>
-                                )}
-                                {r.createdAt && (
-                                  <span
-                                    className="group relative cursor-default text-[10px] text-slate-500"
-                                    title={replyFullDate}
-                                  >
-                                    {formatDiscordTimestamp(r.createdAt)}
-                                  </span>
+                                  {r.author?.isAdmin && (
+                                    <span className="rounded-full border border-emerald-400/70 bg-emerald-500/15 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-200 shadow-sm shadow-emerald-500/30">
+                                      Admin
+                                    </span>
+                                  )}
+                                  {r.createdAt && (
+                                    <span className="relative inline-flex items-center group">
+                                      <span className="cursor-default text-[10px] text-slate-500">
+                                        {formatDiscordTimestamp(r.createdAt)}
+                                      </span>
+                                      {replyFullDate && (
+                                        <span className="pointer-events-none absolute left-1/2 bottom-full z-20 mb-1 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-xl border border-slate-700/80 bg-slate-950/95 px-3 py-1 text-[10px] text-slate-100 shadow-lg shadow-sky-500/20 opacity-0 transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100">
+                                          {replyFullDate}
+                                        </span>
+                                      )}
+                                    </span>
+                                  )}
+                                </div>
+                                {isAdmin && (
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => startEditReply(r)}
+                                      className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-200 hover:bg-slate-700"
+                                    >
+                                      Editar
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => deleteReply(c.id, r.id)}
+                                      className="rounded-full bg-rose-600/80 px-2 py-0.5 text-[10px] text-slate-50 hover:bg-rose-500"
+                                    >
+                                      Eliminar
+                                    </button>
+                                  </div>
                                 )}
                               </div>
-                              <p className="mt-0.5 whitespace-pre-wrap text-slate-200">
-                                {r.text}
-                              </p>
+                              {isEditingReply ? (
+                                <div className="mt-1 space-y-1">
+                                  <textarea
+                                    value={replyEditText}
+                                    onChange={(e) =>
+                                      setReplyEditText(
+                                        e.target.value.slice(0, MAX_COMMENT_LENGTH)
+                                      )
+                                    }
+                                    rows={2}
+                                    className="comment-textarea w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-[11px] text-slate-100 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none"
+                                    placeholder="Edita la respuesta…"
+                                  />
+                                  <div className="flex items-center justify-end gap-2 text-[10px] text-slate-400">
+                                    <button
+                                      type="button"
+                                      onClick={cancelEditReply}
+                                      className="rounded-full bg-slate-800 px-3 py-1 hover:bg-slate-700"
+                                    >
+                                      Cancelar
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => saveEditReply(c.id)}
+                                      className="rounded-full bg-sky-500 px-3 py-1 font-semibold text-slate-900 hover:bg-sky-400"
+                                    >
+                                      Guardar
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="mt-0.5 whitespace-pre-wrap text-slate-200">
+                                  {r.text}
+                                </p>
+                              )}
                             </div>
                           </div>
                         )
                       })}
                     </div>
                   )}
-
                   {isAdmin && isReplying && (
                     <form
                       onSubmit={(e) => {
