@@ -22,8 +22,8 @@ function createFirefly(viewport, now) {
     y: Math.random() * h,
     // movimiento lento y suave
     // movimiento más lento y flotante
-    vx: (Math.random() - 0.5) * 0.10,
-    vy: (Math.random() - 0.5) * 0.10,
+    vx: (Math.random() - 0.3) * 0.2,
+    vy: (Math.random() - 0.3) * 0.2,
     size: 1.2 + Math.random() * 1.8,
     life,
     createdAt: now,
@@ -36,7 +36,7 @@ function createFirefly(viewport, now) {
 }
 
 function updateFireflies(prev, { timestamp, dtFactor, viewport, mouse, count }) {
-  const maxSpeed = 0.25
+  const maxSpeed = 0.10
   const wanderStrength = 0.004 // qué tanto cambian de dirección
   const mouseRadius = 120
   const mouseRadiusSq = mouseRadius * mouseRadius
@@ -96,7 +96,7 @@ function updateFireflies(prev, { timestamp, dtFactor, viewport, mouse, count }) 
     }
 
     // aplicar movimiento (dtFactor hace que se vean suaves aunque baje el FPS)
-    const speedScale = 18 // velocidad global más lenta
+    const speedScale = 15 // velocidad global más lenta
     x += vx * dtFactor * speedScale
     y += vy * dtFactor * speedScale
 
