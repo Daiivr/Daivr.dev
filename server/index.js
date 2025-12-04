@@ -15,6 +15,10 @@ const app = express()
 const PORT = process.env.PORT || 4000
 
 
+const UPLOAD_DIR =
+  process.env.GALLERY_UPLOAD_DIR ||
+  path.join(__dirname, '..', 'uploads')
+
 const STEAMGRID_API_KEY = process.env.STEAMGRID_API_KEY || null
 const steamGridCache = new Map()
 
@@ -77,7 +81,7 @@ app.use(
 
 app.use(express.json())
 app.use(cookieParser())
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
+app.use('/uploads', express.static(UPLOAD_DIR))
 
 app.use('/auth/discord', authRouter)
 app.use('/api/comments', commentsRouter)

@@ -5,7 +5,9 @@ const multer = require('multer')
 const { getUserFromRequest } = require('../utils/session')
 
 const router = express.Router()
-const UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads')
+const UPLOAD_DIR =
+  process.env.GALLERY_UPLOAD_DIR ||
+  path.join(__dirname, '..', '..', 'uploads')
 const OWNER_ID = '271701484922601472'
 
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true })
