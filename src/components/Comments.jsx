@@ -3,6 +3,40 @@ import axios from 'axios'
 
 const MAX_COMMENT_LENGTH = 2000
 const COMMENTS_PER_PAGE = 6
+
+const TENOR_API_KEY = import.meta.env.VITE_TENOR_API_KEY
+const TENOR_CLIENT_KEY = 'daivr-dev-comments'
+const TENOR_LIMIT = 48
+
+const GIF_LINE_REGEX =
+  /^(https?:\/\/(?:media|c)\.tenor\.com\/\S+|https?:\/\/tenor\.com\/view\/\S+)/i
+
+
+const renderTextWithGifs = (text) => {
+  if (!text) return null
+  const lines = String(text).split(/\r?\n/)
+  return lines.map((line, index) => {
+    const trimmed = line.trim()
+    if (GIF_LINE_REGEX.test(trimmed)) {
+      return (
+        <div key={index} className="mt-2 flex justify-start">
+          <img
+            src={trimmed}
+            alt="GIF"
+            loading="lazy"
+            className="max-w-full h-auto rounded-xl border border-slate-700/80"
+          />
+        </div>
+      )
+    }
+    return (
+      <span key={index}>
+        {index > 0 && <br />}
+        {line}
+      </span>
+    )
+  })
+}
 const formatUsername = (name) => (name ? String(name).replace(/#0$/, '') : '')
 
 const formatDiscordTimestamp = (iso) => {
@@ -38,7 +72,9 @@ export default function Comments() {
   const [comments, setComments] = useState([])
   const [page, setPage] = useState(1)
   const [me, setMe] = useState(null)
-  const [text, setText] = useState('')
+  const [text, setText] = useState('') // texto completo (incluye URLs de GIF)
+  const [newTextInput, setNewTextInput] = useState('') // lo que se ve en el textarea
+  const [newGifUrls, setNewGifUrls] = useState([])
   const [loading, setLoading] = useState(true)
 
   // edición inline
@@ -52,6 +88,16 @@ export default function Comments() {
   // confirmación de borrado
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const [deleting, setDeleting] = useState(false)
+
+  // GIF picker (Tenor)
+  const [gifPickerOpen, setGifPickerOpen] = useState(false)
+  const [gifPickerMode, setGifPickerMode] = useState('new') // 'new' | 'reply'
+  const [gifPickerCommentId, setGifPickerCommentId] = useState(null)
+  const [gifQuery, setGifQuery] = useState('')
+  const [gifResults, setGifResults] = useState([])
+  const [gifLoading, setGifLoading] = useState(false)
+  const [gifError, setGifError] = useState('')
+
 
   const isAdmin = !!(me && me.isAdmin)
 
@@ -90,6 +136,104 @@ export default function Comments() {
 
   const textareaRef = useRef(null)
 
+
+  const openGifPickerForNew = () => {
+    setGifPickerMode('new')
+    setGifPickerCommentId(null)
+    setGifPickerOpen(true)
+  }
+
+  const openGifPickerForReply = (commentId) => {
+    setGifPickerMode('reply')
+    setGifPickerCommentId(commentId)
+    setGifPickerOpen(true)
+  }
+
+  const closeGifPicker = () => {
+    setGifPickerOpen(false)
+    setGifQuery('')
+    setGifResults([])
+    setGifError('')
+  }
+
+  const fetchGifs = async (query) => {
+    if (!TENOR_API_KEY) {
+      setGifError(
+        'Falta configurar la API key de Tenor (VITE_TENOR_API_KEY) en las variables de entorno.'
+      )
+      setGifResults([])
+      return
+    }
+
+    const q = query?.trim()
+    if (!q) return
+
+    setGifLoading(true)
+    setGifError('')
+    try {
+      const res = await axios.get('/api/tenor-search', {
+        params: { q },
+      })
+
+      const gifs = res.data?.gifs ?? []
+      if (!gifs.length) {
+        setGifResults([])
+        setGifError('No se encontraron GIFs para esa búsqueda.')
+      } else {
+        setGifResults(gifs)
+      }
+    } catch (error) {
+      console.error('Error Tenor cliente:', error?.response || error)
+      setGifError('No se pudieron cargar los GIFs. Intenta de nuevo.')
+      setGifResults([])
+    } finally {
+      setGifLoading(false)
+    }
+  }
+
+  const handleGifSearchSubmit = (event) => {
+    event.preventDefault()
+    fetchGifs(gifQuery)
+  }
+
+  
+const handleGifSelect = (url) => {
+    if (!url) return
+
+    if (gifPickerMode === 'new') {
+      // Solo permitimos 1 GIF en la vista previa y en el comentario final.
+      const updated = [url]
+      setNewGifUrls(updated)
+
+      setText(() => {
+        const base = newTextInput
+        const gifsPart = updated.length
+          ? base
+            ? `\n${updated[0]}`
+            : updated[0]
+          : ''
+        return `${base}${gifsPart}`
+      })
+    } else if (gifPickerMode === 'reply' && gifPickerCommentId) {
+      if (replyingToId === gifPickerCommentId) {
+        setReplyText((prev) => {
+          if (!prev) return url
+          const trimmed = prev.trimEnd()
+          return trimmed ? `${trimmed}\n${url}` : url
+        })
+      }
+    }
+
+    closeGifPicker()
+  }
+
+
+  const handleRemovePreviewGif = () => {
+    // Quitamos el GIF de la vista previa y del texto que se enviará
+    setNewGifUrls([])
+    setText(newTextInput || '')
+  }
+
   const handleNewChange = (e) => {
     const value = e.target.value.slice(0, MAX_COMMENT_LENGTH)
     const el = textareaRef.current
@@ -100,7 +244,16 @@ export default function Comments() {
       nearBottom = distanceToBottom < 40
     }
 
-    setText(value)
+    setNewTextInput(value)
+    setText(() => {
+      const gifsPart =
+        newGifUrls.length > 0
+          ? value
+            ? `\n${newGifUrls.join('\n')}`
+            : newGifUrls.join('\n')
+          : ''
+      return `${value}${gifsPart}`
+    })
 
     if (el && nearBottom) {
       setTimeout(() => {
@@ -109,17 +262,35 @@ export default function Comments() {
     }
   }
 
+  
   const send = async (e) => {
     e.preventDefault()
-    const trimmed = text.trim()
-    if (!trimmed) return
-    if (trimmed.length > MAX_COMMENT_LENGTH) {
+
+    const visibleTrimmed = newTextInput.trim()
+    const hasGifs = newGifUrls.length > 0
+
+    // No texto y sin GIFs: no enviamos nada
+    if (!visibleTrimmed && !hasGifs) return
+
+    // El límite de caracteres solo aplica al texto visible (no a los links de GIF)
+    if (visibleTrimmed.length > MAX_COMMENT_LENGTH) {
       alert(`El comentario es demasiado largo (máximo ${MAX_COMMENT_LENGTH} caracteres).`)
       return
     }
+
+    // Construimos el payload que realmente se guarda (texto + URLs de GIF)
+    let payloadText = visibleTrimmed
+    if (hasGifs) {
+      payloadText = visibleTrimmed
+        ? `${visibleTrimmed}\n${newGifUrls.join('\n')}`
+        : newGifUrls.join('\n')
+    }
+
     try {
-      const res = await axios.post('/api/comments', { text: trimmed })
+      const res = await axios.post('/api/comments', { text: payloadText })
       setText('')
+      setNewTextInput('')
+      setNewGifUrls([])
       setComments((prev) => [res.data.comment, ...prev])
     } catch (e) {
       console.error(e)
@@ -266,7 +437,7 @@ export default function Comments() {
     }
   }
 
-  const remainingNew = MAX_COMMENT_LENGTH - text.length
+  const remainingNew = MAX_COMMENT_LENGTH - newTextInput.length
   const remainingEdit = MAX_COMMENT_LENGTH - editText.length
 
   return (
@@ -323,17 +494,17 @@ export default function Comments() {
   <div className="relative w-full">
     <textarea
       ref={textareaRef}
-      value={text}
+      value={newTextInput}
       onChange={handleNewChange}
       rows={3}
       placeholder="Escribe algo bonito (o un shitpost controlado)…"
-      className="comment-textarea w-full rounded-2xl border border-slate-800/80 bg-slate-950/60 px-3 pt-3 pb-14 pr-3 text-xs text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
+      className="comment-textarea w-full rounded-2xl border border-slate-700/80 bg-slate-950/70 px-3 pb-7 pt-3 text-[13px] text-slate-100 shadow-[0_0_0_1px_rgba(15,23,42,0.9)] placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
     />
     <div className="pointer-events-none absolute inset-x-3 bottom-2 flex items-center justify-end text-[11px] text-slate-400">
       <div className="mr-auto h-px w-full max-w-[calc(100%-11rem)] bg-gradient-to-r from-slate-600/40 via-slate-500/50 to-transparent" />
       <div className="flex items-center gap-2 rounded-full bg-slate-900/95 px-3 py-1 shadow-[0_0_0_1px_rgba(15,23,42,0.9)]">
         <span className="text-[10px] text-slate-300">
-          {text.length}/{MAX_COMMENT_LENGTH} caracteres
+          {newTextInput.length}/{MAX_COMMENT_LENGTH} caracteres
         </span>
         {remainingNew <= 50 && (
           <span className={remainingNew < 0 ? 'text-rose-300' : 'text-amber-200'}>
@@ -345,10 +516,42 @@ export default function Comments() {
       </div>
     </div>
   </div>
-  <div className="mt-2 flex justify-end">
+
+  {newGifUrls.length > 0 && (
+    <div className="mt-3 rounded-2xl border border-slate-800/80 bg-slate-950/80 px-3 py-2">
+      <p className="mb-1 text-[11px] text-slate-400">Vista previa de GIF(s):</p>
+      <div className="relative inline-block rounded-xl bg-slate-950/60 px-1 py-1">
+        <button
+          type="button"
+          onClick={handleRemovePreviewGif}
+          className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900/90 text-[11px] text-slate-200 shadow-md transition hover:bg-rose-500 hover:text-slate-50"
+          aria-label="Quitar GIF"
+        >
+          ✕
+        </button>
+        <img
+          src={newGifUrls[0]}
+          alt="GIF de vista previa"
+          className="max-w-xs h-auto rounded-xl border border-slate-700/80"
+        />
+      </div>
+    </div>
+  )}
+
+  <div className="mt-2 flex items-center justify-end gap-2">
+    <button
+      type="button"
+      onClick={openGifPickerForNew}
+      className="flex items-center gap-1 rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-1 text-[11px] text-slate-200 transition hover:border-sky-400 hover:text-sky-200"
+    >
+      <span role="img" aria-label="GIF">
+        🎞️
+      </span>
+      <span>GIF</span>
+    </button>
     <button
       type="submit"
-      className="rounded-full bg-fuchsia-500 px-3 py-1 text-[11px] font-semibold text-slate-900"
+      className="rounded-full bg-fuchsia-500 px-3 py-1 text-[11px] font-semibold text-slate-900 hover:bg-fuchsia-400"
     >
       Enviar
     </button>
@@ -464,9 +667,9 @@ export default function Comments() {
                   </header>
 
                   {!isEditing && (
-                    <p className="mt-1 text-slate-200 whitespace-pre-wrap">
-                      {c.text}
-                    </p>
+                    <div className="mt-1 text-slate-200 text-[13px]">
+                      {renderTextWithGifs(c.text)}
+                    </div>
                   )}
 
                   {isEditing && (
@@ -611,9 +814,9 @@ export default function Comments() {
                                   </div>
                                 </div>
                               ) : (
-                                <p className="mt-0.5 whitespace-pre-wrap text-slate-200">
-                                  {r.text}
-                                </p>
+                                <div className="mt-0.5 text-slate-200 text-[12px]">
+                                  {renderTextWithGifs(r.text)}
+                                </div>
                               )}
                             </div>
                           </div>
@@ -642,7 +845,14 @@ export default function Comments() {
                         <span>
                           {replyText.length}/{MAX_COMMENT_LENGTH} caracteres
                         </span>
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openGifPickerForReply(c.id)}
+                            className="rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-1 text-[10px] text-slate-200 transition hover:border-emerald-400 hover:text-emerald-200"
+                          >
+                            GIF
+                          </button>
                           <button
                             type="button"
                             onClick={() => {
@@ -697,7 +907,87 @@ export default function Comments() {
         </div>
       </div>
 
-      {confirmDeleteId && (
+      
+
+      {gifPickerOpen && (
+        <div className="modal-backdrop" onClick={closeGifPicker}>
+          <div
+            className="modal-card max-w-2xl w-full"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 className="modal-title">Elige un GIF</h3>
+            <p className="modal-text">
+              Busca un GIF y haz click en él para insertarlo en tu comentario.
+            </p>
+
+            <form onSubmit={handleGifSearchSubmit} className="mt-3 flex gap-2">
+              <input
+                type="text"
+                value={gifQuery}
+                onChange={(event) => setGifQuery(event.target.value)}
+                placeholder='Escribe algo como "No lo sé Rick"…'
+                className="modal-input"
+              />
+              <button type="submit" className="modal-btn-save">
+                Buscar
+              </button>
+            </form>
+
+            {!TENOR_API_KEY && (
+              <p className="mt-4 text-[11px] text-amber-300">
+                Falta configurar <code>VITE_TENOR_API_KEY</code> en las variables de entorno para
+                poder buscar GIFs de Tenor.
+              </p>
+            )}
+
+            {TENOR_API_KEY && (
+              <div className="mt-4 rounded-2xl border border-slate-700/80 bg-slate-950/90 p-3 comment-textarea max-h-80 overflow-y-auto">
+                {gifLoading && (
+                  <p className="text-[11px] text-slate-400">Cargando GIFs…</p>
+                )}
+
+                {!gifLoading && gifError && (
+                  <p className="text-[11px] text-rose-300">{gifError}</p>
+                )}
+
+                {!gifLoading && !gifError && gifResults.length === 0 && (
+                  <p className="text-[11px] text-slate-500">
+                    Escribe algo arriba y presiona "Buscar" para ver GIFs.
+                  </p>
+                )}
+
+                {!gifLoading && gifResults.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 md:grid-cols-4">
+                    {gifResults.map((url, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleGifSelect(url)}
+                        className="group block overflow-hidden rounded-xl border border-slate-700/70 bg-slate-900/80 hover:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-500/70 focus:ring-offset-2 focus:ring-offset-slate-950"
+                      >
+                        <img
+                          src={url}
+                          alt="GIF"
+                          loading="lazy"
+                          className="h-24 w-full object-cover transition-transform duration-150 group-hover:scale-105"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="mt-5 flex justify-end">
+              <button type="button" onClick={closeGifPicker} className="modal-btn-cancel">
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+{confirmDeleteId && (
         <div className="modal-backdrop">
           <div className="modal-card">
             <h3 className="modal-title">¿Eliminar este comentario?</h3>
