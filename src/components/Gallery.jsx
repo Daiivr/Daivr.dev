@@ -13,9 +13,11 @@ export default function Gallery() {
   // modal de previsualización (ver imagen grande)
   const [previewFile, setPreviewFile] = useState(null)
 
+
   // modal para renombrar antes de subir
   const [uploadPreviewUrl, setUploadPreviewUrl] = useState(null)
   const [uploadName, setUploadName] = useState('')
+  const [uploadDescription, setUploadDescription] = useState('')
   const [showUploadModal, setShowUploadModal] = useState(false)
 
   const isOwner = me && me.id === OWNER_ID
@@ -48,6 +50,9 @@ export default function Gallery() {
     if (uploadName.trim()) {
       formData.append('displayName', uploadName.trim())
     }
+    if (uploadDescription.trim()) {
+      formData.append('description', uploadDescription.trim())
+    }
 
     try {
       setUploading(true)
@@ -57,13 +62,17 @@ export default function Gallery() {
         },
       })
       const uploaded = res.data.file
-      // si el backend soporta displayName, lo usará; si no, lo guardamos en memoria
+      // si el backend soporta displayName/description, los usará; si no, los guardamos en memoria
       if (uploadName.trim()) {
         uploaded.displayName = uploadName.trim()
+      }
+      if (uploadDescription.trim()) {
+        uploaded.description = uploadDescription.trim()
       }
       setFiles((prev) => [uploaded, ...prev])
       setFile(null)
       setUploadName('')
+      setUploadDescription('')
       if (uploadPreviewUrl) {
         URL.revokeObjectURL(uploadPreviewUrl)
         setUploadPreviewUrl(null)
@@ -104,6 +113,7 @@ export default function Gallery() {
     if (!selected) {
       setFile(null)
       setUploadName('')
+      setUploadDescription('')
       if (uploadPreviewUrl) {
         URL.revokeObjectURL(uploadPreviewUrl)
         setUploadPreviewUrl(null)
@@ -133,6 +143,7 @@ export default function Gallery() {
     setShowUploadModal(false)
     setFile(null)
     setUploadName('')
+    setUploadDescription('')
     if (uploadPreviewUrl) {
       URL.revokeObjectURL(uploadPreviewUrl)
       setUploadPreviewUrl(null)
@@ -256,9 +267,29 @@ export default function Gallery() {
                 className="max-h-[70vh] w-full object-contain bg-slate-950"
               />
             </div>
-            <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400">
-              <span className="truncate">{displayLabel(previewFile)}</span>
-              <span>{(previewFile.size / 1024).toFixed(0)}kb</span>
+            <div className="mt-3 flex items-start justify-between gap-4 text-[11px] text-slate-400">
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-medium text-slate-200">
+                  {displayLabel(previewFile)}
+                </div>
+                {previewFile.description && (
+                  <p className="mt-1 whitespace-pre-wrap text-slate-400">
+                    {previewFile.description}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-col items-end gap-1 text-right">
+                {previewFile.createdAt && (
+                  <span className="text-[10px] text-slate-500">
+                    Subida el {new Date(previewFile.createdAt).toLocaleDateString('es-ES', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: '2-digit',
+                    })}
+                  </span>
+                )}
+                <span>{(previewFile.size / 1024).toFixed(0)}kb</span>
+              </div>
             </div>
             <div className="modal-actions">
               <button
@@ -293,18 +324,34 @@ export default function Gallery() {
                 />
               </div>
             )}
-            <div className="space-y-2">
-              <label className="block text-[11px] font-medium text-slate-300">
-                Nombre para mostrar
-              </label>
-              <input
-                type="text"
-                value={uploadName}
-                onChange={(e) => setUploadName(e.target.value)}
-                className="modal-input"
-                maxLength={120}
-                placeholder="Ej. Camden Park, avatar VRChat, etc."
-              />
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <label className="block text-[11px] font-medium text-slate-300">
+                  Nombre para mostrar
+                </label>
+                <input
+                  type="text"
+                  value={uploadName}
+                  onChange={(e) => setUploadName(e.target.value)}
+                  className="modal-input"
+                  maxLength={120}
+                  placeholder="Ej. Camden Park, avatar VRChat, etc."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-[11px] font-medium text-slate-300">
+                  Descripción (opcional)
+                </label>
+                <textarea
+                  value={uploadDescription}
+                  onChange={(e) => setUploadDescription(e.target.value)}
+                  className="modal-input comment-textarea min-h-[72px] resize-none"
+                  maxLength={400}
+                  placeholder="Cuenta un poquito de la imagen, contexto, créditos, etc."
+                />
+              </div>
+
               <p className="text-[10px] text-slate-500">
                 Solo cambia cómo se muestra en la web. El archivo original se mantiene en tu carpeta{' '}
                 <code className="rounded bg-slate-900/80 px-1">/uploads</code>.

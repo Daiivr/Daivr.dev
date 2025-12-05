@@ -83,6 +83,7 @@ function listFiles() {
       const displayName =
         metaEntry.displayName || metaEntry.originalName || originalName || filename
 
+      const description = metaEntry.description || ''
       return {
         filename,
         url: '/uploads/' + filename,
@@ -90,6 +91,7 @@ function listFiles() {
         sizeKB: Math.round(size / 1024),
         originalName,
         displayName,
+        description,
         createdAt,
       }
     })
@@ -120,8 +122,10 @@ router.post('/', upload.single('file'), (req, res) => {
   const stat = fs.statSync(req.file.path)
 
   const rawDisplayName = (req.body.displayName || '').toString().trim()
+  const rawDescription = (req.body.description || '').toString().trim()
   const originalName = path.basename(req.file.originalname)
   const displayName = rawDisplayName || originalName
+  const description = rawDescription || ''
   const createdAt = new Date().toISOString()
 
   // Guardar metadatos
@@ -130,6 +134,7 @@ router.post('/', upload.single('file'), (req, res) => {
     filename: req.file.filename,
     originalName,
     displayName,
+    description,
     createdAt,
   })
   writeMeta(meta)
@@ -142,6 +147,7 @@ router.post('/', upload.single('file'), (req, res) => {
       sizeKB: Math.round(stat.size / 1024),
       originalName,
       displayName,
+      description,
       createdAt,
     },
   })

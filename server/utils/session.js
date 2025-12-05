@@ -9,10 +9,17 @@ const ADMIN_IDS = (process.env.ADMIN_IDS || '')
   .filter(Boolean)
 
 function createSession(res, discordUser) {
+  // Usar el nombre visible de Discord (display name) si existe; si no, caer al username clásico
+  const displayName =
+    discordUser.global_name ||
+    (discordUser.username && discordUser.discriminator
+      ? `${discordUser.username}#${discordUser.discriminator}`
+      : discordUser.username)
+
   const token = jwt.sign(
     {
       id: discordUser.id,
-      username: discordUser.username + '#' + discordUser.discriminator,
+      username: displayName,
       avatar: discordUser.avatar,
     },
     process.env.JWT_SECRET || 'dev-secret',
