@@ -189,8 +189,8 @@ function WelcomeContent({ phase, onEnter, displayName }) {
           : 'pointer-events-none opacity-0 translate-y-3')
       }
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-fuchsia-300/90">
-        bienvenido a mi
+      <p className="text-[14px] font-semibold uppercase tracking-[0.32em] text-fuchsia-300/90">
+        bienvenido
       </p>
       <h1 className="mt-4 text-2xl font-semibold sm:text-3xl">
         <span className="bg-gradient-to-r from-fuchsia-300 via-rose-300 to-sky-300 bg-clip-text text-transparent">
@@ -198,7 +198,7 @@ function WelcomeContent({ phase, onEnter, displayName }) {
         </span>
       </h1>
       <p className="mt-3 max-w-sm text-sm leading-relaxed text-slate-200/95">
-        Mi pequeño rincón de internet para{' '}
+        A mi pequeño rincón de internet para{' '}
         <span className="font-medium text-fuchsia-200">bots, proyectos</span> y
         capturas de aventuras digitales. Ponte cómodo ✨
       </p>
