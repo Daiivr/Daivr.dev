@@ -349,3 +349,80 @@ body {
     opacity: 0.5;
   }
 }
+
+
+/* === Splash equalizer loader === */
+.splash-eq-bar {
+  transform-origin: bottom;
+  animation: splashEqualizer 1.25s ease-in-out infinite;
+}
+
+@keyframes splashEqualizer {
+  0%, 100% { transform: scaleY(0.35); }
+  20% { transform: scaleY(1); }
+  40% { transform: scaleY(0.5); }
+  60% { transform: scaleY(0.9); }
+  80% { transform: scaleY(0.6); }
+}
+
+
+/* === Splash equalizer enhancements === */
+.splash-eq-wrapper {
+  animation: splashFloat 9s ease-in-out infinite;
+}
+
+.splash-eq-progress {
+  animation: splashProgress 3s ease-in-out infinite;
+}
+
+@keyframes splashFloat {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -6px, 0); }
+}
+
+@keyframes splashProgress {
+  0% { transform: translateX(-55%); }
+  50% { transform: translateX(10%); }
+  100% { transform: translateX(55%); }
+}
+
+
+/* === Splash status + equalizer dots === */
+.splash-status-dot {
+  animation: splashStatus 2s ease-in-out infinite;
+}
+
+@keyframes splashStatus {
+  0%, 100% {
+    opacity: 0.5;
+    box-shadow:
+      0 0 6px rgba(52, 211, 153, 0.7),
+      0 0 14px rgba(52, 211, 153, 0.6);
+  }
+  50% {
+    opacity: 1;
+    box-shadow:
+      0 0 10px rgba(52, 211, 153, 0.95),
+      0 0 22px rgba(52, 211, 153, 0.85);
+  }
+}
+
+.splash-eq-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom, #22c55e, #38bdf8);
+  opacity: 0.2;
+  animation: splashEqDot 1.4s ease-in-out infinite;
+}
+
+@keyframes splashEqDot {
+  0%, 100% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+}
