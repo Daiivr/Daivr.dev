@@ -9,6 +9,7 @@ const { router: authRouter } = require('./routes/auth')
 const { router: commentsRouter } = require('./routes/comments')
 const { router: galleryRouter } = require('./routes/gallery')
 const { router: linksRouter } = require('./routes/links')
+const { router: visitsRouter } = require('./routes/visits')
 const { getUserFromRequest } = require('./utils/session')
 
 const app = express()
@@ -93,6 +94,7 @@ app.use('/auth/discord', authRouter)
 app.use('/api/comments', commentsRouter)
 app.use('/api/gallery', galleryRouter)
 app.use('/api/links', linksRouter)
+app.use('/api/visits', visitsRouter)
 
 
 app.get('/api/tenor-search', async (req, res) => {

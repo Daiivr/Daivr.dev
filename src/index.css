@@ -26,6 +26,10 @@ body {
   position: relative;
   @apply glass rounded-3xl p-6 shadow-[0_24px_80px_rgba(15,23,42,0.9)];
   overflow: hidden;
+  transition:
+    transform 220ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 220ms ease-out,
+    background 220ms ease-out;
 }
 
 /* Aura y borde suave tipo hero */
@@ -54,57 +58,120 @@ body {
   pointer-events: none;
 }
 
-/* Subtle animated glow circles (used in hero & discord) */
-.pulse-orb {
-  @apply rounded-full blur-3xl;
-  animation: orb-pulse 10s ease-in-out infinite alternate;
+
+
+/* Cute floaty hover for ALL section cards */
+.section-card::before,
+.section-card::after {
+  transition:
+    opacity 260ms ease-out,
+    transform 260ms ease-out,
+    filter 260ms ease-out;
 }
 
-@keyframes orb-pulse {
-  0% { transform: translate3d(0,0,0) scale(1); opacity: 0.6; }
-  100% { transform: translate3d(12px,-10px,0) scale(1.15); opacity: 0.9; }
+/* Main hover: gentle float, tilt & extra glow */
+.section-card:hover {
+  transform: translateY(-10px) scale(1.02) rotate(-0.4deg);
+  box-shadow:
+    0 40px 130px rgba(15, 23, 42, 1),
+    0 0 0 1px rgba(148, 163, 184, 0.25);
 }
 
-/* Gradient border utility for special cards */
-.gradient-border {
-  position: relative;
+.section-card:hover::before {
+  opacity: 1;
+  filter: blur(10px);
+  animation: sectionCardGlow 8s ease-in-out infinite alternate;
 }
 
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: 1.5rem;
-  background: conic-gradient(
-    from 120deg,
-    #38bdf8,
-    #a855f7,
-    #f97316,
-    #22c55e,
-    #38bdf8
-  );
-  opacity: 0.9;
-  filter: blur(6px);
-  z-index: -1;
+.section-card:hover::after {
+  opacity: 0.8;
+  animation: sectionCardShimmer 4.2s ease-in-out infinite alternate;
 }
 
+/* Tiny pastel shimmer + orbiting glow for extra cuteness */
+@keyframes sectionCardGlow {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  35% {
+    transform: translate3d(6px, -6px, 0) scale(1.04);
+  }
+  70% {
+    transform: translate3d(-4px, 4px, 0) scale(1.03);
+  }
+  100% {
+    transform: translate3d(2px, -3px, 0) scale(1.02);
+  }
+}
 
+@keyframes sectionCardShimmer {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(0, -4px, 0);
+  }
+  50% {
+    transform: translate3d(-1px, 1px, 0);
+  }
+  75% {
+    transform: translate3d(1px, -2px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
 /* Links: floating icon on hover */
 .link-card {
   position: relative;
+  overflow: hidden;
+  transition:
+    transform 220ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 220ms ease-out;
 }
 
+.link-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 1.4rem;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.6), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.7), transparent 55%);
+  opacity: 0;
+  transform: translate3d(0, 6px, 0) scale(0.96);
+  filter: blur(10px);
+  transition:
+    opacity 220ms ease-out,
+    transform 260ms ease-out,
+    filter 260ms ease-out;
+  pointer-events: none;
+}
+
+.link-card:hover {
+  transform: translateY(-8px) scale(1.02) rotate(-0.3deg);
+  box-shadow:
+    0 26px 80px rgba(15, 23, 42, 0.95),
+    0 0 0 1px rgba(148, 163, 184, 0.3);
+}
+
+.link-card:hover::before {
+  opacity: 0.95;
+  transform: translate3d(0, -2px, 0) scale(1.04);
+  filter: blur(12px);
+}
+
+/* Main little floaty icon animation */
 .link-icon-float {
   opacity: 0;
-  transform: translateY(6px) scale(0.9);
-  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+  transform: translateY(8px) scale(0.9);
+  transition: opacity 0.2s ease-out, transform 0.22s ease-out;
 }
 
 .link-card:hover .link-icon-float {
   opacity: 1;
-  transform: translateY(-6px) scale(1);
+  transform: translateY(-10px) scale(1.05);
 }
-
 /* Slime morphing logo shape */
 .slime-shape {
   position: relative;
