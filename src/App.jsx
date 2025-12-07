@@ -38,8 +38,6 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
 
   const discordId = me?.id ? String(me.id) : null
 
-  // Para The Cube seguimos usando la versión local con soporte de discordId.
-  // Para Drive Mad usamos la versión avanzada alojada en gamecollections.me
   const basePath =
     internalGame === 'cube'
       ? '/the-cube/index.html'
@@ -112,9 +110,44 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
   )
 }
 
+function AudioToggleButton({ visible, muted, onToggle }) {
+  if (!visible) return null
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="fixed bottom-5 right-5 z-40 rounded-full p-[2px] bg-gradient-to-r from-sky-500/60 via-cyan-400/60 to-fuchsia-500/60 shadow-[0_12px_40px_rgba(8,47,73,0.85)] transition-transform duration-200 hover:translate-y-0.5 active:scale-[0.97]"
+      aria-label={muted ? 'Activar música lo-fi' : 'Mutear música lo-fi'}
+    >
+      <div className="flex items-center gap-2 rounded-full bg-slate-950/90 px-3 py-2 border border-slate-700/80">
+        <span className="relative flex h-5 w-5 items-center justify-center">
+          {!muted && (
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/30 animate-ping" />
+          )}
+          <span
+            className={`relative inline-flex h-3 w-3 rounded-full ${
+              muted
+                ? 'bg-slate-400 shadow-[0_0_10px_rgba(148,163,184,0.9)]'
+                : 'bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.95)]'
+            }`}
+          />
+        </span>
+        <span className="uppercase tracking-[0.22em] text-[9px] text-slate-400">
+          LOFI
+        </span>
+        <span className="text-[11px] font-semibold text-slate-100">
+          {muted ? 'OFF' : 'ON'}
+        </span>
+      </div>
+    </button>
+  )
+}
+
 export default function App() {
   const [showSplash, setShowSplash] = useState(true)
   const [playAudio, setPlayAudio] = useState(false)
+  const [audioMuted, setAudioMuted] = useState(false)
   const [visitCount, setVisitCount] = useState(null)
   const [visitError, setVisitError] = useState(false)
   const [me, setMe] = useState(null)
@@ -217,13 +250,18 @@ export default function App() {
 
   return (
     <div className="min-h-screen text-slate-50">
-      <BackgroundAudio play={playAudio} />
+      <BackgroundAudio play={playAudio} muted={audioMuted} />
       <Fireflies />
       <KonamiGameOverlay
         open={showGameOverlay}
         activeGame={activeGame}
         me={me}
         onClose={() => setShowGameOverlay(false)}
+      />
+      <AudioToggleButton
+        visible={!showSplash}
+        muted={audioMuted}
+        onToggle={() => setAudioMuted((prev) => !prev)}
       />
       {showSplash && <Splash onEnter={handleEnter} />}
       <Navbar />
@@ -267,7 +305,7 @@ export default function App() {
   )
 }
 
-function BackgroundAudio({ play }) {
+function BackgroundAudio({ play, muted }) {
   const iframeRef = useRef(null)
 
   useEffect(() => {
@@ -280,14 +318,23 @@ function BackgroundAudio({ play }) {
         if (data && data.event === 'onReady') {
           const iframe = iframeRef.current
           if (!iframe || !iframe.contentWindow) return
-          iframe.contentWindow.postMessage(
-            JSON.stringify({
-              event: 'command',
-              func: 'setVolume',
-              args: [20],
-            }),
-            '*',
-          )
+          const msg = (func, args = []) =>
+            iframe.contentWindow.postMessage(
+              JSON.stringify({
+                event: 'command',
+                func,
+                args,
+              }),
+              '*',
+            )
+
+          if (muted) {
+            msg('mute')
+            msg('setVolume', [0])
+          } else {
+            msg('unMute')
+            msg('setVolume', [20])
+          }
         }
       } catch {
         // ignore
@@ -311,8 +358,13 @@ function BackgroundAudio({ play }) {
             '*',
           )
 
-        msg('setVolume', [20])
-        msg('unMute')
+        if (muted) {
+          msg('mute')
+          msg('setVolume', [0])
+        } else {
+          msg('unMute')
+          msg('setVolume', [20])
+        }
       } catch {
         // ignore
       }
@@ -326,7 +378,7 @@ function BackgroundAudio({ play }) {
       clearInterval(interval)
       window.removeEventListener('message', onMessage)
     }
-  }, [play])
+  }, [play, muted])
 
   if (!play) return null
 
