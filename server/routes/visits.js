@@ -5,14 +5,8 @@ const path = require('path')
 const router = express.Router()
 
 // Directorio de almacenamiento (permite override por env para hosting)
-// Prioridad:
-// 1. VISITS_DATA_DIR (dedicado para visitas)
-// 2. COMMENTS_DATA_DIR (mismo disco que comentarios, si ya lo tienes en Render)
-// 3. Carpeta local ./data (solo útil en desarrollo)
 const DATA_DIR =
-  process.env.VISITS_DATA_DIR ||
-  process.env.COMMENTS_DATA_DIR ||
-  path.join(__dirname, '..', '..', 'data')
+  process.env.VISITS_DATA_DIR || path.join(__dirname, '..', '..', 'data')
 
 const FILE = path.join(DATA_DIR, 'visits.json')
 
