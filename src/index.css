@@ -36,13 +36,32 @@ body {
 .section-card::before {
   content: '';
   position: absolute;
-  inset: -1px;
+  inset: 0;
   border-radius: inherit;
+  padding: 1.5px;
   background:
-    radial-gradient(circle at top left, rgba(56, 189, 248, 0.35), transparent 60%),
-    radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.40), transparent 60%);
-  opacity: 0.9;
-  z-index: -1;
+    linear-gradient(
+      90deg,
+      rgba(56, 189, 248, 0.0) 0%,
+      rgba(56, 189, 248, 0.0) 35%,
+      rgba(56, 189, 248, 0.4) 45%,
+      rgba(244, 114, 182, 0.9) 55%,
+      rgba(250, 204, 21, 0.9) 65%,
+      rgba(56, 189, 248, 0.0) 75%,
+      rgba(56, 189, 248, 0.0) 100%
+    );
+  background-size: 300% 100%;
+  background-position: 0% 0%;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+
+  /* sólo el anillo del borde, centro transparente */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
 }
 
 .section-card::after {
@@ -71,17 +90,20 @@ body {
 
 /* Main hover: gentle float, tilt & extra glow */
 .section-card:hover {
-  transform: translateY(-10px) scale(1.02) rotate(-0.4deg);
+  transform: translateY(-8px);
   box-shadow:
     0 40px 130px rgba(15, 23, 42, 1),
     0 0 0 1px rgba(148, 163, 184, 0.25);
 }
 
+
 .section-card:hover::before {
   opacity: 1;
-  filter: blur(10px);
-  animation: sectionCardGlow 8s ease-in-out infinite alternate;
+  animation:
+    neonBorderSlideCW 7s linear infinite,
+    neonBorderSparkSoft 3.5s ease-in-out infinite;
 }
+
 
 .section-card:hover::after {
   opacity: 0.8;
@@ -133,33 +155,48 @@ body {
 .link-card::before {
   content: '';
   position: absolute;
-  inset: -1px;
+  inset: 0;
   border-radius: 1.4rem;
+  padding: 1.5px;
   background:
-    radial-gradient(circle at top left, rgba(56, 189, 248, 0.6), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.7), transparent 55%);
+    linear-gradient(
+      90deg,
+      rgba(56, 189, 248, 0.0) 0%,
+      rgba(56, 189, 248, 0.0) 35%,
+      rgba(56, 189, 248, 0.45) 45%,
+      rgba(244, 114, 182, 0.98) 55%,
+      rgba(251, 113, 133, 0.98) 65%,
+      rgba(56, 189, 248, 0.0) 75%,
+      rgba(56, 189, 248, 0.0) 100%
+    );
+  background-size: 300% 100%;
+  background-position: 0% 0%;
   opacity: 0;
-  transform: translate3d(0, 6px, 0) scale(0.96);
-  filter: blur(10px);
-  transition:
-    opacity 220ms ease-out,
-    transform 260ms ease-out,
-    filter 260ms ease-out;
   pointer-events: none;
+  mix-blend-mode: screen;
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
 }
 
 .link-card:hover {
-  transform: translateY(-8px) scale(1.02) rotate(-0.3deg);
+  transform: translateY(-6px);
   box-shadow:
     0 26px 80px rgba(15, 23, 42, 0.95),
     0 0 0 1px rgba(148, 163, 184, 0.3);
 }
 
+
 .link-card:hover::before {
-  opacity: 0.95;
-  transform: translate3d(0, -2px, 0) scale(1.04);
-  filter: blur(12px);
+  opacity: 1;
+  animation:
+    neonBorderSlideCW 5s linear infinite,
+    neonBorderSparkSoft 3s ease-in-out infinite;
 }
+
 
 /* Main little floaty icon animation */
 .link-icon-float {
@@ -491,5 +528,30 @@ body {
   50% {
     opacity: 1;
     transform: translateY(-1px);
+  }
+}
+
+
+/* El neón se desliza alrededor del borde en sentido de las manecillas del reloj */
+@keyframes neonBorderSlideCW {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: -300% 0%;
+  }
+}
+
+
+/* Spark suave del segmento de neón mientras se mueve */
+@keyframes neonBorderSparkSoft {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  45% {
+    filter: brightness(1.35);
+  }
+  65% {
+    filter: brightness(1.15);
   }
 }
