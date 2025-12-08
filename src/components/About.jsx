@@ -71,15 +71,16 @@ export default function About() {
                 Proyectos
               </dt>
               <dd className="flex flex-wrap gap-2">
-                <span className="inline-flex items-center rounded-full bg-slate-900/60 px-3 py-1 text-[11px] font-medium text-slate-100">
-                  DaiBot
-                </span>
-                <span className="inline-flex items-center rounded-full bg-slate-900/60 px-3 py-1 text-[11px] font-medium text-slate-100">
+                <span className="tag-chip">DaiBot</span>
+                <a
+                  href="https://github.com/Daiivr/PokeNexo"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="tag-chip"
+                >
                   PokeNexo
-                </span>
-                <span className="inline-flex items-center rounded-full bg-slate-900/60 px-3 py-1 text-[11px] font-medium text-slate-100">
-                  Emoji Bank
-                </span>
+                </a>
+                <span className="tag-chip">Emoji Bank</span>
               </dd>
             </div>
           </dl>
