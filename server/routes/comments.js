@@ -2,6 +2,7 @@ const express = require('express')
 const fs = require('fs')
 const path = require('path')
 const { getUserFromRequest } = require('../utils/session')
+const { getDiscordAvatarUrl } = require('../utils/discordAvatar')
 
 const router = express.Router()
 
@@ -84,17 +85,56 @@ function withAdminFlags(comment) {
   }
 }
 
-// GET all
-router.get('/', (req, res) => {
-  const comments = readComments()
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .map((c) => withAdminFlags(c))
+async function withAvatars(comment) {
+  const hydrated = withAdminFlags(comment)
+  const token = process.env.DISCORD_BOT_TOKEN
 
-  res.json({ comments })
+  // Si hay Bot Token, resolvemos el avatar actual. Si no, dejamos el guardado
+  // y nos aseguramos de que exista un fallback para evitar img rota.
+  if (hydrated?.author?.id) {
+    if (token) hydrated.author.avatarUrl = await getDiscordAvatarUrl(hydrated.author.id, 64)
+    if (!hydrated.author.avatarUrl) {
+      hydrated.author.avatarUrl = 'https://cdn.discordapp.com/embed/avatars/0.png'
+    }
+  }
+
+  const replies = Array.isArray(hydrated.replies) ? hydrated.replies : []
+  hydrated.replies = await Promise.all(
+    replies.map(async (r) => {
+      if (!r) return r
+      if (!r.author?.id) return r
+
+      const next = { ...r, author: { ...r.author } }
+      if (token) next.author.avatarUrl = await getDiscordAvatarUrl(next.author.id, 64)
+      if (!next.author.avatarUrl) {
+        next.author.avatarUrl = 'https://cdn.discordapp.com/embed/avatars/0.png'
+      }
+      return next
+    })
+  )
+
+  return hydrated
+}
+
+
+// GET all
+router.get('/', async (req, res) => {
+  try {
+    const raw = readComments().sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    )
+
+    const comments = await Promise.all(raw.map((c) => withAvatars(c)))
+    res.json({ comments })
+  } catch (e) {
+    console.error('Error sirviendo comentarios', e)
+    res.status(500).json({ error: 'Error cargando comentarios' })
+  }
 })
 
+
 // POST new (requires auth)
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const user = getUserFromRequest(req)
   if (!user)
     return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
@@ -124,11 +164,11 @@ router.post('/', (req, res) => {
   comments.push(comment)
   writeComments(comments)
 
-  res.json({ comment: withAdminFlags(comment) })
+  res.json({ comment: await withAvatars(comment) })
 })
 
 // PUT edit (only author)
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const user = getUserFromRequest(req)
   if (!user)
     return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
@@ -159,7 +199,7 @@ router.put('/:id', (req, res) => {
   comments[index] = comment
   writeComments(comments)
 
-  res.json({ comment: withAdminFlags(comment) })
+  res.json({ comment: await withAvatars(comment) })
 })
 
 // DELETE comment (author or admin)
@@ -191,7 +231,7 @@ router.delete('/:id', (req, res) => {
 })
 
 // POST reply (solo admin puede responder)
-router.post('/:id/replies', (req, res) => {
+router.post('/:id/replies', async (req, res) => {
   const user = getUserFromRequest(req)
   if (!user)
     return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
@@ -238,11 +278,11 @@ router.post('/:id/replies', (req, res) => {
   comments[index] = baseComment
   writeComments(comments)
 
-  res.json({ comment: withAdminFlags(baseComment) })
+  res.json({ comment: await withAvatars(baseComment) })
 })
 
 // PUT reply (editar respuesta del admin)
-router.put('/:commentId/replies/:replyId', (req, res) => {
+router.put('/:commentId/replies/:replyId', async (req, res) => {
   const user = getUserFromRequest(req)
   if (!user)
     return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
@@ -283,11 +323,11 @@ router.put('/:commentId/replies/:replyId', (req, res) => {
   comments[index] = baseComment
   writeComments(comments)
 
-  res.json({ comment: withAdminFlags(baseComment) })
+  res.json({ comment: await withAvatars(baseComment) })
 })
 
 // DELETE reply (eliminar respuesta del admin)
-router.delete('/:commentId/replies/:replyId', (req, res) => {
+router.delete('/:commentId/replies/:replyId', async (req, res) => {
   const user = getUserFromRequest(req)
   if (!user)
     return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
@@ -316,7 +356,7 @@ router.delete('/:commentId/replies/:replyId', (req, res) => {
   comments[index] = baseComment
   writeComments(comments)
 
-  res.json({ comment: withAdminFlags(baseComment) })
+  res.json({ comment: await withAvatars(baseComment) })
 })
 
 module.exports = { router }

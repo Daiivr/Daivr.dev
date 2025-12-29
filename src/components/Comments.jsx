@@ -456,6 +456,7 @@ const handleGifSelect = (url) => {
                 <div className="flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1">
                   <img
                     src={me.avatarUrl}
+                    onError={(e) => (e.currentTarget.src = 'https://cdn.discordapp.com/embed/avatars/0.png')}
                     className="h-5 w-5 rounded-full"
                     alt={formatUsername(me.username)}
                   />
@@ -594,6 +595,7 @@ const handleGifSelect = (url) => {
               >
                 <img
                   src={c.author.avatarUrl}
+                    onError={(e) => (e.currentTarget.src = 'https://cdn.discordapp.com/embed/avatars/0.png')}
                   className="mt-1 h-7 w-7 rounded-full"
                   alt={formatUsername(c.author.username)}
                 />
@@ -737,6 +739,7 @@ const handleGifSelect = (url) => {
                           >
                             <img
                               src={r.author?.avatarUrl}
+                    onError={(e) => (e.currentTarget.src = 'https://cdn.discordapp.com/embed/avatars/0.png')}
                               alt={formatUsername(r.author?.username)}
                               className="mt-0.5 h-5 w-5 rounded-full"
                             />
