@@ -163,7 +163,7 @@ export default function Gallery() {
       <div className="section-card">
         <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-slate-100">Galería</h2>
+            <h2 className="section-title">Galería</h2>
             <p className="mt-1 text-xs text-slate-400">
               Mi pequeña vitrina de imágenes.
             </p>
@@ -256,39 +256,61 @@ export default function Gallery() {
       {previewFile && (
         <div className="modal-backdrop" onClick={closePreview}>
           <div
-            className="modal-card max-w-3xl"
+            className="modal-card modal-fit"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="modal-title mb-3">Vista previa</h3>
-            <div className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950/60">
-              <img
-                src={previewFile.url}
-                alt={displayLabel(previewFile)}
-                className="max-h-[70vh] w-full object-contain bg-slate-950"
-              />
-            </div>
-            <div className="mt-3 flex items-start justify-between gap-4 text-[11px] text-slate-400">
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-medium text-slate-200">
-                  {displayLabel(previewFile)}
-                </div>
-                {previewFile.description && (
-                  <p className="mt-1 whitespace-pre-wrap text-slate-400">
-                    {previewFile.description}
-                  </p>
-                )}
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">Vista previa</h3>
               </div>
-              <div className="flex flex-col items-end gap-1 text-right">
-                {previewFile.createdAt && (
-                  <span className="text-[10px] text-slate-500">
-                    Subida el {new Date(previewFile.createdAt).toLocaleDateString('es-ES', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: '2-digit',
-                    })}
-                  </span>
-                )}
-                <span>{(previewFile.size / 1024).toFixed(0)}kb</span>
+              <button
+                type="button"
+                onClick={closePreview}
+                className="modal-close"
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/*
+              Ajuste: este modal se “encoge” al tamaño real de la imagen (con límites de viewport)
+              para evitar los espacios laterales cuando la imagen es vertical.
+            */}
+            <div className="text-center">
+              <div className="inline-block max-w-[85vw] text-left">
+                <div className="modal-panel inline-block overflow-hidden rounded-2xl">
+                  <img
+                    src={previewFile.url}
+                    alt={displayLabel(previewFile)}
+                    className="block h-auto w-auto max-h-[70vh] max-w-full object-contain bg-slate-950"
+                  />
+                </div>
+
+                <div className="mt-3 flex items-start justify-between gap-4 text-[11px] text-slate-400">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-medium text-slate-200">
+                      {displayLabel(previewFile)}
+                    </div>
+                    {previewFile.description && (
+                      <p className="mt-1 whitespace-pre-wrap text-slate-400">
+                        {previewFile.description}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-1 text-right">
+                    {previewFile.createdAt && (
+                      <span className="text-[10px] text-slate-500">
+                        Subida el {new Date(previewFile.createdAt).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: '2-digit',
+                        })}
+                      </span>
+                    )}
+                    <span>{(previewFile.size / 1024).toFixed(0)}kb</span>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="modal-actions">
@@ -308,15 +330,28 @@ export default function Gallery() {
       {showUploadModal && file && (
         <div className="modal-backdrop" onClick={cancelUploadModal}>
           <div
-            className="modal-card max-w-lg"
+            className="modal-card modal-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="modal-title mb-2">Preparar imagen</h3>
-            <p className="modal-text mb-3">
-              Revisa la vista previa y ajusta el nombre con el que aparecerá en tu galería.
-            </p>
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">Preparar imagen</h3>
+                <p className="modal-text">
+                  Revisa la vista previa y ajusta el nombre con el que aparecerá en tu galería.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={cancelUploadModal}
+                className="modal-close"
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+
             {uploadPreviewUrl && (
-              <div className="mb-3 overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950/60">
+              <div className="modal-panel mb-3 overflow-hidden rounded-2xl">
                 <img
                   src={uploadPreviewUrl}
                   alt={uploadName || file.name}

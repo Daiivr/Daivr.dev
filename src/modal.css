@@ -1,60 +1,135 @@
 
-/* Backdrop oscuro con glow suave que hace match con el fondo de la web */
+/*
+  Modal System (Daivr.dev)
+  - Same glass + neon vibe as the rest of the site
+  - Consistent header/actions
+  - Size variants via .modal-sm/.modal-lg/etc
+*/
+
+/* Backdrop (mismo vibe que el body, pero más “focus”) */
 .modal-backdrop {
   position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 1.25rem;
+
+  /* Reutiliza el mismo tipo de aura que el body, pero un poquito más marcada */
   background:
-    radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 60%),
-    radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.18), transparent 60%),
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.14), transparent 58%),
+    radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.14), transparent 58%),
     rgba(2, 6, 23, 0.86);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
   z-index: 2000;
 }
 
-/* Tarjeta tipo glass con borde degradado como las section-card */
+/* Card glass (el “contenedor” del modal) */
 .modal-card {
+  --modal-max: 26rem;
+
   position: relative;
-  width: min(100%, 26rem);
-  border-radius: 1.25rem;
-  padding: 1.5rem 1.75rem;
-  color: #e5e7eb;
-  background:
-    radial-gradient(circle at top left, rgba(56, 189, 248, 0.20), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.18), transparent 55%),
-    rgba(15, 23, 42, 0.96);
-  border: 1px solid rgba(148, 163, 184, 0.5);
+  width: 100%;
+  max-width: var(--modal-max);
+  max-height: calc(100dvh - 3rem);
+  overflow: auto;
+
+  /* Match con las cards principales */
+  border-radius: 1.5rem;
+  padding: 1.35rem;
+  color: rgb(226 232 240);
+
+  /* “Glass” similar al resto del sitio */
+  @apply bg-slate-900/75 border border-slate-700/70 backdrop-blur-xl;
+
   box-shadow:
-    0 24px 60px rgba(15, 23, 42, 0.95),
-    0 0 0 1px rgba(15, 23, 42, 1);
-  overflow: hidden;
+    0 40px 130px rgba(15, 23, 42, 1),
+    0 0 0 1px rgba(148, 163, 184, 0.18);
+
+  isolation: isolate;
   animation: modal-pop 0.18s ease-out;
 }
 
-/* Borde glow degradado */
+/* Para modals que deben “ajustarse” al contenido (ej: preview de imagen en galería)
+   - Evita el espacio lateral cuando la imagen es vertical
+   - Sigue respetando el límite del viewport
+*/
+.modal-card.modal-fit {
+  width: fit-content;
+  max-width: calc(100vw - 2.5rem); /* coincide con el padding del backdrop */
+}
+
+/* Size variants */
+.modal-card.modal-sm { --modal-max: 22rem; }
+.modal-card.modal-md { --modal-max: 26rem; }
+.modal-card.modal-lg { --modal-max: 34rem; }
+.modal-card.modal-xl { --modal-max: 44rem; }
+.modal-card.modal-2xl { --modal-max: 56rem; }
+
+/* Borde glow (mismo “ring” que las section cards, pero fijo) */
 .modal-card::before {
-  content: "";
+  content: '';
   position: absolute;
-  inset: -1px;
+  inset: 0;
   border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(
-    135deg,
-    rgba(56, 189, 248, 0.9),
-    rgba(94, 234, 212, 0.8),
-    rgba(244, 114, 182, 0.95)
-  );
-  -webkit-mask: 
-    linear-gradient(#000 0 0) content-box, 
+  padding: 1.5px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(56, 189, 248, 0.0) 0%,
+      rgba(56, 189, 248, 0.0) 35%,
+      rgba(56, 189, 248, 0.35) 45%,
+      rgba(244, 114, 182, 0.85) 55%,
+      rgba(250, 204, 21, 0.85) 65%,
+      rgba(56, 189, 248, 0.0) 75%,
+      rgba(56, 189, 248, 0.0) 100%
+    );
+  background-size: 300% 100%;
+  background-position: 0% 0%;
+  opacity: 0.65;
+  pointer-events: none;
+  mix-blend-mode: screen;
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
           mask-composite: exclude;
-  opacity: 0.7;
+}
+
+/* Glass sheen (igual al bento-sheen: sin “líneas raras” / sin seam) */
+.modal-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   pointer-events: none;
+  z-index: 0;
+
+  /* Soft highlights + moving sheen band */
+  background:
+    radial-gradient(120% 95% at 20% -15%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 62%),
+    radial-gradient(95% 80% at 85% 0%, rgba(56, 189, 248, 0.10), rgba(56, 189, 248, 0) 55%),
+    radial-gradient(110% 90% at 30% 115%, rgba(244, 114, 182, 0.08), rgba(244, 114, 182, 0) 55%),
+    linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.00) 20%,
+      rgba(255, 255, 255, 0.07) 34%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0.07) 66%,
+      rgba(255, 255, 255, 0.00) 82%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  background-size: auto, auto, auto, 200% 100%;
+  background-position: 0 0, 0 0, 0 0, 0% 0%;
+  mix-blend-mode: screen;
+  opacity: 0.52;
+  filter: blur(0.25px);
+  will-change: background-position;
+  animation: modalSheenSlide 7.5s linear infinite;
 }
 
 /* Contenido real encima del borde decorativo */
@@ -63,43 +138,86 @@
   z-index: 1;
 }
 
+/* Header (título + botón X) */
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.modal-close {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  @apply border border-slate-700/70 bg-slate-900/60;
+  color: rgb(226 232 240);
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.7);
+  transition: transform 0.12s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.modal-close:hover {
+  background: rgba(51, 65, 85, 0.72);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.85), 0 0 20px rgba(56, 189, 248, 0.18);
+  transform: translateY(-1px);
+}
+
+.modal-close:active {
+  transform: translateY(0px) scale(0.98);
+}
+
 /* Título y texto del modal */
 .modal-title {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.25rem;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: 0.01em;
-  color: #f9fafb;
+  color: rgb(248 250 252);
 }
 
 .modal-text {
   margin: 0;
   font-size: 0.78rem;
   line-height: 1.55;
-  color: #9ca3af;
+  color: rgba(226, 232, 240, 0.74);
 }
 
-/* Inputs / textareas dentro del modal: mismos vibes que los inputs del sitio */
+/* Panel interior (para previews/listas dentro del modal) */
+.modal-panel {
+  border-radius: 1.25rem;
+  @apply border border-slate-700/70 bg-slate-950/40;
+  box-shadow:
+    inset 0 0 0 1px rgba(2, 6, 23, 0.65),
+    0 10px 30px rgba(2, 6, 23, 0.35);
+}
+
+/* Inputs / textareas dentro del modal */
 .modal-input,
 .modal-card input[type="text"],
 .modal-card input[type="url"],
 .modal-card textarea {
   width: 100%;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(51, 65, 85, 0.9);
-  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 1));
-  padding: 0.5rem 0.85rem;
+  border-radius: 1rem;
+  @apply border border-slate-700/70 bg-slate-900/60;
+  padding: 0.6rem 0.9rem;
   font-size: 0.8rem;
-  color: #e5e7eb;
+  color: rgb(226 232 240);
   outline: none;
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, 1);
+  box-shadow: 0 0 0 1px rgba(2, 6, 23, 0.65);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
 .modal-input::placeholder,
 .modal-card input::placeholder,
 .modal-card textarea::placeholder {
-  color: #64748b;
+  color: rgba(148, 163, 184, 0.65);
 }
 
 .modal-input:focus,
@@ -107,18 +225,13 @@
 .modal-card textarea:focus {
   border-color: #38bdf8;
   box-shadow:
-    0 0 0 1px rgba(56, 189, 248, 0.8),
-    0 0 18px rgba(56, 189, 248, 0.35);
-}
-
-/* Separación vertical suave entre campos */
-.modal-card .space-y-2 > * + * {
-  margin-top: 0.5rem;
+    0 0 0 1px rgba(56, 189, 248, 0.75),
+    0 0 18px rgba(56, 189, 248, 0.28);
 }
 
 /* Barra de acciones alineada a la derecha */
 .modal-actions {
-  margin-top: 1.25rem;
+  margin-top: 1.15rem;
   display: flex;
   justify-content: flex-end;
   gap: 0.6rem;
@@ -132,11 +245,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.45rem 1.05rem;
+  padding: 0.48rem 1.05rem;
   border-radius: 9999px;
   border: none;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 550;
   letter-spacing: 0.02em;
   cursor: pointer;
   transition:
@@ -149,53 +262,50 @@
 
 /* Cancelar: gris azulado */
 .modal-btn-cancel {
-  background: rgba(51, 65, 85, 0.95);
-  color: #e5e7eb;
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, 1);
+  @apply border border-white/10;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgb(226 232 240);
+  box-shadow: 0 0 0 1px rgba(2, 6, 23, 0.65);
 }
 
 .modal-btn-cancel:hover:not(:disabled) {
-  background: rgba(71, 85, 105, 1);
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, 1), 0 12px 24px rgba(15, 23, 42, 0.8);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 0 0 1px rgba(2, 6, 23, 0.65), 0 12px 24px rgba(15, 23, 42, 0.8);
   transform: translateY(-1px);
 }
 
 /* Guardar: degradado celeste/fucsia */
 .modal-btn-save {
   background: linear-gradient(
-    135deg,
-    #38bdf8,
-    #22d3ee,
-    #e879f9
+    90deg,
+    rgba(56, 189, 248, 0.95),
+    rgba(244, 114, 182, 0.95)
   );
-  color: #0f172a;
-  font-weight: 600;
-  box-shadow: 0 12px 30px rgba(56, 189, 248, 0.6);
+  color: rgb(15 23 42);
+  font-weight: 750;
+  box-shadow: 0 12px 30px rgba(56, 189, 248, 0.35);
 }
 
 .modal-btn-save:hover:not(:disabled) {
   box-shadow:
-    0 0 0 1px rgba(15, 23, 42, 1),
-    0 16px 40px rgba(129, 140, 248, 0.8);
+    0 0 0 1px rgba(2, 6, 23, 0.65),
+    0 16px 40px rgba(244, 114, 182, 0.22);
   transform: translateY(-1px);
 }
 
 /* Eliminar / danger */
 .modal-btn-danger {
-  background: linear-gradient(
-    135deg,
-    #fb7185,
-    #f97316
-  );
-  color: #0f172a;
-  font-weight: 600;
-  box-shadow: 0 12px 30px rgba(248, 113, 113, 0.55);
+  background: linear-gradient(135deg, #fb7185, #f97316);
+  color: rgb(15 23 42);
+  font-weight: 650;
+  box-shadow: 0 12px 30px rgba(248, 113, 113, 0.5);
 }
 
 .modal-btn-danger:hover:not(:disabled) {
   box-shadow:
     0 0 0 1px rgba(15, 23, 42, 1),
-    0 16px 40px rgba(248, 113, 113, 0.85);
+    0 16px 40px rgba(248, 113, 113, 0.8);
   transform: translateY(-1px);
 }
 
@@ -208,7 +318,30 @@
   box-shadow: none;
 }
 
-/* Animación de aparición */
+/* Scrollbar (por si el modal es alto) */
+.modal-card {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.7) transparent;
+}
+
+.modal-card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-card::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.7);
+  border-radius: 9999px;
+}
+
+.modal-card::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(226, 232, 240, 0.9);
+}
+
+/* Animaciones */
 @keyframes modal-pop {
   from {
     opacity: 0;
@@ -220,51 +353,38 @@
   }
 }
 
-/* Responsivo: en pantallas muy pequeñas reducimos padding */
+@keyframes modalSheenSlide {
+  from { background-position: 0 0, 0 0, 0 0, 0% 0%; }
+  to   { background-position: 0 0, 0 0, 0 0, -100% 0%; }
+}
+
+/* Mobile tweaks */
 @media (max-width: 480px) {
-  .modal-card {
-    padding: 1.25rem 1.25rem;
-  }
-
-  .modal-title {
-    font-size: 0.9rem;
-  }
-
-  .modal-text {
-    font-size: 0.76rem;
-  }
+  .modal-backdrop { padding: 1rem; }
+  .modal-card { padding: 1.1rem; border-radius: 1.35rem; }
+  .modal-close { width: 1.85rem; height: 1.85rem; }
 }
 
-
-/* === Animación suave específica para el splash del juego (Konami) === */
-.cube-overlay-backdrop {
-  animation: none; /* anulamos la animación por defecto del modal */
-  opacity: 0;
-  transition: opacity 220ms ease;
+/* === Splash screen (reusa el look del modal para quedar inline con el tema) === */
+.modal-card.splash-card {
+  overflow: hidden; /* evita scrollbars en el splash */
 }
 
-.cube-overlay-backdrop.cube-overlay-backdrop--open {
-  opacity: 1;
+.modal-card.splash-card::before {
+  opacity: 0.72;
+  animation: neonBorderSlideCW 10s linear infinite;
 }
 
-.cube-overlay-backdrop.cube-overlay-backdrop--close {
-  opacity: 0;
+.modal-card.splash-card::after {
+  opacity: 0.58;
+  animation-duration: 8.5s;
 }
 
-.cube-overlay-panel {
-  opacity: 0;
-  transform: translateY(16px) scale(0.96);
-  transition:
-    opacity 220ms ease,
-    transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1);
+.splash-enter-btn {
+  padding: 0.62rem 1.7rem;
+  font-size: 0.85rem;
 }
 
-.cube-overlay-panel.cube-overlay-panel--open {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.cube-overlay-panel.cube-overlay-panel--close {
-  opacity: 0;
-  transform: translateY(16px) scale(0.96);
+@media (max-width: 480px) {
+  .splash-enter-btn { padding: 0.6rem 1.55rem; }
 }

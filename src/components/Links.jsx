@@ -6,6 +6,11 @@ export default function Links() {
   const [me, setMe] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // confirm modal (salir a página externa)
+  const [showExternalConfirm, setShowExternalConfirm] = useState(false)
+  const [pendingExternal, setPendingExternal] = useState(null)
+  const [copiedExternal, setCopiedExternal] = useState(false)
+
   // nuevo link
   const [label, setLabel] = useState('')
   const [href, setHref] = useState('')
@@ -40,6 +45,84 @@ export default function Links() {
     }
     load()
   }, [])
+
+  const normalizeHref = (rawHref) => {
+    const h = (rawHref ?? '').trim()
+    if (!h) return ''
+    // internal anchors / relative paths (no confirm)
+    if (h.startsWith('#') || h.startsWith('/')) return h
+    // already has scheme (http/https/mailto/etc)
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(h)) return h
+    // no scheme -> assume https
+    return `https://${h}`
+  }
+
+  const isExternalHref = (hrefNormalized) => {
+    if (!hrefNormalized) return false
+    if (hrefNormalized.startsWith('#') || hrefNormalized.startsWith('/')) return false
+    return true
+  }
+
+  const getHostLabel = (hrefNormalized) => {
+    try {
+      const url = new URL(hrefNormalized)
+      return (url.hostname || hrefNormalized).replace(/^www\./, '')
+    } catch {
+      return hrefNormalized
+        .replace(/^https?:\/\//, '')
+        .replace(/^www\./, '')
+        .split('/')[0]
+    }
+  }
+
+  const openExternalConfirm = (e, link) => {
+    const safeHref = normalizeHref(link.href)
+    if (!isExternalHref(safeHref)) return
+    e.preventDefault()
+    e.stopPropagation()
+    setPendingExternal({ ...link, safeHref })
+    setShowExternalConfirm(true)
+  }
+
+  const closeExternalConfirm = () => {
+    setShowExternalConfirm(false)
+    setPendingExternal(null)
+    setCopiedExternal(false)
+  }
+
+  const continueToExternal = () => {
+    if (!pendingExternal?.safeHref) return
+    const url = pendingExternal.safeHref
+    closeExternalConfirm()
+    // abrir nueva pestaña (seguro)
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  const copyExternalLink = async () => {
+    const text = pendingExternal?.safeHref
+    if (!text) return
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text)
+      } else {
+        const el = document.createElement('textarea')
+        el.value = text
+        el.setAttribute('readonly', '')
+        el.style.position = 'fixed'
+        el.style.opacity = '0'
+        document.body.appendChild(el)
+        el.select()
+        document.execCommand('copy')
+        document.body.removeChild(el)
+      }
+
+      setCopiedExternal(true)
+      window.clearTimeout(copyExternalLink._t)
+      copyExternalLink._t = window.setTimeout(() => setCopiedExternal(false), 1400)
+    } catch {
+      // ignore
+    }
+  }
 
   const handleAddLink = async (e) => {
     e.preventDefault()
@@ -138,8 +221,8 @@ export default function Links() {
     <section id="links" className="section-shell">
       <div className="section-card">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-slate-100">Links rápidos</h2>
-          <span className="text-[10px] uppercase tracking-wide text-slate-400">
+          <h2 className="section-title">Links rápidos</h2>
+          <span className="section-kicker">
             click · explora · regresa
           </span>
         </div>
@@ -188,7 +271,11 @@ export default function Links() {
             </p>
           )}
 
-          {links.map((link, index) => (
+          {links.map((link, index) => {
+            const safeHref = normalizeHref(link.href)
+            const isExternal = isExternalHref(safeHref)
+
+            return (
             <div
               key={link.id}
               className="link-card group relative flex items-center justify-between overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/70 px-4 py-3 text-sm hover:scale-[1.02] hover:shadow-xl transition-all duration-300"
@@ -198,10 +285,11 @@ export default function Links() {
               onDragEnd={handleDragEnd}
             >
               <a
-                href={link.href}
-                target="_blank"
-                rel="noreferrer"
+                href={safeHref}
+                target={isExternal ? '_blank' : undefined}
+                rel={isExternal ? 'noreferrer' : undefined}
                 className="relative flex flex-1 items-center gap-3"
+                onClick={(e) => openExternalConfirm(e, link)}
               >
                 {link.iconUrl && (
                   <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-slate-900/90 border border-slate-700 shadow-inner">
@@ -237,17 +325,24 @@ export default function Links() {
                 </div>
               )}
             </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
       {/* Modal de edición */}
       {showModal && (
-        <div className="modal-backdrop">
-          <div className="modal-card">
-            <h3 className="text-lg font-semibold mb-4 text-slate-100">
-              Editar link
-            </h3>
+        <div className="modal-backdrop" onClick={closeModal}>
+          <div className="modal-card modal-md" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">Editar link</h3>
+                <p className="modal-text">Actualiza el nombre, URL e ícono del botón.</p>
+              </div>
+              <button type="button" onClick={closeModal} className="modal-close" aria-label="Cerrar">
+                ✕
+              </button>
+            </div>
 
             <div className="space-y-2">
               <input
@@ -270,20 +365,93 @@ export default function Links() {
               />
             </div>
 
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={closeModal}
-                className="modal-btn-cancel"
-              >
+            <div className="modal-actions">
+              <button type="button" onClick={closeModal} className="modal-btn-cancel">
                 Cancelar
               </button>
+              <button type="button" onClick={handleSaveEdit} className="modal-btn-save">
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmación: salir a página externa */}
+      {showExternalConfirm && pendingExternal && (
+        <div className="modal-backdrop" onClick={closeExternalConfirm}>
+          <div className="modal-card modal-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">Abrir {pendingExternal.label}</h3>
+                <p className="modal-text">
+                  Se abrirá <span className="font-semibold text-slate-200">{getHostLabel(pendingExternal.safeHref)}</span> en una nueva pestaña.
+                </p>
+              </div>
               <button
                 type="button"
-                onClick={handleSaveEdit}
-                className="modal-btn-save"
+                onClick={closeExternalConfirm}
+                className="modal-close"
+                aria-label="Cerrar"
               >
-                Guardar
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-panel p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  {pendingExternal.iconUrl ? (
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-900/90 border border-slate-700 shadow-inner">
+                      <img
+                        src={pendingExternal.iconUrl}
+                        alt={pendingExternal.label}
+                        className="h-8 w-8 rounded-2xl object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-900/90 border border-slate-700 shadow-inner">
+                      <span className="text-lg">🔗</span>
+                    </div>
+                  )}
+
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-100 truncate">
+                      {pendingExternal.label}
+                    </p>
+                    <p className="text-xs text-slate-400 truncate">
+                      {getHostLabel(pendingExternal.safeHref)}
+                    </p>
+                  </div>
+                </div>
+
+                <span className="shrink-0 rounded-full border border-slate-700/70 bg-slate-950/30 px-2 py-1 text-[10px] font-semibold tracking-wide text-slate-300">
+                  NUEVA PESTAÑA
+                </span>
+              </div>
+
+              <div className="mt-3 flex items-start justify-between gap-2 rounded-xl border border-slate-800/70 bg-slate-950/35 px-3 py-2">
+                <div className="min-w-0 font-mono text-[11px] text-slate-300 break-all">
+                  {pendingExternal.safeHref}
+                </div>
+                <button
+                  type="button"
+                  onClick={copyExternalLink}
+                  className="shrink-0 rounded-lg border border-slate-700/70 bg-slate-900/60 px-2 py-1 text-[10px] font-semibold text-slate-200 hover:bg-slate-900/80"
+                  aria-label="Copiar enlace"
+                  title="Copiar"
+                >
+                  {copiedExternal ? '✓ Copiado' : 'Copiar'}
+                </button>
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button type="button" onClick={closeExternalConfirm} className="modal-btn-cancel">
+                Cancelar
+              </button>
+              <button type="button" onClick={continueToExternal} className="modal-btn-save">
+                Abrir
               </button>
             </div>
           </div>

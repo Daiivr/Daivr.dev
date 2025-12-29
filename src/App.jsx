@@ -8,6 +8,7 @@ import DiscordCard from './components/DiscordCard'
 import Comments from './components/Comments'
 import Splash from './components/Splash'
 import Fireflies from './components/Fireflies'
+import Snowfall from './components/Snowfall'
 
 function KonamiGameOverlay({ open, activeGame, me, onClose }) {
   const [isMounted, setIsMounted] = useState(false)
@@ -144,6 +145,43 @@ function AudioToggleButton({ visible, muted, onToggle }) {
   )
 }
 
+
+function ChristmasToggleButton({ visible, enabled, saving, onToggle }) {
+  if (!visible) return null
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      disabled={saving}
+      className="fixed bottom-[4.75rem] right-5 z-40 rounded-full p-[2px] bg-gradient-to-r from-rose-500/70 via-red-500/60 to-emerald-500/70 shadow-[0_14px_44px_rgba(15,23,42,0.9)] transition-transform duration-200 hover:translate-y-0.5 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed"
+      aria-label={enabled ? 'Desactivar tema navideño' : 'Activar tema navideño'}
+      title={enabled ? 'Christmas theme: ON' : 'Christmas theme: OFF'}
+    >
+      <div className="flex items-center gap-2 rounded-full bg-slate-950/90 px-3 py-2 border border-slate-700/80">
+        <span className="relative flex h-5 w-5 items-center justify-center">
+          {enabled && (
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/25 animate-ping" />
+          )}
+          <span
+            className={`relative inline-flex h-3 w-3 rounded-full ${
+              enabled
+                ? 'bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.95)]'
+                : 'bg-slate-400 shadow-[0_0_10px_rgba(148,163,184,0.9)]'
+            }`}
+          />
+        </span>
+        <span className="uppercase tracking-[0.22em] text-[9px] text-slate-400">
+          XMAS
+        </span>
+        <span className="text-[11px] font-semibold text-slate-100">
+          {saving ? '...' : enabled ? 'ON' : 'OFF'}
+        </span>
+      </div>
+    </button>
+  )
+}
+
 export default function App() {
   const [showSplash, setShowSplash] = useState(true)
   const [playAudio, setPlayAudio] = useState(false)
@@ -151,6 +189,8 @@ export default function App() {
   const [visitCount, setVisitCount] = useState(null)
   const [visitError, setVisitError] = useState(false)
   const [me, setMe] = useState(null)
+  const [christmasEnabled, setChristmasEnabled] = useState(false)
+  const [christmasSaving, setChristmasSaving] = useState(false)
   const [showGameOverlay, setShowGameOverlay] = useState(false)
   const [activeGame, setActiveGame] = useState(null)
   const konamiIndexRef = useRef(0)
@@ -181,12 +221,19 @@ export default function App() {
   useEffect(() => {
     const loadMe = async () => {
       try {
-        const res = await fetch('/api/me')
+        // Important for local + Render:
+        // - local: Vite proxy -> backend (cookies are same-site)
+        // - prod: same-origin or behind proxy; credentials ensures cookie is sent
+        const res = await fetch('/api/me', { credentials: 'include' })
         if (!res.ok) return
         const data = await res.json()
-        if (data && data.id) {
-          setMe(data)
-        }
+
+        // /api/me can return:
+        //   { user: { ... } }
+        //   { user: { ... }, ...userFields } (compat)
+        //   { ...userFields } (older)
+        const user = data?.user ?? (data?.id ? data : null)
+        setMe(user)
       } catch (err) {
         console.error('Error cargando /api/me', err)
       }
@@ -194,6 +241,27 @@ export default function App() {
 
     loadMe()
   }, [])
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await fetch('/api/site-settings')
+        if (!res.ok) return
+        const data = await res.json()
+        setChristmasEnabled(!!data.christmasEnabled)
+      } catch (err) {
+        console.error('Error cargando /api/site-settings', err)
+      }
+    }
+
+    loadSettings()
+  }, [])
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('theme-xmas', !!christmasEnabled)
+    return () => root.classList.remove('theme-xmas')
+  }, [christmasEnabled])
+
 
   useEffect(() => {
     const KONAMI_SEQUENCE = [
@@ -248,10 +316,34 @@ export default function App() {
     }, 450)
   }
 
+  const toggleChristmasTheme = async () => {
+    if (!me || !me.isAdmin || christmasSaving) return
+    const next = !christmasEnabled
+    setChristmasEnabled(next) // optimistic
+    setChristmasSaving(true)
+    try {
+      const res = await fetch('/api/site-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ christmasEnabled: next }),
+      })
+      if (!res.ok) throw new Error('save-failed')
+      const data = await res.json()
+      setChristmasEnabled(!!data.christmasEnabled)
+    } catch (err) {
+      console.error('Error guardando christmasEnabled', err)
+      setChristmasEnabled((prev) => !prev) // revert
+    } finally {
+      setChristmasSaving(false)
+    }
+  }
+
   return (
-    <div className="min-h-screen text-slate-50">
+    <div className="app-shell">
+      <div className="app-bg" aria-hidden="true" />
       <BackgroundAudio play={playAudio} muted={audioMuted} />
-      <Fireflies />
+      {christmasEnabled ? <Snowfall /> : <Fireflies />}
       <KonamiGameOverlay
         open={showGameOverlay}
         activeGame={activeGame}
@@ -263,11 +355,17 @@ export default function App() {
         muted={audioMuted}
         onToggle={() => setAudioMuted((prev) => !prev)}
       />
+      <ChristmasToggleButton
+        visible={!showSplash && !!(me && me.isAdmin)}
+        enabled={christmasEnabled}
+        saving={christmasSaving}
+        onToggle={toggleChristmasTheme}
+      />
       {showSplash && <Splash onEnter={handleEnter} />}
       <Navbar />
-      <main className="pb-16 space-y-4">
+      <main className="app-main">
         <Hero startTyping={!showSplash} />
-        <div className="section-shell space-y-8">
+        <div className="space-y-10">
           <About />
           <Links />
           <DiscordCard />
@@ -275,8 +373,8 @@ export default function App() {
           <Comments />
         </div>
       </main>
-      <footer className="border-t border-slate-800/60 bg-slate-950/80 py-4 px-4 text-[11px] text-slate-500">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 sm:flex-row sm:justify-between sm:gap-3">
+      <footer className="app-footer">
+        <div className="footer-shell mx-auto flex max-w-6xl flex-col items-center gap-2 sm:flex-row sm:justify-between sm:gap-3">
           <p className="text-center sm:text-left">
             Hecho con{' '}
             <span className="inline-block footer-heart">❤️</span>, café y un

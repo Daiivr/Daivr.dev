@@ -445,7 +445,7 @@ const handleGifSelect = (url) => {
       <div className="section-card">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-slate-100">Comentarios</h2>
+            <h2 className="section-title">Comentarios</h2>
             <p className="mt-1 text-xs text-slate-400">
               Deja un mensajito si estás conectado con tu cuenta de Discord.
             </p>
@@ -912,13 +912,25 @@ const handleGifSelect = (url) => {
       {gifPickerOpen && (
         <div className="modal-backdrop" onClick={closeGifPicker}>
           <div
-            className="modal-card max-w-2xl w-full"
+            className="modal-card modal-xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <h3 className="modal-title">Elige un GIF</h3>
-            <p className="modal-text">
-              Busca un GIF y haz click en él para insertarlo en tu comentario.
-            </p>
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">Elige un GIF</h3>
+                <p className="modal-text">
+                  Busca un GIF y haz click en él para insertarlo en tu comentario.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeGifPicker}
+                className="modal-close"
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
 
             <form onSubmit={handleGifSearchSubmit} className="mt-3 flex gap-2">
               <input
@@ -941,7 +953,7 @@ const handleGifSelect = (url) => {
             )}
 
             {TENOR_API_KEY && (
-              <div className="mt-4 rounded-2xl border border-slate-700/80 bg-slate-950/90 p-3 comment-textarea max-h-80 overflow-y-auto">
+              <div className="modal-panel mt-4 rounded-2xl p-3 comment-textarea max-h-80 overflow-y-auto">
                 {gifLoading && (
                   <p className="text-[11px] text-slate-400">Cargando GIFs…</p>
                 )}
@@ -978,7 +990,7 @@ const handleGifSelect = (url) => {
               </div>
             )}
 
-            <div className="mt-5 flex justify-end">
+            <div className="modal-actions">
               <button type="button" onClick={closeGifPicker} className="modal-btn-cancel">
                 Cerrar
               </button>
@@ -988,12 +1000,24 @@ const handleGifSelect = (url) => {
       )}
 
 {confirmDeleteId && (
-        <div className="modal-backdrop">
-          <div className="modal-card">
-            <h3 className="modal-title">¿Eliminar este comentario?</h3>
-            <p className="modal-text">
-              Esta acción no se puede deshacer. El comentario desaparecerá para todos.
-            </p>
+        <div className="modal-backdrop" onClick={closeDeleteConfirm}>
+          <div className="modal-card modal-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">¿Eliminar este comentario?</h3>
+                <p className="modal-text">
+                  Esta acción no se puede deshacer. El comentario desaparecerá para todos.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeDeleteConfirm}
+                className="modal-close"
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
             <div className="modal-actions">
               <button
                 type="button"

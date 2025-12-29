@@ -56,12 +56,13 @@ export default function Splash({ onEnter }) {
     }
   }
 
+  // Reusa el mismo look de los modals (glass + ring + sheen) para que quede 100% inline con el tema
   const overlayClasses =
-    'fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-2xl transition-opacity duration-500 ' +
+    'modal-backdrop transition-opacity duration-500 ' +
     (closing ? 'opacity-0 pointer-events-none' : 'opacity-100')
 
   const cardBase =
-    'relative mx-4 w-full max-w-xl overflow-hidden rounded-3xl border border-fuchsia-500/40 bg-slate-900/80 shadow-[0_0_140px_rgba(236,72,153,0.45)] transition-all duration-700 ease-[cubic-bezier(0.22,0.61,0.36,1)]'
+    'modal-card modal-xl splash-card transition-all duration-700 ease-[cubic-bezier(0.22,0.61,0.36,1)]'
   const cardState = cardVisible
     ? ' opacity-100 translate-y-0 scale-100'
     : ' opacity-0 translate-y-4 scale-95'
@@ -73,23 +74,14 @@ export default function Splash({ onEnter }) {
   return (
     <div className={overlayClasses}>
       <div className={cardBase + cardState}>
-        {/* Glow orbs */}
-        <div className="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full bg-fuchsia-500/25 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 right-0 h-44 w-44 rounded-full bg-sky-400/25 blur-3xl" />
-
-        {/* Animated grid */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(244,114,182,0.22),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(56,189,248,0.18),_transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(to_right,rgba(148,163,184,0.2)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.2)_1px,transparent_1px)] [background-size:28px_28px]" />
-
-        <div className="relative px-6 py-7 sm:px-8 sm:py-9">
-          <div className="mb-4 flex items-center justify-between text-[10px] uppercase tracking-[0.25em] text-slate-400/70">
+        <div className="relative">
+          <div className="mb-4 flex items-center justify-between text-[10px] uppercase tracking-[0.25em] text-slate-400/75">
             <span>daivr.dev</span>
             <span className="flex items-center gap-1">
               <span className="splash-status-dot h-[6px] w-[6px] rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
               <span className="leading-none">{phase === 'loading' ? 'booting' : 'online'}</span>
             </span>
           </div>
-
 
           <div className="relative h-44 sm:h-52">
             <LoadingContent phase={phase} />
@@ -208,7 +200,7 @@ function WelcomeContent({ phase, onEnter, displayName }) {
       <button
         type="button"
         onClick={onEnter}
-        className="mt-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-fuchsia-500 via-rose-500 to-sky-500 px-7 py-2.5 text-sm font-medium text-slate-950 shadow-[0_0_26px_rgba(236,72,153,0.9)] transition hover:brightness-110 hover:shadow-[0_0_38px_rgba(236,72,153,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300/80"
+        className="modal-btn-save splash-enter-btn mt-6"
       >
         Entrar
       </button>

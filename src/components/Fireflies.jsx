@@ -133,11 +133,33 @@ function updateFireflies(prev, { timestamp, dtFactor, viewport, mouse, count }) 
 
 export default function Fireflies() {
   const [fireflies, setFireflies] = useState([])
+  const [count, setCount] = useState(24)
   const mouseRef = useRef({ x: null, y: null })
   const viewportRef = useRef({ w: 0, h: 0 })
   const lastTimeRef = useRef(null)
 
-  const NUM_FIREFLIES = 34
+  // Performance: en mobile bajamos el conteo; si el user tiene "reduce motion", las apagamos.
+  useEffect(() => {
+    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+    const compute = () => {
+      if (mq && mq.matches) {
+        setCount(0)
+        return
+      }
+      const w = window.innerWidth || 1024
+      const next = w < 420 ? 12 : w < 768 ? 18 : 26
+      setCount(next)
+    }
+
+    compute()
+    window.addEventListener('resize', compute)
+    mq?.addEventListener?.('change', compute)
+
+    return () => {
+      window.removeEventListener('resize', compute)
+      mq?.removeEventListener?.('change', compute)
+    }
+  }, [])
 
   useEffect(() => {
     const updateViewport = () => {
@@ -168,7 +190,7 @@ export default function Fireflies() {
     // iniciar con un grupo de luciérnagas ya activas
     setFireflies(() => {
       const initial = []
-      for (let i = 0; i < NUM_FIREFLIES; i++) {
+      for (let i = 0; i < count; i++) {
         // damos un "offset" a createdAt para que no todas estén en el mismo punto del fade
         const offsetNow = now - Math.random() * 8000
         initial.push(createFirefly(viewportRef.current, offsetNow))
@@ -194,7 +216,7 @@ export default function Fireflies() {
           dtFactor,
           viewport: viewportRef.current,
           mouse: mouseRef.current,
-          count: NUM_FIREFLIES,
+          count,
         }),
       )
 
@@ -211,7 +233,9 @@ export default function Fireflies() {
         window.cancelAnimationFrame(rafId)
       }
     }
-  }, [])
+  }, [count])
+
+  if (count <= 0) return null
 
   return (
     <div

@@ -10,9 +10,11 @@ const { router: commentsRouter } = require('./routes/comments')
 const { router: galleryRouter } = require('./routes/gallery')
 const { router: linksRouter } = require('./routes/links')
 const { router: visitsRouter } = require('./routes/visits')
+const { router: siteSettingsRouter } = require('./routes/siteSettings')
 const { getUserFromRequest } = require('./utils/session')
 
 const app = express()
+app.set('trust proxy', 1)
 const PORT = process.env.PORT || 4000
 
 
@@ -95,6 +97,7 @@ app.use('/api/comments', commentsRouter)
 app.use('/api/gallery', galleryRouter)
 app.use('/api/links', linksRouter)
 app.use('/api/visits', visitsRouter)
+app.use('/api/site-settings', siteSettingsRouter)
 
 
 app.get('/api/tenor-search', async (req, res) => {
@@ -200,7 +203,9 @@ app.get('/api/game-image', async (req, res) => {
 
 app.get('/api/me', (req, res) => {
   const user = getUserFromRequest(req)
-  res.json({ user })
+  // Compat: algunos componentes esperan {id,...} y otros {user}
+  if (!user) return res.json({ user: null })
+  return res.json({ user, ...user })
 })
 
 

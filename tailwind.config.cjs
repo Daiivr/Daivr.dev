@@ -4,7 +4,18 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['system-ui', 'ui-sans-serif', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'ui-sans-serif', 'sans-serif'],
+        mono: [
+          'JetBrains Mono',
+          'ui-monospace',
+          'SFMono-Regular',
+          'Menlo',
+          'Monaco',
+          'Consolas',
+          'Liberation Mono',
+          'Courier New',
+          'monospace',
+        ],
       },
       animation: {
         'float-slow': 'float 8s ease-in-out infinite',

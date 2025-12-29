@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function About() {
   return (
-    <section id="about-section" className="section-shell">
+    <section id="about" className="section-shell">
       <div className="grid gap-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         {/* Sobre mí */}
         <div className="section-card">
