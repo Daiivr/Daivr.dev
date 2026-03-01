@@ -130,6 +130,161 @@
         }
       })();
     </script>
+  <script>
+      (function () {
+        var targetVolume = 0;
+        var currentVolume = 0;
+        var fadeFrame = null;
+
+        function clampVolume(value) {
+          var next = Number(value);
+          if (!isFinite(next)) return 0;
+          if (next < 0) return 0;
+          if (next > 1) return 1;
+          return next;
+        }
+
+        function stopFade() {
+          if (!fadeFrame) return;
+          cancelAnimationFrame(fadeFrame);
+          fadeFrame = null;
+        }
+
+        function setCurrentVolume(value) {
+          currentVolume = clampVolume(value);
+        }
+
+        function easeInOutQuad(t) {
+          return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        }
+
+        function fadeToVolume(nextTarget, fadeMs) {
+          targetVolume = clampVolume(nextTarget);
+          var duration = Number(fadeMs);
+          if (!isFinite(duration) || duration <= 0) {
+            stopFade();
+            setCurrentVolume(targetVolume);
+            applyVolume();
+            return;
+          }
+
+          stopFade();
+          var fromVolume = currentVolume;
+          var startAt = performance.now();
+
+          var tick = function (now) {
+            var progress = Math.min(1, (now - startAt) / duration);
+            var eased = easeInOutQuad(progress);
+            var next = fromVolume + (targetVolume - fromVolume) * eased;
+            setCurrentVolume(next);
+            applyVolume();
+            if (progress < 1) {
+              fadeFrame = requestAnimationFrame(tick);
+            } else {
+              fadeFrame = null;
+              setCurrentVolume(targetVolume);
+              applyVolume();
+            }
+          };
+
+          fadeFrame = requestAnimationFrame(tick);
+        }
+
+        function setMediaVolume(media) {
+          if (!media) return;
+          try {
+            media.volume = currentVolume;
+            media.muted = currentVolume <= 0.001;
+          } catch (e) {}
+        }
+
+        function patchSdlAudioContext() {
+          try {
+            if (!window.SDL || !window.SDL.audioContext) return;
+            var ctx = window.SDL.audioContext;
+            if (!ctx.__daivrVolumePatched) {
+              ctx.__daivrVolumePatched = true;
+              ctx.__daivrMasterGain = ctx.createGain();
+              ctx.__daivrMasterGain.gain.value = currentVolume;
+              ctx.__daivrMasterGain.connect(ctx.destination);
+
+              var originalCreateBufferSource = ctx.createBufferSource.bind(ctx);
+              ctx.createBufferSource = function () {
+                var source = originalCreateBufferSource();
+                var originalConnect = source.connect;
+                source.connect = function (destination) {
+                  if (destination === ctx.destination) {
+                    return originalConnect.call(source, ctx.__daivrMasterGain);
+                  }
+                  return originalConnect.apply(source, arguments);
+                };
+                return source;
+              };
+            }
+
+            if (ctx.__daivrMasterGain) {
+              ctx.__daivrMasterGain.gain.value = currentVolume;
+            }
+          } catch (e) {}
+        }
+
+        function applyVolume() {
+          try {
+            var mediaEls = document.querySelectorAll('audio, video');
+            for (var i = 0; i < mediaEls.length; i++) {
+              setMediaVolume(mediaEls[i]);
+            }
+          } catch (e) {}
+
+          try {
+            if (window.SDL && Array.isArray(window.SDL.channels)) {
+              for (var j = 0; j < window.SDL.channels.length; j++) {
+                var chan = window.SDL.channels[j];
+                if (chan && chan.audio) setMediaVolume(chan.audio);
+              }
+            }
+            if (window.SDL && window.SDL.music && window.SDL.music.audio) {
+              setMediaVolume(window.SDL.music.audio);
+            }
+          } catch (e) {}
+
+          patchSdlAudioContext();
+        }
+
+        window.addEventListener(
+          'message',
+          function (event) {
+            var data = event && event.data;
+            if (!data) return;
+
+            if (typeof data === 'string') {
+              try {
+                data = JSON.parse(data);
+              } catch (e) {
+                return;
+              }
+            }
+
+            if (!data || data.type !== 'daivr:set-volume') return;
+            fadeToVolume(data.volume, data.fadeMs);
+          },
+          false,
+        );
+
+        try {
+          var observer = new MutationObserver(function () {
+            applyVolume();
+          });
+          observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+          });
+        } catch (e) {}
+
+        setInterval(applyVolume, 1500);
+        applyVolume();
+      })();
+    </script>
   <script src="https://deckard.openprocessing.org/user485717/visual2458132/hf42bec4b58ab09712c0f3bedb92cada1/index.wasm.js"></script>
   <script src="https://deckard.openprocessing.org/user485717/visual2458132/hf42bec4b58ab09712c0f3bedb92cada1/index.data.js"></script>
   <title>Drive Mad</title>
