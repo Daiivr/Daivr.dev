@@ -268,26 +268,30 @@ export default function Hero({ startTyping }) {
             </div>
           </div>
 
-          <div className="bento-card bento-media vibe-card">
-            <img
-              src={peachCard}
-              alt=""
-              className="vibe-bg vibe-bg-cover absolute inset-0 h-full w-full object-cover opacity-[0.35]"
-              loading="lazy"
-            />
-
-            <div className="relative z-10">
-              <p className="bento-kicker">// vibe.cfg</p>
-              <p className="bento-title">CRT glow · neon · lo-fi loops</p>
-              <p className="bento-text">
-                Estética terminal, pixel art y RGB suave. Como si tu IDE
-                viviera dentro de una arcade.
-              </p>
-            </div>
-            <div className="bento-sheen" aria-hidden="true" />
-          </div>
+          <VibeCard />
         </div>
       </div>
     </section>
+  )
+}
+
+function VibeCard() {
+  return (
+    <div className="bento-card vibe-card">
+      <img
+        src={peachCard}
+        alt=""
+        className="vibe-bg"
+        loading="lazy"
+      />
+      <div className="relative z-10">
+        <p className="bento-kicker">// vibe.cfg</p>
+        <p className="bento-title">CRT glow · neon · lo-fi loops</p>
+        <p className="bento-text">
+          Estética terminal, pixel art y RGB suave. Como si tu IDE
+          viviera dentro de una arcade.
+        </p>
+      </div>
+    </div>
   )
 }

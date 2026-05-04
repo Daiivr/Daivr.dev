@@ -1408,97 +1408,78 @@ body {
 
 
 /* Vibe card: replace glass with aurora glow (no blur) */
+/* Vibe card: same baseline look as the other bento cards.
+   Only difference: an image hidden until hover that rises out the top. */
 .vibe-card {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  background:
-    radial-gradient(120% 90% at 12% 0%, rgba(56, 189, 248, 0.16), rgba(56, 189, 248, 0) 60%),
-    radial-gradient(120% 90% at 100% 12%, rgba(244, 114, 182, 0.14), rgba(244, 114, 182, 0) 62%),
-    radial-gradient(120% 120% at 48% 120%, rgba(168, 85, 247, 0.12), rgba(168, 85, 247, 0) 62%),
-    linear-gradient(180deg, rgba(15, 23, 42, 0.84), rgba(2, 6, 23, 0.94));
-  border-color: rgba(255, 255, 255, 0.12);
+  min-height: 156px;
 }
 
-.vibe-card::after {
-  content: '';
+/* Beat .bento-card { overflow: hidden } so the head can escape on hover */
+.bento-card.vibe-card {
+  overflow: visible;
+}
+
+/* Lift the hovered card above its neighbors so the protruding head isn't clipped */
+.vibe-card:hover,
+.vibe-card:focus-within {
+  z-index: 20;
+}
+
+/* Image: hidden by default. Width matches the card exactly (never extends
+   sideways), bottom anchored to the card bottom. Height is 140% of the card
+   so the top sits above the card top — only revealed on hover. */
+.bento-card.vibe-card img.vibe-bg {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  width: 100%;
+  height: 140%;
+  object-fit: cover;
+  object-position: 50% 0%;
+  opacity: 0;
+  border-radius: 0 0 1.5rem 1.5rem;
   pointer-events: none;
-  z-index: 4;
-  background: linear-gradient(
-    120deg,
-    rgba(56, 189, 248, 0.55),
-    rgba(244, 114, 182, 0.55),
-    rgba(168, 85, 247, 0.45),
-    rgba(56, 189, 248, 0.55)
-  );
-  opacity: 0.65;
-  filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.10)) drop-shadow(0 0 16px rgba(244, 114, 182, 0.10));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  transform-origin: 50% 100%;
+  transform: scale(0.95);
+  filter: saturate(1.05) brightness(1.02);
+  transition:
+    opacity 480ms ease,
+    transform 600ms cubic-bezier(0.22, 1.15, 0.36, 1),
+    filter 480ms ease;
+  /* Sit above the global .bento-card::before window-chrome bar (z-index: 4)
+     so the dots/bar don't draw over the character on hover */
+  z-index: 5;
 }
 
-.vibe-card .bento-sheen {
-  opacity: 0.85;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: none;
-  mix-blend-mode: screen;
+.bento-card.vibe-card:hover img.vibe-bg,
+.bento-card.vibe-card:focus-within img.vibe-bg {
+  opacity: 1;
+  transform: scale(1);
+  filter:
+    saturate(1.18) brightness(1.06)
+    drop-shadow(0 24px 40px rgba(244, 114, 182, 0.45))
+    drop-shadow(0 14px 26px rgba(56, 189, 248, 0.38))
+    drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
 }
 
-.vibe-card .bento-sheen::before {
-  content: '';
-  position: absolute;
-  inset: -45%;
-  border-radius: 999px;
-  background: conic-gradient(
-    from 180deg,
-    rgba(56, 189, 248, 0.18),
-    rgba(244, 114, 182, 0.18),
-    rgba(168, 85, 247, 0.14),
-    rgba(56, 189, 248, 0.18)
-  );
-  opacity: 0.8;
-  filter: blur(26px) saturate(1.25);
-  transform: rotate(0deg);
-  animation: vibeAuroraSpin 18s linear infinite;
+/* Hide the kicker / title / body text on hover so the image stands alone */
+.vibe-card > .relative {
+  transition: opacity 320ms ease;
 }
 
-.vibe-card .bento-sheen::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.00) 28%,
-      rgba(255, 255, 255, 0.10) 44%,
-      rgba(255, 255, 255, 0.22) 52%,
-      rgba(255, 255, 255, 0.10) 60%,
-      rgba(255, 255, 255, 0.00) 76%,
-      rgba(255, 255, 255, 0) 100%
-    );
-  background-size: 220% 100%;
-  background-position: 120% 0%;
-  opacity: 0.28;
-  will-change: background-position;
-  animation: vibeLightSweep 8.5s ease-in-out infinite;
+.vibe-card:hover > .relative,
+.vibe-card:focus-within > .relative {
+  opacity: 0;
 }
 
-@keyframes vibeAuroraSpin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes vibeLightSweep {
-  0%   { background-position: 120% 0%; }
-  55%  { background-position: -20% 0%; }
-  100% { background-position: -20% 0%; }
+@media (prefers-reduced-motion: reduce) {
+  .bento-card.vibe-card img.vibe-bg,
+  .vibe-card > .relative {
+    transition: none;
+    transform: none;
+  }
 }
 
 /* Small chips */
@@ -1523,9 +1504,6 @@ body {
 /* Reduce heavy animations for people who prefer it */
 @media (prefers-reduced-motion: reduce) {
   .bento-sheen::after {
-    animation: none !important;
-  }
-  .vibe-card .bento-sheen::before {
     animation: none !important;
   }
   .btn-primary:hover {
@@ -1839,6 +1817,45 @@ html:not(.theme-xmas) .app-bg {
     linear-gradient(90deg, var(--arc-grid) 1px, transparent 1px);
   background-size: auto, 42px 42px, 42px 42px;
   opacity: 0.65;
+  /* Slowly scroll scanlines + grid diagonally — like a CRT/Tron grid drifting */
+  animation: appBgDrift 22s linear infinite;
+  will-change: background-position;
+}
+
+@keyframes appBgDrift {
+  from { background-position: 0 0, 0 0, 0 0; }
+  to   { background-position: 0 42px, 42px 42px, 42px 42px; }
+}
+
+/* Periodic neon scan beam sweeping down the screen (CRT scan line) */
+html:not(.theme-xmas) .app-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 48.5%,
+    rgba(0, 255, 229, 0.10) 49.5%,
+    rgba(255, 43, 214, 0.06) 50%,
+    rgba(0, 255, 229, 0.10) 50.5%,
+    transparent 51.5%,
+    transparent 100%
+  );
+  background-size: 100% 220vh;
+  background-repeat: no-repeat;
+  animation: appBgScanBeam 9s linear infinite;
+  mix-blend-mode: screen;
+  filter: blur(0.6px);
+  z-index: 0;
+}
+
+@keyframes appBgScanBeam {
+  0%   { background-position: 0 -120vh; opacity: 0.55; }
+  10%  { opacity: 0.85; }
+  90%  { opacity: 0.85; }
+  100% { background-position: 0 120vh; opacity: 0.4; }
 }
 
 /* Subtle CRT vignette at edges */
@@ -1852,6 +1869,14 @@ html:not(.theme-xmas) .app-bg::after {
     transparent 55%,
     rgba(0, 0, 0, 0.45) 100%
   );
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.theme-xmas) .app-bg,
+  html:not(.theme-xmas) .app-bg::before {
+    animation: none;
+  }
 }
 
 /* ---------- Cards as code-editor windows ---------- */
