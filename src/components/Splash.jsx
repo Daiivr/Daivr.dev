@@ -4,7 +4,7 @@ import axios from 'axios'
 const formatDisplayName = (name) => (name ? String(name).replace(/#0$/, '') : '')
 const DISCORD_FALLBACK_AVATAR = 'https://cdn.discordapp.com/embed/avatars/0.png'
 
-const INTRO_TAGS = ['bots', 'projects', 'night coding', 'pixel vibes']
+const INTRO_TAGS = ['bots', 'projects', 'night-coding', 'pixel-vibes']
 
 export default function Splash({ onEnter }) {
   const [closing, setClosing] = useState(false)
@@ -142,9 +142,9 @@ function LoadingContent({ phase, avatarUrl, isLoggedIn, displayName }) {
         <LoaderBar delay="0.4s" height="h-7" />
       </div>
 
-      <p className="splash-loader-title">Boot sequence</p>
+      <p className="splash-loader-title">./boot --init</p>
       <p className="splash-loader-copy">
-        Syncing profile cards, comments, and hidden game mode.
+        loading profile · comments · hidden game mode...
       </p>
     </section>
   )
@@ -176,14 +176,14 @@ function WelcomeContent({ phase, onEnter, displayName }) {
           : 'pointer-events-none opacity-0 translate-y-3')
       }
     >
-      <p className="splash-kicker">personal corner</p>
+      <p className="splash-kicker">~/personal $</p>
       <h1 className="splash-title">
         <span className="bg-gradient-to-r from-fuchsia-300 via-rose-300 to-sky-300 bg-clip-text text-transparent">
           {displayName}
         </span>
       </h1>
       <p className="splash-copy">
-        A tiny internet home for experiments, visual ideas, and side projects.
+        Personal hub for projects, links and a live discord feed.
       </p>
 
       <div className="splash-tags">
@@ -200,10 +200,10 @@ function WelcomeContent({ phase, onEnter, displayName }) {
           onClick={onEnter}
           className="modal-btn-save splash-enter-btn"
         >
-          Enter site
+          ./enter
         </button>
         <p className="splash-hint">
-          Tip: use the Konami code after entering for secret games.
+          {'// tip: try the konami code once inside.'}
         </p>
       </div>
     </section>

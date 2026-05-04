@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import SidebarTrafficLight from './SidebarTrafficLight'
 
 const navLinks = [
-  { href: '#home', label: 'Home' },
-  { href: '#about', label: 'Sobre mí' },
-  { href: '#links', label: 'Links' },
-  { href: '#discord', label: 'Discord' },
-  { href: '#gallery', label: 'Galería' },
-  { href: '#comments', label: 'Comentarios' },
+  { href: '#home', label: 'home' },
+  { href: '#about', label: 'about' },
+  { href: '#links', label: 'links' },
+  { href: '#discord', label: 'discord' },
+  { href: '#gallery', label: 'gallery' },
+  { href: '#comments', label: 'comments' },
 ]
 
 function getSectionOffsets() {
@@ -120,7 +120,7 @@ export default function Navbar() {
           <span className="brand-orb brand-orb-lg" aria-hidden="true" />
           <div className="leading-tight">
             <div className="text-[12px] uppercase tracking-[0.22em] text-slate-400">
-              Portfolio
+              ~/portfolio
             </div>
             <div className="text-base font-semibold tracking-tight">
               daivr.dev
@@ -141,8 +141,7 @@ export default function Navbar() {
         <div className="mt-auto px-2 pt-6">
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
             <p className="text-xs text-slate-300 leading-relaxed">
-              Un rincón bonito para lo que construyo, juego y rompo… y luego
-              arreglo mejor. ✨
+              {'// portfolio · projects, links & a live discord feed.'}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="mini-chip">React</span>

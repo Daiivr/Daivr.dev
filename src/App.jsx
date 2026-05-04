@@ -165,12 +165,12 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 ${
+      className={`konami-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 ${
         isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >
       <div
-        className={`relative mx-2 h-[88dvh] w-full max-w-5xl overflow-hidden rounded-[26px] border border-slate-700/80 bg-slate-900/90 shadow-[0_0_60px_rgba(15,23,42,0.9)] transform-gpu transition-all duration-300 sm:mx-4 sm:h-[82vh] sm:rounded-[32px] ${
+        className={`konami-window relative mx-2 h-[88dvh] w-full max-w-5xl overflow-hidden rounded-[26px] border border-slate-700/80 bg-slate-900/90 shadow-[0_0_60px_rgba(15,23,42,0.9)] transform-gpu transition-all duration-300 sm:mx-4 sm:h-[82vh] sm:rounded-[32px] ${
           isVisible
             ? 'opacity-100 translate-y-0 scale-100'
             : 'opacity-0 translate-y-4 scale-95'
@@ -244,11 +244,11 @@ function AudioToggleButton({ visible, muted, onToggle }) {
     <button
       type="button"
       onClick={onToggle}
-      className="fixed bottom-5 right-5 z-40 rounded-full p-[2px] bg-gradient-to-r from-sky-500/60 via-cyan-400/60 to-fuchsia-500/60 shadow-[0_12px_40px_rgba(8,47,73,0.85)] transition-transform duration-200 hover:translate-y-0.5 active:scale-[0.97]"
+      className={`arc-toggle arc-toggle-lofi ${muted ? 'arc-toggle-off' : 'arc-toggle-on'} fixed bottom-5 right-5 z-40 rounded-full p-[2px] bg-gradient-to-r from-sky-500/60 via-cyan-400/60 to-fuchsia-500/60 shadow-[0_12px_40px_rgba(8,47,73,0.85)] transition-transform duration-200 hover:translate-y-0.5 active:scale-[0.97]`}
       aria-label={muted ? 'Activate lo-fi music' : 'Mute lo-fi music'}
     >
-      <div className="flex items-center gap-2 rounded-full bg-slate-950/90 px-3 py-2 border border-slate-700/80">
-        <span className="relative flex h-5 w-5 items-center justify-center">
+      <div className="arc-toggle-inner flex items-center gap-2 rounded-full bg-slate-950/90 px-3 py-2 border border-slate-700/80">
+        <span className="arc-toggle-led relative flex h-5 w-5 items-center justify-center">
           {!muted && (
             <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/30 animate-ping" />
           )}
@@ -260,10 +260,10 @@ function AudioToggleButton({ visible, muted, onToggle }) {
             }`}
           />
         </span>
-        <span className="uppercase tracking-[0.22em] text-[9px] text-slate-400">
+        <span className="arc-toggle-label uppercase tracking-[0.22em] text-[9px] text-slate-400">
           LOFI
         </span>
-        <span className="text-[11px] font-semibold text-slate-100">
+        <span className="arc-toggle-value text-[11px] font-semibold text-slate-100">
           {muted ? 'OFF' : 'ON'}
         </span>
       </div>
@@ -280,12 +280,12 @@ function ChristmasToggleButton({ visible, enabled, saving, onToggle }) {
       type="button"
       onClick={onToggle}
       disabled={saving}
-      className="fixed bottom-[4.75rem] right-5 z-40 rounded-full p-[2px] bg-gradient-to-r from-rose-500/70 via-red-500/60 to-emerald-500/70 shadow-[0_14px_44px_rgba(15,23,42,0.9)] transition-transform duration-200 hover:translate-y-0.5 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed"
+      className={`arc-toggle arc-toggle-xmas ${enabled ? 'arc-toggle-on' : 'arc-toggle-off'} fixed bottom-[4.75rem] right-5 z-40 rounded-full p-[2px] bg-gradient-to-r from-rose-500/70 via-red-500/60 to-emerald-500/70 shadow-[0_14px_44px_rgba(15,23,42,0.9)] transition-transform duration-200 hover:translate-y-0.5 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed`}
       aria-label={enabled ? 'Disable Christmas theme' : 'Enable Christmas theme'}
       title={enabled ? 'Christmas theme: ON' : 'Christmas theme: OFF'}
     >
-      <div className="flex items-center gap-2 rounded-full bg-slate-950/90 px-3 py-2 border border-slate-700/80">
-        <span className="relative flex h-5 w-5 items-center justify-center">
+      <div className="arc-toggle-inner flex items-center gap-2 rounded-full bg-slate-950/90 px-3 py-2 border border-slate-700/80">
+        <span className="arc-toggle-led relative flex h-5 w-5 items-center justify-center">
           {enabled && (
             <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/25 animate-ping" />
           )}
@@ -297,10 +297,10 @@ function ChristmasToggleButton({ visible, enabled, saving, onToggle }) {
             }`}
           />
         </span>
-        <span className="uppercase tracking-[0.22em] text-[9px] text-slate-400">
+        <span className="arc-toggle-label uppercase tracking-[0.22em] text-[9px] text-slate-400">
           XMAS
         </span>
-        <span className="text-[11px] font-semibold text-slate-100">
+        <span className="arc-toggle-value text-[11px] font-semibold text-slate-100">
           {saving ? '...' : enabled ? 'ON' : 'OFF'}
         </span>
       </div>
@@ -504,9 +504,9 @@ export default function App() {
       <footer className="app-footer">
         <div className="footer-shell mx-auto flex max-w-6xl flex-col items-center gap-2 sm:flex-row sm:justify-between sm:gap-3">
           <p className="text-center sm:text-left">
-            Hecho con{' '}
-            <span className="inline-block footer-heart">{'\u2764\uFE0F'}</span>,
-            {' cafe y un poco de caos \u00B7 '}
+            {'// built with '}
+            <span className="inline-block footer-heart">{'\u2764'}</span>
+            {", caffeine && console.log('caos') \u00B7 "}
             {new Date().getFullYear()}
           </p>
 
@@ -516,7 +516,7 @@ export default function App() {
               <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.85)]" />
             </span>
             <span className="uppercase tracking-[0.16em] text-[9px] text-slate-400">
-              Visitors
+              players_online
             </span>
             <span className="tabular-nums text-[11px] text-slate-50">
               {visitError

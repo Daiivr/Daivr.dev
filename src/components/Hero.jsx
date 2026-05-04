@@ -4,18 +4,18 @@ import peachCard from '../assets/dai-peach-card.png'
 const DISCORD_ID = import.meta.env.VITE_DISCORD_ID || '271701484922601472'
 
 const TAGLINE_TEXT =
-  'SysBot enjoyer · VRChat lover · Wanderer de Fallout.\n\n' +
-  'Programo bots y automatizaciones para juegos y vivo rotando entre VRChat, Minecraft, ARK y otros mundos digitales con lofi y anime de fondo. 🎮🌙✨'
+  '> whoami\n' +
+  'full-stack dev · bot wrangler · night-shift player.\n' +
+  'building Discord bots, SysBot tooling y mundos en VRChat, Fallout y Minecraft.'
 
 const STATUS_LABEL = {
-  online: 'En línea',
-  idle: 'Ausente',
-  dnd: 'No molestar',
-  offline: 'Offline',
+  online: 'online',
+  idle: 'idle',
+  dnd: 'dnd',
+  offline: 'offline',
 }
 
-// Hero chips (manual tags, since navigation is handled by the navbar)
-const HERO_TAGS = ['Full-stack dev', 'Sysbot', 'Discord bots', 'Fallout & Minecraft']
+const HERO_TAGS = ['full-stack', 'sysbot', 'discord-bots', 'game-dev']
 
 function buildTypingFrames(text) {
   const frames = []
@@ -211,13 +211,14 @@ export default function Hero({ startTyping }) {
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="section-kicker">Hola, Soy</p>
+                <p className="section-kicker">~/personal $ login</p>
 
                 <h1 className="hero-title">
                   <span className="bg-gradient-to-r from-sky-300 via-fuchsia-300 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(56,189,248,0.16)]">
                     {displayName}
                   </span>
                 </h1>
+                <p className="code-meta mt-2"><span className="dot" />status: {statusLabel}</p>
               </div>
             </div>
 
@@ -247,20 +248,20 @@ export default function Hero({ startTyping }) {
         {/* Bento side */}
         <div className="hero-bento">
           <div className="bento-card">
-            <p className="bento-kicker">Ahora mismo</p>
-            <p className="bento-title">Construyendo cositas para Discord y juegos</p>
+            <p className="bento-kicker">// now_running</p>
+            <p className="bento-title">Bots de Discord & herramientas SysBot</p>
             <p className="bento-text">
-              Embeds bonitos, UI con vibe “cozy”, automatizaciones y proyectos
-              que parecen pequeños… hasta que se vuelven enormes. 😅
+              Embeds limpios, automatizaciones para juegos y side-projects que
+              empiezan en 200 LoC y terminan en repos enteros.
             </p>
           </div>
 
           <div className="bento-card">
-            <p className="bento-kicker">Stack</p>
+            <p className="bento-kicker">// stack.json</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="mini-chip">React</span>
               <span className="mini-chip">Tailwind</span>
-              <span className="mini-chip">Node/Express</span>
+              <span className="mini-chip">Node</span>
               <span className="mini-chip">C#</span>
               <span className="mini-chip">PKHeX</span>
               <span className="mini-chip">SysBot</span>
@@ -276,10 +277,11 @@ export default function Hero({ startTyping }) {
             />
 
             <div className="relative z-10">
-              <p className="bento-kicker">Vibe</p>
-              <p className="bento-title">Lo-fi, neon suave y estética limpia</p>
+              <p className="bento-kicker">// vibe.cfg</p>
+              <p className="bento-title">CRT glow · neon · lo-fi loops</p>
               <p className="bento-text">
-                Cute, profesional y con detalles que se sienten “hechos a mano”.
+                Estética terminal, pixel art y RGB suave. Como si tu IDE
+                viviera dentro de una arcade.
               </p>
             </div>
             <div className="bento-sheen" aria-hidden="true" />

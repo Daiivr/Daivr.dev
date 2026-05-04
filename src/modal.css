@@ -653,3 +653,551 @@
     max-width: 30ch;
   }
 }
+
+/* ========================================================================== */
+/* ARCADE TERMINAL THEME — splash + modals + konami overlay                   */
+/* ========================================================================== */
+
+/* ---------- Backdrop: darker, scanlines, terminal grid ---------- */
+
+html:not(.theme-xmas) .modal-backdrop,
+html:not(.theme-xmas) .konami-overlay {
+  background:
+    radial-gradient(circle at top left, rgba(0, 255, 229, 0.08), transparent 58%),
+    radial-gradient(circle at bottom right, rgba(255, 43, 214, 0.08), transparent 58%),
+    rgba(2, 4, 10, 0.92) !important;
+  backdrop-filter: blur(10px) saturate(1.05) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(1.05) !important;
+}
+
+html:not(.theme-xmas) .modal-backdrop::before,
+html:not(.theme-xmas) .konami-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 2px,
+      rgba(255, 255, 255, 0.022) 2px,
+      rgba(255, 255, 255, 0.022) 3px
+    ),
+    linear-gradient(rgba(0, 255, 229, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 229, 0.04) 1px, transparent 1px);
+  background-size: auto, 42px 42px, 42px 42px;
+  opacity: 0.55;
+  z-index: 0;
+}
+
+html:not(.theme-xmas) .modal-backdrop > *,
+html:not(.theme-xmas) .konami-overlay > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Modal card -> code-editor window ---------- */
+
+html:not(.theme-xmas) .modal-card {
+  border-radius: 10px !important;
+  border: 1px solid rgba(0, 255, 229, 0.22) !important;
+  background:
+    linear-gradient(180deg, rgba(10, 14, 26, 0.96), rgba(6, 9, 18, 0.98)) !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 30px 80px -30px rgba(0, 255, 229, 0.28),
+    0 30px 80px -30px rgba(255, 43, 214, 0.28) !important;
+  font-family: var(--font-mono);
+  padding-top: 2.5rem !important;
+}
+
+/* Replace the rainbow border ring with a window chrome bar + traffic-lights */
+html:not(.theme-xmas) .modal-card::before {
+  content: '';
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  inset: auto !important;
+  height: 28px !important;
+  padding: 0 !important;
+  border-radius: 10px 10px 0 0 !important;
+  background:
+    radial-gradient(circle 4px at 14px 14px, #ff5f56 60%, transparent 62%),
+    radial-gradient(circle 4px at 30px 14px, #ffbd2e 60%, transparent 62%),
+    radial-gradient(circle 4px at 46px 14px, #27c93f 60%, transparent 62%),
+    linear-gradient(180deg, rgba(20, 26, 42, 0.96), rgba(10, 14, 26, 0.92)) !important;
+  border-bottom: 1px solid rgba(0, 255, 229, 0.18) !important;
+  box-shadow:
+    0 0 6px rgba(255, 95, 86, 0.45),
+    0 0 6px rgba(39, 201, 63, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4) !important;
+  -webkit-mask: none !important;
+          mask: none !important;
+  -webkit-mask-composite: source-over !important;
+          mask-composite: add !important;
+  mix-blend-mode: normal !important;
+  opacity: 1 !important;
+  animation: none !important;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* Subtle moving sweep for sheen */
+html:not(.theme-xmas) .modal-card::after {
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 42%,
+      rgba(0, 255, 229, 0.08) 50%,
+      transparent 58%,
+      transparent 100%
+    ) !important;
+  background-size: 200% 100% !important;
+  background-position: 0% 0 !important;
+  background-repeat: repeat !important;
+  mix-blend-mode: screen !important;
+  filter: none !important;
+  opacity: 0.55 !important;
+  animation: arcSweep 8s linear infinite !important;
+}
+
+/* Header: title + close */
+html:not(.theme-xmas) .modal-title {
+  font-family: var(--font-mono);
+  color: var(--arc-cyan);
+  text-shadow: 0 0 8px rgba(0, 255, 229, 0.4);
+  letter-spacing: 0.04em;
+}
+html:not(.theme-xmas) .modal-title::before {
+  content: '> ';
+  color: var(--arc-magenta);
+  text-shadow: 0 0 6px rgba(255, 43, 214, 0.4);
+}
+
+html:not(.theme-xmas) .modal-text {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(220, 231, 255, 0.72);
+}
+
+html:not(.theme-xmas) .modal-close {
+  border-radius: 4px !important;
+  border: 1px solid rgba(0, 255, 229, 0.35) !important;
+  background: rgba(0, 255, 229, 0.05) !important;
+  color: var(--arc-cyan) !important;
+  font-family: var(--font-mono);
+  text-shadow: 0 0 6px rgba(0, 255, 229, 0.35);
+  box-shadow: inset 0 0 8px rgba(0, 255, 229, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+html:not(.theme-xmas) .modal-close:hover {
+  background: rgba(0, 255, 229, 0.1) !important;
+  border-color: var(--arc-cyan) !important;
+  box-shadow: 0 0 14px rgba(0, 255, 229, 0.4) !important;
+}
+
+/* Inner panel + inputs */
+html:not(.theme-xmas) .modal-panel {
+  border-radius: 6px !important;
+  border: 1px solid rgba(0, 255, 229, 0.18) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  font-family: var(--font-mono);
+}
+
+html:not(.theme-xmas) .modal-input,
+html:not(.theme-xmas) .modal-card input[type="text"],
+html:not(.theme-xmas) .modal-card input[type="url"],
+html:not(.theme-xmas) .modal-card textarea {
+  border-radius: 4px !important;
+  border: 1px solid rgba(0, 255, 229, 0.22) !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+  font-family: var(--font-mono);
+  color: var(--arc-fg) !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4) !important;
+}
+html:not(.theme-xmas) .modal-input::placeholder,
+html:not(.theme-xmas) .modal-card input::placeholder,
+html:not(.theme-xmas) .modal-card textarea::placeholder {
+  color: rgba(106, 122, 153, 0.7);
+  font-family: var(--font-mono);
+}
+html:not(.theme-xmas) .modal-input:focus,
+html:not(.theme-xmas) .modal-card input:focus,
+html:not(.theme-xmas) .modal-card textarea:focus {
+  border-color: var(--arc-cyan) !important;
+  box-shadow:
+    0 0 0 1px var(--arc-cyan),
+    0 0 14px rgba(0, 255, 229, 0.3) !important;
+}
+
+/* Modal buttons */
+html:not(.theme-xmas) .modal-btn-cancel {
+  border-radius: 6px !important;
+  border: 1px solid rgba(106, 122, 153, 0.4) !important;
+  background: rgba(255, 255, 255, 0.025) !important;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--arc-muted) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+html:not(.theme-xmas) .modal-btn-cancel:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.045) !important;
+  border-color: rgba(0, 255, 229, 0.4) !important;
+  color: var(--arc-cyan) !important;
+}
+
+html:not(.theme-xmas) .modal-btn-save {
+  border-radius: 6px !important;
+  background: linear-gradient(180deg, var(--arc-cyan) 0%, #00cfb6 100%) !important;
+  color: #06080f !important;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700 !important;
+  border: 1px solid rgba(0, 255, 229, 0.6) !important;
+  box-shadow: 0 0 14px rgba(0, 255, 229, 0.45), inset 0 -2px 0 rgba(0, 0, 0, 0.25) !important;
+  text-shadow: none !important;
+}
+html:not(.theme-xmas) .modal-btn-save:hover:not(:disabled) {
+  box-shadow: 0 0 22px rgba(0, 255, 229, 0.65), inset 0 -2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+html:not(.theme-xmas) .modal-btn-danger {
+  border-radius: 6px !important;
+  background: linear-gradient(180deg, var(--arc-red) 0%, #d63d57 100%) !important;
+  color: #06080f !important;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700 !important;
+  border: 1px solid rgba(255, 84, 112, 0.6) !important;
+  box-shadow: 0 0 14px rgba(255, 84, 112, 0.45), inset 0 -2px 0 rgba(0, 0, 0, 0.25) !important;
+  text-shadow: none !important;
+}
+html:not(.theme-xmas) .modal-btn-danger:hover:not(:disabled) {
+  box-shadow: 0 0 22px rgba(255, 84, 112, 0.65), inset 0 -2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Inner scrollbar inside modal */
+html:not(.theme-xmas) .modal-card::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 255, 229, 0.45) !important;
+  border-radius: 2px;
+}
+
+/* ---------- SPLASH SCREEN ---------- */
+
+html:not(.theme-xmas) .modal-card.splash-card {
+  padding-top: 2.5rem !important;
+}
+html:not(.theme-xmas) .modal-card.splash-card::before {
+  /* keep window chrome */
+  animation: none !important;
+}
+
+html:not(.theme-xmas) .splash-shell {
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 229, 0.18);
+  background:
+    radial-gradient(circle at top left, rgba(0, 255, 229, 0.08), transparent 58%),
+    radial-gradient(circle at bottom right, rgba(255, 43, 214, 0.08), transparent 62%),
+    rgba(2, 4, 10, 0.7);
+}
+
+html:not(.theme-xmas) .splash-aurora {
+  background:
+    radial-gradient(circle at 20% 25%, rgba(0, 255, 229, 0.3), transparent 52%),
+    radial-gradient(circle at 78% 22%, rgba(255, 43, 214, 0.28), transparent 55%),
+    radial-gradient(circle at 48% 82%, rgba(255, 182, 39, 0.16), transparent 58%);
+  filter: blur(22px);
+  opacity: 0.7;
+}
+
+html:not(.theme-xmas) .splash-grid-mask {
+  background-image:
+    linear-gradient(rgba(0, 255, 229, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 229, 0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.18;
+}
+
+html:not(.theme-xmas) .splash-topbar {
+  font-family: var(--font-mono);
+  color: var(--arc-muted);
+}
+
+html:not(.theme-xmas) .splash-brand {
+  font-family: var(--font-pixel);
+  font-size: 0.62rem;
+  color: var(--arc-cyan);
+  text-shadow: var(--arc-glow-cyan);
+  letter-spacing: 0.08em;
+}
+
+html:not(.theme-xmas) .splash-live-pill {
+  font-family: var(--font-mono);
+  border: 1px solid rgba(0, 255, 229, 0.35) !important;
+  background: rgba(0, 255, 229, 0.05) !important;
+  color: var(--arc-cyan);
+  border-radius: 4px !important;
+  text-shadow: 0 0 6px rgba(0, 255, 229, 0.4);
+}
+
+/* Boot orb */
+html:not(.theme-xmas) .splash-loader-orb {
+  height: 4.4rem;
+  width: 4.4rem;
+}
+
+html:not(.theme-xmas) .splash-loader-ring {
+  border: 2px solid rgba(0, 255, 229, 0.28);
+  border-top-color: var(--arc-magenta);
+  border-right-color: var(--arc-cyan);
+  filter: drop-shadow(0 0 6px rgba(0, 255, 229, 0.5));
+}
+
+html:not(.theme-xmas) .splash-loader-core {
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, #0a1426, #050811);
+  border: 1px solid rgba(0, 255, 229, 0.5);
+  color: var(--arc-cyan);
+  font-family: var(--font-pixel);
+  font-size: 0.85rem;
+  text-shadow: var(--arc-glow-cyan);
+  box-shadow:
+    inset 0 0 10px rgba(0, 255, 229, 0.2),
+    0 0 16px rgba(0, 255, 229, 0.35);
+}
+
+html:not(.theme-xmas) .splash-loader-core img {
+  border-radius: 3px !important;
+  image-rendering: pixelated;
+}
+
+/* Bars: switch to hard pixel boxes with cyan/magenta */
+html:not(.theme-xmas) .splash-eq-bar {
+  background: linear-gradient(to top, var(--arc-magenta), var(--arc-cyan)) !important;
+  border-radius: 1px !important;
+  box-shadow: 0 0 8px rgba(0, 255, 229, 0.4);
+}
+
+html:not(.theme-xmas) .splash-loader-title {
+  font-family: var(--font-mono);
+  color: var(--arc-cyan);
+  text-shadow: 0 0 8px rgba(0, 255, 229, 0.4);
+  letter-spacing: 0.16em;
+}
+
+html:not(.theme-xmas) .splash-loader-copy {
+  font-family: var(--font-mono);
+  color: var(--arc-muted);
+}
+
+html:not(.theme-xmas) .splash-kicker {
+  font-family: var(--font-mono);
+  color: var(--arc-magenta);
+  text-shadow: 0 0 6px rgba(255, 43, 214, 0.4);
+  letter-spacing: 0.22em;
+}
+
+html:not(.theme-xmas) .splash-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(1.2rem, 3vw, 1.9rem);
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
+html:not(.theme-xmas) .splash-title > span {
+  background: linear-gradient(90deg, var(--arc-cyan), var(--arc-magenta), var(--arc-amber)) !important;
+  -webkit-background-clip: text !important;
+          background-clip: text !important;
+  color: transparent !important;
+  filter: drop-shadow(0 0 14px rgba(0, 255, 229, 0.35)) drop-shadow(0 0 18px rgba(255, 43, 214, 0.18));
+}
+
+html:not(.theme-xmas) .splash-copy {
+  font-family: var(--font-mono);
+  color: rgba(220, 231, 255, 0.88);
+  font-size: 0.82rem;
+}
+
+html:not(.theme-xmas) .splash-tag {
+  font-family: var(--font-mono);
+  border-radius: 4px;
+  border: 1px solid rgba(0, 255, 229, 0.32) !important;
+  background: rgba(0, 255, 229, 0.05) !important;
+  color: var(--arc-cyan) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 6px rgba(0, 255, 229, 0.3);
+  font-size: 0.6rem;
+  padding: 0.28rem 0.6rem;
+}
+html:not(.theme-xmas) .splash-tag::before { content: '['; color: var(--arc-magenta); margin-right: 3px; }
+html:not(.theme-xmas) .splash-tag::after { content: ']'; color: var(--arc-magenta); margin-left: 3px; }
+
+html:not(.theme-xmas) .splash-hint {
+  font-family: var(--font-mono);
+  color: var(--arc-muted);
+  font-size: 0.7rem;
+}
+
+html:not(.theme-xmas) .splash-enter-btn {
+  border-radius: 6px !important;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+}
+
+/* ---------- KONAMI GAME OVERLAY ---------- */
+
+html:not(.theme-xmas) .konami-overlay {
+  background:
+    radial-gradient(circle at top left, rgba(0, 255, 229, 0.08), transparent 58%),
+    radial-gradient(circle at bottom right, rgba(255, 43, 214, 0.08), transparent 58%),
+    rgba(2, 4, 10, 0.92) !important;
+}
+
+html:not(.theme-xmas) .konami-window {
+  border-radius: 12px !important;
+  border: 1px solid rgba(0, 255, 229, 0.35) !important;
+  background:
+    linear-gradient(180deg, rgba(10, 14, 26, 0.96), rgba(6, 9, 18, 0.98)) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 0 60px rgba(0, 255, 229, 0.28),
+    0 0 60px rgba(255, 43, 214, 0.22) !important;
+  font-family: var(--font-mono);
+  padding-top: 30px;
+}
+
+@media (min-width: 640px) {
+  html:not(.theme-xmas) .konami-window {
+    border-radius: 14px !important;
+  }
+}
+
+/* Window chrome bar with traffic-light dots */
+html:not(.theme-xmas) .konami-window::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  border-radius: 12px 12px 0 0;
+  background:
+    radial-gradient(circle 4px at 14px 14px, #ff5f56 60%, transparent 62%),
+    radial-gradient(circle 4px at 30px 14px, #ffbd2e 60%, transparent 62%),
+    radial-gradient(circle 4px at 46px 14px, #27c93f 60%, transparent 62%),
+    linear-gradient(180deg, rgba(20, 26, 42, 0.96), rgba(10, 14, 26, 0.92));
+  border-bottom: 1px solid rgba(0, 255, 229, 0.22);
+  box-shadow:
+    0 0 6px rgba(255, 95, 86, 0.45),
+    0 0 6px rgba(39, 201, 63, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 5;
+}
+@media (min-width: 640px) {
+  html:not(.theme-xmas) .konami-window::before {
+    border-radius: 14px 14px 0 0;
+  }
+}
+
+/* Title pill inside the konami window */
+html:not(.theme-xmas) .konami-window header > div .inline-flex {
+  border-radius: 4px !important;
+  border: 1px solid rgba(0, 255, 229, 0.4) !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  color: var(--arc-cyan) !important;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 6px rgba(0, 255, 229, 0.35);
+}
+html:not(.theme-xmas) .konami-window header > div .inline-flex span:not(.inline-flex) {
+  color: inherit;
+}
+
+/* Close button */
+html:not(.theme-xmas) .konami-window header > button {
+  border-radius: 4px !important;
+  border: 1px solid rgba(0, 255, 229, 0.4) !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  color: var(--arc-cyan) !important;
+  font-family: var(--font-mono);
+  text-shadow: 0 0 6px rgba(0, 255, 229, 0.35);
+  font-size: 0.95rem !important;
+  font-weight: 700;
+}
+html:not(.theme-xmas) .konami-window header > button:hover {
+  background: rgba(0, 255, 229, 0.12) !important;
+  border-color: var(--arc-cyan) !important;
+  box-shadow: 0 0 12px rgba(0, 255, 229, 0.4);
+  color: #c8fff7 !important;
+}
+
+/* Iframe frame */
+html:not(.theme-xmas) .konami-window iframe {
+  border-radius: 6px;
+}
+html:not(.theme-xmas) .konami-window .relative.flex-1.overflow-hidden {
+  border-radius: 6px !important;
+  border: 1px solid rgba(0, 255, 229, 0.25) !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 0 22px rgba(0, 255, 229, 0.18);
+}
+
+/* Subtitle line under iframe */
+html:not(.theme-xmas) .konami-window p.text-center {
+  font-family: var(--font-mono);
+  color: var(--arc-muted) !important;
+  letter-spacing: 0.06em;
+}
+html:not(.theme-xmas) .konami-window p.text-center::before {
+  content: '// ';
+  color: rgba(106, 122, 153, 0.7);
+}
+
+/* Volume slider pill */
+html:not(.theme-xmas) .konami-window label.inline-flex {
+  border-radius: 4px !important;
+  border: 1px solid rgba(0, 255, 229, 0.3) !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  color: var(--arc-cyan) !important;
+  font-family: var(--font-mono);
+}
+html:not(.theme-xmas) .konami-window label.inline-flex span {
+  color: var(--arc-cyan) !important;
+}
+html:not(.theme-xmas) .konami-window label.inline-flex span.uppercase {
+  color: var(--arc-magenta) !important;
+  text-shadow: 0 0 6px rgba(255, 43, 214, 0.4);
+}
+html:not(.theme-xmas) .konami-window input[type="range"] {
+  accent-color: var(--arc-cyan);
+}
+
+/* Pulse status dot inside konami header pill -> arcade green */
+html:not(.theme-xmas) .konami-window header .bg-emerald-400 {
+  background: var(--arc-green) !important;
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.85) !important;
+}
+
+/* Konami inner aurora gradient blob -> tone down to neon cyan/magenta */
+html:not(.theme-xmas) .konami-window > .absolute.inset-0.pointer-events-none {
+  background:
+    radial-gradient(circle at top left, rgba(0, 255, 229, 0.18), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(255, 43, 214, 0.18), transparent 60%) !important;
+  opacity: 0.55;
+}
+

@@ -221,9 +221,9 @@ export default function Links() {
     <section id="links" className="section-shell">
       <div className="section-card">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="section-title">Links rápidos</h2>
+          <h2 className="section-title">links.sh</h2>
           <span className="section-kicker">
-            click · explora · regresa
+            ./run · external · new tab
           </span>
         </div>
 
@@ -267,7 +267,7 @@ export default function Links() {
 
           {!loading && links.length === 0 && (
             <p className="text-[11px] text-slate-500">
-              Aún no hay links guardados ✨
+              {'// no links · array is empty'}
             </p>
           )}
 
