@@ -12,9 +12,37 @@ import Snowfall from './components/Snowfall'
 
 const KONAMI_VOLUME_STORAGE_KEY = 'daivr_konami_volume'
 const DEFAULT_KONAMI_VOLUME_PERCENT = 8
+const LOFI_VOLUME_STORAGE_KEY = 'daivr_lofi_volume'
+const DEFAULT_LOFI_VOLUME_PERCENT = 20
+const LOFI_TRACKS = [
+  {
+    id: 'DkbPMHFumss',
+    title: 'Arcade LoFi',
+    subtitle: 'background signal',
+  },
+  {
+    id: 'jfKfPfyJRdk',
+    title: 'Study Radio',
+    subtitle: 'beats to code to',
+  },
+  {
+    id: '4xDzrJKXOOY',
+    title: 'Synthwave Radio',
+    subtitle: 'night drive mode',
+  },
+]
+
 const clampVolumePercent = (value) => {
   const num = Number(value)
   if (!Number.isFinite(num)) return DEFAULT_KONAMI_VOLUME_PERCENT
+  if (num < 0) return 0
+  if (num > 100) return 100
+  return Math.round(num)
+}
+
+const clampLofiVolumePercent = (value) => {
+  const num = Number(value)
+  if (!Number.isFinite(num)) return DEFAULT_LOFI_VOLUME_PERCENT
   if (num < 0) return 0
   if (num > 100) return 100
   return Math.round(num)
@@ -237,37 +265,247 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
     </div>
   )
 }
-function AudioToggleButton({ visible, muted, onToggle }) {
+function ControlIcon({ type }) {
+  const common = {
+    width: 16,
+    height: 16,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    'aria-hidden': 'true',
+  }
+
+  const paths = {
+    play: <polygon points="7 5 19 12 7 19 7 5" fill="currentColor" stroke="none" />,
+    pause: (
+      <>
+        <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none" />
+        <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none" />
+      </>
+    ),
+    previous: (
+      <>
+        <path d="M19 5L9 12l10 7V5z" fill="currentColor" stroke="none" />
+        <path d="M5 5v14" />
+      </>
+    ),
+    next: (
+      <>
+        <path d="M5 5l10 7-10 7V5z" fill="currentColor" stroke="none" />
+        <path d="M19 5v14" />
+      </>
+    ),
+    volume: (
+      <>
+        <path d="M4 10v4h4l5 4V6L8 10H4z" />
+        <path d="M16 9.5a4 4 0 010 5" />
+        <path d="M18.5 7a7 7 0 010 10" />
+      </>
+    ),
+    mute: (
+      <>
+        <path d="M4 10v4h4l5 4V6L8 10H4z" />
+        <path d="M18 9l-5 6" />
+        <path d="M13 9l5 6" />
+      </>
+    ),
+    close: (
+      <>
+        <path d="M6 6l12 12" />
+        <path d="M18 6L6 18" />
+      </>
+    ),
+  }
+
+  return <svg {...common}>{paths[type]}</svg>
+}
+
+function MusicControlButton({
+  visible,
+  open,
+  muted,
+  gameMuted,
+  paused,
+  volume,
+  track,
+  trackIndex,
+  trackCount,
+  onOpenChange,
+  onToggleMute,
+  onTogglePlay,
+  onVolumeChange,
+  onNext,
+  onPrevious,
+}) {
+  const shellRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return undefined
+
+    const handlePointerDown = (event) => {
+      if (shellRef.current && !shellRef.current.contains(event.target)) {
+        onOpenChange(false)
+      }
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onOpenChange(false)
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open, onOpenChange])
+
+  useEffect(() => {
+    if (!visible) onOpenChange(false)
+  }, [visible, onOpenChange])
+
   if (!visible) return null
 
+  const effectiveMuted = muted || gameMuted || volume === 0
+  const statusLabel = gameMuted
+    ? 'GAME'
+    : effectiveMuted
+      ? 'MUTE'
+      : paused
+        ? 'PAUS'
+        : 'ON'
+
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className={`arc-toggle arc-toggle-lofi ${muted ? 'arc-toggle-off' : 'arc-toggle-on'} fixed bottom-5 right-5 z-40 rounded-full p-[2px] bg-gradient-to-r from-sky-500/60 via-cyan-400/60 to-fuchsia-500/60 shadow-[0_12px_40px_rgba(8,47,73,0.85)] transition-transform duration-200 hover:translate-y-0.5 active:scale-[0.97]`}
-      aria-label={muted ? 'Activate lo-fi music' : 'Mute lo-fi music'}
-    >
-      <div className="arc-toggle-inner flex items-center gap-2 rounded-full bg-slate-950/90 px-3 py-2 border border-slate-700/80">
-        <span className="arc-toggle-led relative flex h-5 w-5 items-center justify-center">
-          {!muted && (
-            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/30 animate-ping" />
-          )}
-          <span
-            className={`relative inline-flex h-3 w-3 rounded-full ${
-              muted
-                ? 'bg-slate-400 shadow-[0_0_10px_rgba(148,163,184,0.9)]'
-                : 'bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.95)]'
-            }`}
-          />
-        </span>
-        <span className="arc-toggle-label uppercase tracking-[0.22em] text-[9px] text-slate-400">
-          LOFI
-        </span>
-        <span className="arc-toggle-value text-[11px] font-semibold text-slate-100">
-          {muted ? 'OFF' : 'ON'}
-        </span>
-      </div>
-    </button>
+    <div ref={shellRef} className="music-control-shell fixed bottom-5 right-5 z-50">
+      {open && (
+        <div className="music-control-panel" role="dialog" aria-label="Lo-fi music controls">
+          <div className="music-control-panel-top">
+            <div>
+              <p className="music-control-kicker">audio://lofi</p>
+              <p className="music-control-title">{track.title}</p>
+              <p className="music-control-subtitle">{track.subtitle}</p>
+            </div>
+            <button
+              type="button"
+              className="music-control-close"
+              onClick={() => onOpenChange(false)}
+              aria-label="Close music controls"
+            >
+              <ControlIcon type="close" />
+            </button>
+          </div>
+
+          <div className="music-control-screen">
+            <span className="music-control-scanline" aria-hidden="true" />
+            <span className="music-control-track-index">
+              {String(trackIndex + 1).padStart(2, '0')} / {String(trackCount).padStart(2, '0')}
+            </span>
+            <span className="music-control-track-name">{paused ? 'paused' : 'streaming'}</span>
+            <span
+              className={`music-control-bars ${paused ? 'is-paused' : ''}`}
+              aria-hidden="true"
+            >
+              {[0.38, 0.72, 0.52, 0.9, 0.64, 1, 0.46, 0.78, 0.56].map(
+                (level, index) => (
+                  <span
+                    key={index}
+                    style={{
+                      '--level': level,
+                      '--delay': `${index * -0.11}s`,
+                    }}
+                  />
+                ),
+              )}
+            </span>
+          </div>
+
+          <div className="music-control-actions">
+            <button
+              type="button"
+              className="music-control-icon-button"
+              onClick={onPrevious}
+              aria-label="Previous lo-fi track"
+            >
+              <ControlIcon type="previous" />
+            </button>
+            <button
+              type="button"
+              className="music-control-icon-button music-control-play"
+              onClick={onTogglePlay}
+              aria-label={paused ? 'Play lo-fi music' : 'Pause lo-fi music'}
+            >
+              <ControlIcon type={paused ? 'play' : 'pause'} />
+            </button>
+            <button
+              type="button"
+              className="music-control-icon-button"
+              onClick={onNext}
+              aria-label="Next lo-fi track"
+            >
+              <ControlIcon type="next" />
+            </button>
+          </div>
+
+          <div className="music-control-volume">
+            <button
+              type="button"
+              className={`music-control-icon-button music-control-mute ${effectiveMuted ? 'is-muted' : ''}`}
+              onClick={onToggleMute}
+              aria-label={effectiveMuted ? 'Unmute lo-fi music' : 'Mute lo-fi music'}
+            >
+              <ControlIcon type={effectiveMuted ? 'mute' : 'volume'} />
+            </button>
+            <label className="music-control-slider-label">
+              <span>volume</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={volume}
+                onChange={(event) => onVolumeChange(event.target.value)}
+                aria-label="Lo-fi volume"
+              />
+            </label>
+            <span className="music-control-volume-value">
+              {String(volume).padStart(2, '0')}%
+            </span>
+          </div>
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={() => onOpenChange(!open)}
+        className={`arc-toggle arc-toggle-lofi ${effectiveMuted || paused ? 'arc-toggle-off' : 'arc-toggle-on'} rounded-full p-[2px] bg-gradient-to-r from-sky-500/60 via-cyan-400/60 to-fuchsia-500/60 shadow-[0_12px_40px_rgba(8,47,73,0.85)] transition-transform duration-200 hover:translate-y-0.5 active:scale-[0.97]`}
+        aria-label={open ? 'Close lo-fi music controls' : 'Open lo-fi music controls'}
+        aria-expanded={open}
+      >
+        <div className="arc-toggle-inner flex items-center gap-2 rounded-full bg-slate-950/90 px-3 py-2 border border-slate-700/80">
+          <span className="arc-toggle-led relative flex h-5 w-5 items-center justify-center">
+            {!effectiveMuted && !paused && (
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/30 animate-ping" />
+            )}
+            <span
+              className={`relative inline-flex h-3 w-3 rounded-full ${
+                effectiveMuted || paused
+                  ? 'bg-slate-400 shadow-[0_0_10px_rgba(148,163,184,0.9)]'
+                  : 'bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.95)]'
+              }`}
+            />
+          </span>
+          <span className="arc-toggle-label uppercase tracking-[0.22em] text-[9px] text-slate-400">
+            LOFI
+          </span>
+          <span className="arc-toggle-value text-[11px] font-semibold text-slate-100">
+            {statusLabel}
+          </span>
+        </div>
+      </button>
+    </div>
   )
 }
 
@@ -312,6 +550,10 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true)
   const [playAudio, setPlayAudio] = useState(false)
   const [audioMuted, setAudioMuted] = useState(false)
+  const [audioPaused, setAudioPaused] = useState(false)
+  const [audioVolume, setAudioVolume] = useState(DEFAULT_LOFI_VOLUME_PERCENT)
+  const [audioTrackIndex, setAudioTrackIndex] = useState(0)
+  const [audioControlsOpen, setAudioControlsOpen] = useState(false)
   const [visitCount, setVisitCount] = useState(null)
   const [visitError, setVisitError] = useState(false)
   const [me, setMe] = useState(null)
@@ -320,6 +562,28 @@ export default function App() {
   const [showGameOverlay, setShowGameOverlay] = useState(false)
   const [activeGame, setActiveGame] = useState(null)
   const konamiIndexRef = useRef(0)
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(LOFI_VOLUME_STORAGE_KEY)
+      if (stored !== null) {
+        setAudioVolume(clampLofiVolumePercent(stored))
+      }
+    } catch (err) {
+      console.error('Error loading lo-fi volume', err)
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        LOFI_VOLUME_STORAGE_KEY,
+        String(clampLofiVolumePercent(audioVolume)),
+      )
+    } catch (err) {
+      console.error('Error saving lo-fi volume', err)
+    }
+  }, [audioVolume])
 
   useEffect(() => {
     const hitVisit = async () => {
@@ -465,12 +729,43 @@ export default function App() {
     }
   }
 
-  const effectiveAudioMuted = audioMuted || showGameOverlay
+  const currentAudioTrack =
+    LOFI_TRACKS[audioTrackIndex] || LOFI_TRACKS[0]
+  const effectiveAudioMuted = audioMuted || showGameOverlay || audioVolume === 0
+  const setNextAudioTrack = () => {
+    setAudioTrackIndex((prev) => (prev + 1) % LOFI_TRACKS.length)
+    setAudioPaused(false)
+  }
+  const setPreviousAudioTrack = () => {
+    setAudioTrackIndex((prev) =>
+      (prev - 1 + LOFI_TRACKS.length) % LOFI_TRACKS.length,
+    )
+    setAudioPaused(false)
+  }
+  const handleLofiVolumeChange = (value) => {
+    const next = clampLofiVolumePercent(value)
+    setAudioVolume(next)
+    if (next > 0) setAudioMuted(false)
+  }
+  const toggleLofiMute = () => {
+    if (audioVolume === 0) {
+      setAudioVolume(DEFAULT_LOFI_VOLUME_PERCENT)
+      setAudioMuted(false)
+      return
+    }
+    setAudioMuted((prev) => !prev)
+  }
 
   return (
     <div className="app-shell">
       <div className="app-bg" aria-hidden="true" />
-      <BackgroundAudio play={playAudio} muted={effectiveAudioMuted} />
+      <BackgroundAudio
+        play={playAudio}
+        muted={effectiveAudioMuted}
+        paused={audioPaused}
+        volume={showGameOverlay ? 0 : audioVolume}
+        track={currentAudioTrack}
+      />
       {christmasEnabled ? <Snowfall /> : <Fireflies />}
       <KonamiGameOverlay
         open={showGameOverlay}
@@ -478,10 +773,22 @@ export default function App() {
         me={me}
         onClose={() => setShowGameOverlay(false)}
       />
-      <AudioToggleButton
+      <MusicControlButton
         visible={!showSplash}
+        open={audioControlsOpen}
         muted={effectiveAudioMuted}
-        onToggle={() => setAudioMuted((prev) => !prev)}
+        gameMuted={showGameOverlay}
+        paused={audioPaused}
+        volume={audioVolume}
+        track={currentAudioTrack}
+        trackIndex={audioTrackIndex}
+        trackCount={LOFI_TRACKS.length}
+        onOpenChange={setAudioControlsOpen}
+        onToggleMute={toggleLofiMute}
+        onTogglePlay={() => setAudioPaused((prev) => !prev)}
+        onVolumeChange={handleLofiVolumeChange}
+        onNext={setNextAudioTrack}
+        onPrevious={setPreviousAudioTrack}
       />
       <ChristmasToggleButton
         visible={!showSplash && !!(me && me.isAdmin)}
@@ -532,45 +839,14 @@ export default function App() {
   )
 }
 
-function BackgroundAudio({ play, muted }) {
+function BackgroundAudio({ play, muted, paused, volume, track }) {
   const iframeRef = useRef(null)
+  const trackId = track?.id || LOFI_TRACKS[0].id
 
   useEffect(() => {
     if (!play) return
 
-    const onMessage = (event) => {
-      if (!event || !event.data) return
-      try {
-        const data = JSON.parse(event.data)
-        if (data && data.event === 'onReady') {
-          const iframe = iframeRef.current
-          if (!iframe || !iframe.contentWindow) return
-          const msg = (func, args = []) =>
-            iframe.contentWindow.postMessage(
-              JSON.stringify({
-                event: 'command',
-                func,
-                args,
-              }),
-              '*',
-            )
-
-          if (muted) {
-            msg('mute')
-            msg('setVolume', [0])
-          } else {
-            msg('unMute')
-            msg('setVolume', [20])
-          }
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    window.addEventListener('message', onMessage)
-
-    const sendVolume = () => {
+    const sendPlayerState = () => {
       const iframe = iframeRef.current
       if (!iframe || !iframe.contentWindow) return
 
@@ -585,35 +861,60 @@ function BackgroundAudio({ play, muted }) {
             '*',
           )
 
-        if (muted) {
+        const nextVolume = muted ? 0 : clampLofiVolumePercent(volume)
+
+        if (muted || nextVolume === 0) {
           msg('mute')
           msg('setVolume', [0])
         } else {
           msg('unMute')
-          msg('setVolume', [20])
+          msg('setVolume', [nextVolume])
+        }
+
+        msg(paused ? 'pauseVideo' : 'playVideo')
+      } catch {
+        // ignore
+      }
+    }
+
+    const onMessage = (event) => {
+      if (!event || !event.data) return
+      try {
+        const data =
+          typeof event.data === 'string' ? JSON.parse(event.data) : event.data
+        if (data && data.event === 'onReady') {
+          sendPlayerState()
         }
       } catch {
         // ignore
       }
     }
 
-    const quick = setTimeout(sendVolume, 200)
-    const interval = setInterval(sendVolume, 1500)
+    window.addEventListener('message', onMessage)
+
+    const quick = setTimeout(sendPlayerState, 200)
+    const interval = setInterval(sendPlayerState, 1500)
 
     return () => {
       clearTimeout(quick)
       clearInterval(interval)
       window.removeEventListener('message', onMessage)
     }
-  }, [play, muted])
+  }, [play, muted, paused, volume, trackId])
 
   if (!play) return null
 
+  const origin =
+    typeof window !== 'undefined'
+      ? `&origin=${encodeURIComponent(window.location.origin)}`
+      : ''
+
   return (
     <iframe
+      key={trackId}
       ref={iframeRef}
       className="pointer-events-none fixed inset-0 h-0 w-0 opacity-0"
-      src="https://www.youtube.com/embed/DkbPMHFumss?autoplay=1&loop=1&playlist=DkbPMHFumss&enablejsapi=1&mute=1"
+      src={`https://www.youtube.com/embed/${trackId}?autoplay=1&loop=1&playlist=${trackId}&enablejsapi=1&mute=1&playsinline=1${origin}`}
       title="Background music"
       allow="autoplay; encrypted-media"
     />

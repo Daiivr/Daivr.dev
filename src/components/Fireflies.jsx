@@ -12,6 +12,24 @@ let FIREFLY_ID = 0
 function createFirefly(viewport, now) {
   const w = viewport.w || window.innerWidth || 0
   const h = viewport.h || window.innerHeight || 0
+  const palette = [
+    {
+      core: 'rgba(0, 255, 229, 0.95)',
+      halo: 'rgba(0, 255, 229, 0.58)',
+      trail: 'rgba(0, 255, 229, 0.55)',
+    },
+    {
+      core: 'rgba(255, 43, 214, 0.95)',
+      halo: 'rgba(255, 43, 214, 0.50)',
+      trail: 'rgba(255, 43, 214, 0.46)',
+    },
+    {
+      core: 'rgba(255, 182, 39, 0.92)',
+      halo: 'rgba(255, 182, 39, 0.36)',
+      trail: 'rgba(255, 182, 39, 0.38)',
+    },
+  ]
+  const color = palette[Math.floor(Math.random() * palette.length)]
 
   // vida más larga para que el fade se note (ms)
   const life = 24000 + Math.random() * 18000 // 24–42s
@@ -32,6 +50,11 @@ function createFirefly(viewport, now) {
     delay: Math.random() * -8,
     alpha: 0,
     progress: 0,
+    core: color.core,
+    halo: color.halo,
+    trail: color.trail,
+    trailLength: 18 + Math.random() * 32,
+    trailAngle: Math.random() * 360,
   }
 }
 
@@ -147,7 +170,7 @@ export default function Fireflies() {
         return
       }
       const w = window.innerWidth || 1024
-      const next = w < 420 ? 12 : w < 768 ? 18 : 26
+      const next = w < 420 ? 16 : w < 768 ? 24 : 34
       setCount(next)
     }
 
@@ -255,6 +278,11 @@ export default function Fireflies() {
             opacity: f.alpha,
             animationDuration: `${f.flicker}s`,
             animationDelay: `${f.delay}s`,
+            '--firefly-core': f.core,
+            '--firefly-halo': f.halo,
+            '--firefly-trail': f.trail,
+            '--firefly-trail-length': `${f.trailLength}px`,
+            '--firefly-trail-angle': `${f.trailAngle}deg`,
           }}
         />
       ))}
