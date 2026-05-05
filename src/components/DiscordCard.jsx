@@ -1,36 +1,50 @@
 import React, { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import axios from 'axios'
+import nitroRubyBadge from '../assets/discord-badge-nitro-ruby.svg'
+import serverBoostBadge from '../assets/discord-badge-boost.svg'
 
 const DISCORD_ID = '271701484922601472'
 const LANYARD_WS = 'wss://api.lanyard.rest/socket'
 
 
 // ----- BADGES FROM DISCORD PUBLIC FLAGS -----
-const BADGES = {
-  HYPESQUAD_BRAVERY: {
-    flag: 64,
-    icon: "https://raw.githubusercontent.com/merlinfuchs/discord-badges/main/SVG/hypesquad_bravery.svg",
-    label: "Bravery",
-  },
-  HYPESQUAD_BRILLIANCE: {
-    flag: 128,
-    icon: "https://raw.githubusercontent.com/merlinfuchs/discord-badges/main/SVG/hypesquad_brilliance.svg",
-    label: "Brilliance",
-  },
-  HYPESQUAD_BALANCE: {
-    flag: 256,
-    icon: "https://raw.githubusercontent.com/merlinfuchs/discord-badges/main/SVG/hypesquad_balance.svg",
-    label: "Balance",
-  },
-  EARLY_SUPPORTER: {
-    flag: 512,
-    icon: "https://raw.githubusercontent.com/merlinfuchs/discord-badges/main/SVG/early_supporter.svg",
-    label: "Early Supporter",
-  }
-};
+const BADGE_BASE = "https://raw.githubusercontent.com/merlinfuchs/discord-badges/main/SVG"
 
-function getUserBadges(flags) {
-  return Object.values(BADGES).filter(b => (flags & b.flag) !== 0);
+const BADGES = [
+  { flag: 1 << 0,  icon: `${BADGE_BASE}/discord_employee.svg`,             label: "Discord Staff" },
+  { flag: 1 << 1,  icon: `${BADGE_BASE}/partnered_server_owner.svg`,        label: "Partnered Server Owner" },
+  { flag: 1 << 2,  icon: `${BADGE_BASE}/hypesquad_events.svg`,              label: "HypeSquad Events" },
+  { flag: 1 << 3,  icon: `${BADGE_BASE}/bug_hunter_level_1.svg`,            label: "Bug Hunter" },
+  { flag: 1 << 6,  icon: `${BADGE_BASE}/hypesquad_bravery.svg`,             label: "HypeSquad Bravery" },
+  { flag: 1 << 7,  icon: `${BADGE_BASE}/hypesquad_brilliance.svg`,          label: "HypeSquad Brilliance" },
+  { flag: 1 << 8,  icon: `${BADGE_BASE}/hypesquad_balance.svg`,             label: "HypeSquad Balance" },
+  { flag: 1 << 9,  icon: `${BADGE_BASE}/early_supporter.svg`,               label: "Early Supporter" },
+  { flag: 1 << 14, icon: `${BADGE_BASE}/bug_hunter_level_2.svg`,            label: "Bug Hunter Level 2" },
+  { flag: 1 << 17, icon: `${BADGE_BASE}/early_verified_bot_developer.svg`,  label: "Early Verified Bot Developer" },
+  { flag: 1 << 18, icon: `${BADGE_BASE}/discord_certified_moderator.svg`,   label: "Moderator Programs Alumni" },
+  { flag: 1 << 22, icon: `${BADGE_BASE}/active_developer.svg`,              label: "Active Developer" },
+]
+
+// Manual extras — Lanyard/the gateway don't expose Nitro tier or server-boost
+// duration on the user object, so we add them here for the profile owner.
+const CUSTOM_BADGES = [
+  {
+    icon: nitroRubyBadge,
+    label: "NITRO RUBY",
+    sublabel: "Subscriber since 9/6/20",
+  },
+  {
+    icon: serverBoostBadge,
+    label: "Server boosting since Sep 12, 2020",
+  },
+]
+
+function getUserBadges(user) {
+  if (!user) return []
+  const flags = user.public_flags || 0
+  const list = BADGES.filter(b => (flags & b.flag) !== 0)
+  return [...list, ...CUSTOM_BADGES]
 }
 // ----- END BADGES -----
 
@@ -39,6 +53,7 @@ export default function DiscordCard() {
   const [connected, setConnected] = useState(false)
   const [now, setNow] = useState(Date.now())
   const [gameImageUrl, setGameImageUrl] = useState(null)
+  const [badgeTooltip, setBadgeTooltip] = useState(null)
 
   // WebSocket Lanyard
   useEffect(() => {
@@ -98,6 +113,17 @@ export default function DiscordCard() {
   const customStatus = activities.find((a) => a.type === 4)
   const mainActivity = activities.find((a) => a.type === 0)
   const spotify = data?.spotify
+
+  // Discord "Server Tag" / Primary Guild (the small clan pill next to the name)
+  const primaryGuild = user?.primary_guild || user?.clan
+  const hasGuildTag =
+    primaryGuild?.identity_enabled &&
+    primaryGuild?.tag &&
+    primaryGuild?.badge &&
+    primaryGuild?.identity_guild_id
+  const guildBadgeUrl = hasGuildTag
+    ? `https://cdn.discordapp.com/clan-badges/${primaryGuild.identity_guild_id}/${primaryGuild.badge}.png?size=32`
+    : null
   const hasRichPresenceImage = !!(
     mainActivity &&
     mainActivity.assets &&
@@ -205,10 +231,35 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
     }
   })()
 
+  const showBadgeTooltip = (badge, element) => {
+    const rect = element.getBoundingClientRect()
+    setBadgeTooltip({
+      label: badge.label,
+      sublabel: badge.sublabel,
+      left: rect.left + rect.width / 2,
+      top: rect.top - 8,
+    })
+  }
+
+  const hideBadgeTooltip = () => setBadgeTooltip(null)
+
+  useEffect(() => {
+    if (!badgeTooltip) return undefined
+
+    const dismissTooltip = () => setBadgeTooltip(null)
+    window.addEventListener('scroll', dismissTooltip, true)
+    window.addEventListener('resize', dismissTooltip)
+
+    return () => {
+      window.removeEventListener('scroll', dismissTooltip, true)
+      window.removeEventListener('resize', dismissTooltip)
+    }
+  }, [badgeTooltip])
+
   return (
     <section id="discord" className="mx-auto max-w-6xl px-4 py-6">
       <div className="section-card flex flex-col gap-6 md:flex-row">
-        <div className="w-full md:w-64 flex flex-col items-center">
+        <div className="discord-profile-panel w-full md:w-64 flex flex-col items-center">
           
 
 
@@ -237,33 +288,79 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
           />
         </div>
 
-          <p className="text-lg font-semibold text-slate-100 mt-4">
-
-            {user?.global_name || user?.username || 'Cargando…'}
+          <p className="text-lg font-semibold text-slate-100 mt-4 flex items-center justify-center gap-2">
+            <span>{user?.global_name || user?.username || 'Cargando…'}</span>
+            {hasGuildTag && (
+              <span
+                className="inline-flex items-center gap-1 rounded border border-slate-700/80 bg-slate-800/70 px-1.5 py-[2px] align-middle backdrop-blur-sm leading-none"
+                title={`Server Tag · ${primaryGuild.tag}`}
+              >
+                <img
+                  src={guildBadgeUrl}
+                  alt=""
+                  className="h-3 w-3"
+                  loading="lazy"
+                />
+                <span className="text-[10px] font-bold uppercase tracking-wide text-slate-100">
+                  {primaryGuild.tag}
+                </span>
+              </span>
+            )}
           </p>
           <p className="text-sm text-slate-400">@{user?.username || '...'}</p>
 
-          <p className="mt-2 text-xs text-slate-500">
-            {customStatus?.state ||
-              (presence === 'online' && 'Construyendo cosas y rompiéndolas otra vez ✨') ||
-              (presence === 'idle' && 'AFK pero de buen humor 💤') ||
-              (presence === 'dnd' && 'Modo sweat, no molestar 🔥') ||
-              (presence === 'offline' && 'Desconectado (o invis) 👻') ||
-              (!connected && 'Conectando a Lanyard…')}
+          <p className="mt-2 text-xs text-slate-500 inline-flex items-center justify-center gap-1.5">
+            {customStatus?.emoji?.id && (
+              <img
+                src={`https://cdn.discordapp.com/emojis/${customStatus.emoji.id}.${
+                  customStatus.emoji.animated ? 'gif' : 'png'
+                }?size=32&quality=lossless`}
+                alt={customStatus.emoji.name || ''}
+                className="inline-block h-4 w-4 align-middle"
+                loading="lazy"
+              />
+            )}
+            {customStatus?.emoji?.name && !customStatus?.emoji?.id && (
+              <span className="align-middle">{customStatus.emoji.name}</span>
+            )}
+            <span>
+              {customStatus?.state ||
+                (presence === 'online' && 'Construyendo cosas y rompiéndolas otra vez ✨') ||
+                (presence === 'idle' && 'AFK pero de buen humor 💤') ||
+                (presence === 'dnd' && 'Modo sweat, no molestar 🔥') ||
+                (presence === 'offline' && 'Desconectado (o invis) 👻') ||
+                (!connected && 'Conectando a Lanyard…')}
+            </span>
           </p>
 
-          
-<div className="flex flex-wrap gap-2 mt-4 justify-center">
-  {getUserBadges(user?.public_flags || 0).map((badge) => (
-    <div
-      key={badge.label}
-      className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/60 border border-slate-700 shadow-sm"
-    >
-      <img src={badge.icon} className="h-4 w-4" />
-      <span className="text-[11px] text-slate-200">{badge.label}</span>
-    </div>
-  ))}
-</div>
+          {(() => {
+            const badges = getUserBadges(user)
+            if (!badges.length) return null
+            return (
+              <div className="discord-badge-row mt-4 flex justify-center">
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/60 px-3 py-1.5 shadow-sm">
+                  {badges.map((badge) => (
+                    <div
+                      key={badge.label}
+                      className="discord-badge-item relative inline-flex h-5 w-5 items-center justify-center"
+                      tabIndex={0}
+                      onMouseEnter={(event) => showBadgeTooltip(badge, event.currentTarget)}
+                      onMouseLeave={hideBadgeTooltip}
+                      onFocus={(event) => showBadgeTooltip(badge, event.currentTarget)}
+                      onBlur={hideBadgeTooltip}
+                    >
+                      <img
+                        src={badge.icon}
+                        alt={badge.label}
+                        className="h-5 w-5"
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
 
         </div>
 
@@ -342,6 +439,24 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
           )}
         </div>
       </div>
+      {badgeTooltip &&
+        createPortal(
+          <div
+            className="discord-floating-tooltip"
+            style={{ left: `${badgeTooltip.left}px`, top: `${badgeTooltip.top}px` }}
+            role="tooltip"
+          >
+            <span className="discord-badge-tooltip-label">
+              {badgeTooltip.label}
+            </span>
+            {badgeTooltip.sublabel && (
+              <span className="discord-badge-tooltip-sublabel">
+                {badgeTooltip.sublabel}
+              </span>
+            )}
+          </div>,
+          document.body
+        )}
     </section>
   )
 }
