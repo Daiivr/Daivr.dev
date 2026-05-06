@@ -37,12 +37,28 @@ function readComments() {
     const raw = fs.readFileSync(FILE, 'utf8')
     const data = raw ? JSON.parse(raw) : []
     if (!Array.isArray(data)) return []
-    // Aseguramos que siempre exista replies y reactions como array
-    return data.map((c) => ({
-      ...c,
-      replies: Array.isArray(c.replies) ? c.replies : [],
-      reactions: Array.isArray(c.reactions) ? c.reactions : [],
-    }))
+    // Aseguramos shape consistente para replies / reactions / pinned
+    return data.map((c) => {
+      let reactions = {}
+      if (Array.isArray(c.reactions)) {
+        // Migración: shape antigua era ["😀", "❤️"]
+        c.reactions.forEach((emoji) => {
+          if (typeof emoji === 'string') reactions[emoji] = []
+        })
+      } else if (c.reactions && typeof c.reactions === 'object') {
+        Object.entries(c.reactions).forEach(([emoji, users]) => {
+          if (typeof emoji !== 'string') return
+          if (!Array.isArray(users)) return
+          reactions[emoji] = users.map((u) => String(u)).filter(Boolean)
+        })
+      }
+      return {
+        ...c,
+        replies: Array.isArray(c.replies) ? c.replies : [],
+        reactions,
+        pinned: !!c.pinned,
+      }
+    })
   } catch (e) {
     console.error('Error leyendo comments.json', e)
     return []
@@ -121,9 +137,11 @@ async function withAvatars(comment) {
 // GET all
 router.get('/', async (req, res) => {
   try {
-    const raw = readComments().sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    )
+    const raw = readComments().sort((a, b) => {
+      // Pinneados primero, después por fecha desc
+      if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1
+      return new Date(b.createdAt) - new Date(a.createdAt)
+    })
 
     const comments = await Promise.all(raw.map((c) => withAvatars(c)))
     res.json({ comments })
@@ -327,18 +345,11 @@ router.put('/:commentId/replies/:replyId', async (req, res) => {
   res.json({ comment: await withAvatars(baseComment) })
 })
 
-// POST toggle reaction (admin only)
+// POST toggle reaction (cualquier usuario logueado)
 router.post('/:id/reactions', async (req, res) => {
   const user = getUserFromRequest(req)
   if (!user)
     return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
-
-  const isAdmin = !!user.isAdmin || ADMIN_IDS.includes(String(user.id))
-  if (!isAdmin) {
-    return res
-      .status(403)
-      .json({ error: 'Solo el admin puede añadir reacciones' })
-  }
 
   const { emoji } = req.body || {}
   if (!emoji || typeof emoji !== 'string' || emoji.length > 16) {
@@ -352,17 +363,54 @@ router.post('/:id/reactions', async (req, res) => {
     return res.status(404).json({ error: 'Comentario no encontrado' })
   }
 
+  const userId = String(user.id)
   const comment = comments[index]
-  const reactions = Array.isArray(comment.reactions) ? [...comment.reactions] : []
-  const existingIndex = reactions.indexOf(emoji)
+  const reactions =
+    comment.reactions && typeof comment.reactions === 'object'
+      ? { ...comment.reactions }
+      : {}
+  const current = Array.isArray(reactions[emoji]) ? [...reactions[emoji]] : []
+  const userIndex = current.indexOf(userId)
 
-  if (existingIndex >= 0) {
-    reactions.splice(existingIndex, 1)
+  if (userIndex >= 0) {
+    current.splice(userIndex, 1)
   } else {
-    reactions.push(emoji)
+    current.push(userId)
+  }
+
+  if (current.length === 0) {
+    delete reactions[emoji]
+  } else {
+    reactions[emoji] = current
   }
 
   comment.reactions = reactions
+  comments[index] = comment
+  writeComments(comments)
+
+  res.json({ comment: await withAvatars(comment) })
+})
+
+// POST toggle pin (admin only)
+router.post('/:id/pin', async (req, res) => {
+  const user = getUserFromRequest(req)
+  if (!user)
+    return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
+
+  const isAdmin = !!user.isAdmin || ADMIN_IDS.includes(String(user.id))
+  if (!isAdmin) {
+    return res.status(403).json({ error: 'Solo el admin puede fijar comentarios' })
+  }
+
+  const id = Number(req.params.id)
+  const comments = readComments()
+  const index = comments.findIndex((c) => c.id === id)
+  if (index === -1) {
+    return res.status(404).json({ error: 'Comentario no encontrado' })
+  }
+
+  const comment = comments[index]
+  comment.pinned = !comment.pinned
   comments[index] = comment
   writeComments(comments)
 

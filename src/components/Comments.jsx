@@ -14,6 +14,59 @@ const TENOR_LIMIT = 48
 const GIF_LINE_REGEX =
   /^(https?:\/\/(?:media|c)\.tenor\.com\/\S+|https?:\/\/tenor\.com\/view\/\S+)/i
 
+// Markdown inline: **bold**, *italic*, `code`. Code wins (no nesting inside it).
+const MD_PATTERNS = [
+  { regex: /`([^`\n]+)`/, tag: 'code', cls: 'md-code' },
+  { regex: /\*\*([^*\n]+)\*\*/, tag: 'strong', cls: 'md-strong' },
+  { regex: /\*([^*\n]+)\*/, tag: 'em', cls: 'md-em' },
+]
+
+const renderInlineMarkdown = (text, keyPrefix = 'md') => {
+  if (!text) return null
+  const out = []
+  let remaining = String(text)
+  let n = 0
+
+  while (remaining.length) {
+    let earliest = null
+    for (const p of MD_PATTERNS) {
+      const m = remaining.match(p.regex)
+      if (m && (earliest === null || m.index < earliest.match.index)) {
+        earliest = { ...p, match: m }
+      }
+    }
+    if (!earliest) {
+      out.push(remaining)
+      break
+    }
+    const before = remaining.slice(0, earliest.match.index)
+    if (before) out.push(before)
+
+    const inner = earliest.match[1]
+    const k = `${keyPrefix}-${n++}`
+    if (earliest.tag === 'code') {
+      out.push(
+        <code key={k} className={earliest.cls}>
+          {inner}
+        </code>
+      )
+    } else if (earliest.tag === 'strong') {
+      out.push(
+        <strong key={k} className={earliest.cls}>
+          {renderInlineMarkdown(inner, k)}
+        </strong>
+      )
+    } else {
+      out.push(
+        <em key={k} className={earliest.cls}>
+          {renderInlineMarkdown(inner, k)}
+        </em>
+      )
+    }
+    remaining = remaining.slice(earliest.match.index + earliest.match[0].length)
+  }
+  return out
+}
 
 const renderTextWithGifs = (text) => {
   if (!text) return null
@@ -35,7 +88,7 @@ const renderTextWithGifs = (text) => {
     return (
       <span key={index}>
         {index > 0 && <br />}
-        {line}
+        {renderInlineMarkdown(line, `md-${index}`)}
       </span>
     )
   })
@@ -438,7 +491,7 @@ const handleGifSelect = (url) => {
   }
 
   const toggleReaction = async (commentId, emoji) => {
-    if (!isAdmin || !emoji) return
+    if (!me || !emoji) return
     try {
       const res = await axios.post(`/api/comments/${commentId}/reactions`, { emoji })
       const updated = res.data.comment
@@ -449,6 +502,27 @@ const handleGifSelect = (url) => {
     } catch (e) {
       console.error(e)
       alert(e.response?.data?.error ?? 'Error añadiendo reacción')
+    }
+  }
+
+  const togglePin = async (commentId) => {
+    if (!isAdmin) return
+    try {
+      const res = await axios.post(`/api/comments/${commentId}/pin`)
+      const updated = res.data.comment
+      if (updated) {
+        setComments((prev) => {
+          const next = prev.map((c) => (c.id === updated.id ? updated : c))
+          // Reordenar: pinneados arriba, después por fecha desc
+          return [...next].sort((a, b) => {
+            if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1
+            return new Date(b.createdAt) - new Date(a.createdAt)
+          })
+        })
+      }
+    } catch (e) {
+      console.error(e)
+      alert(e.response?.data?.error ?? 'Error fijando comentario')
     }
   }
 
@@ -479,6 +553,15 @@ const handleGifSelect = (url) => {
           <div>
             <h2 className="section-title">Comentarios</h2>
             <p className="comments-panel-subtitle">discord-auth messages · guestbook stream</p>
+            <div className="comments-meta">
+              <span className="comments-count-pill">
+                {comments.length} {comments.length === 1 ? 'comentario' : 'comentarios'}
+              </span>
+              <span className="comments-live-pill" title="Auto-refresca cada 5s">
+                <span className="comments-live-dot" aria-hidden="true" />
+                LIVE
+              </span>
+            </div>
           </div>
           <div className="comments-auth-zone">
             {me ? (
@@ -620,8 +703,13 @@ const handleGifSelect = (url) => {
             return (
               <article
                 key={c.id}
-                className="comment-card"
+                className={`comment-card${c.pinned ? ' is-pinned' : ''}`}
               >
+                {c.pinned && (
+                  <span className="comment-pin-badge" aria-label="Comentario fijado">
+                    📌 PINNED
+                  </span>
+                )}
                 <img
                   src={c.author.avatarUrl}
                     onError={(e) => (e.currentTarget.src = 'https://cdn.discordapp.com/embed/avatars/0.png')}
@@ -657,8 +745,22 @@ const handleGifSelect = (url) => {
                         {' · editado'}
                       </span>
                     )}
-                    {(canEdit || canDelete) && (
+                    {(canEdit || canDelete || isAdmin) && (
                       <div className="comment-actions">
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => togglePin(c.id)}
+                            className={`rounded-full px-2 py-1 text-[10px] transition ${
+                              c.pinned
+                                ? 'bg-amber-400/90 text-slate-900 hover:bg-amber-300'
+                                : 'bg-slate-800 text-slate-200 hover:bg-amber-400/80 hover:text-slate-900'
+                            }`}
+                            title={c.pinned ? 'Quitar fijado' : 'Fijar arriba'}
+                          >
+                            📌
+                          </button>
+                        )}
                         {canEdit && (
                           <button
                             type="button"
@@ -704,57 +806,77 @@ const handleGifSelect = (url) => {
                     </div>
                   )}
 
-                  {!isEditing && (Array.isArray(c.reactions) && c.reactions.length > 0 || isAdmin) && (
-                    <div className="comment-reactions">
-                      {(c.reactions ?? []).map((emoji) => {
-                        const isHeart = emoji === '❤️'
-                        return (
-                          <button
-                            key={emoji}
-                            type="button"
-                            onClick={() => toggleReaction(c.id, emoji)}
-                            disabled={!isAdmin}
-                            className={`reaction-chip${isHeart ? ' is-heart' : ''}`}
-                            title={isAdmin ? 'Quitar reacción' : emoji}
-                          >
-                            <span className="reaction-emoji">{emoji}</span>
-                          </button>
-                        )
-                      })}
-                      {isAdmin && (
-                        <div className="reaction-picker-wrapper">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setReactionPickerId((prev) => (prev === c.id ? null : c.id))
-                            }
-                            className="reaction-add-btn"
-                            aria-label="Añadir reacción"
-                          >
-                            <span aria-hidden="true">+</span>
-                            <span className="reaction-add-icon" aria-hidden="true">☺</span>
-                          </button>
-                          {reactionPickerId === c.id && (
-                            <div className="reaction-picker" role="menu">
-                              {REACTION_PRESETS.map((emoji) => {
-                                const active = (c.reactions ?? []).includes(emoji)
-                                return (
-                                  <button
-                                    key={emoji}
-                                    type="button"
-                                    onClick={() => toggleReaction(c.id, emoji)}
-                                    className={`reaction-picker-item ${active ? 'is-active' : ''}`}
-                                  >
-                                    {emoji}
-                                  </button>
-                                )
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  {!isEditing && (() => {
+                    const reactionMap =
+                      c.reactions && typeof c.reactions === 'object' && !Array.isArray(c.reactions)
+                        ? c.reactions
+                        : {}
+                    const entries = Object.entries(reactionMap).filter(
+                      ([, ids]) => Array.isArray(ids) && ids.length > 0
+                    )
+                    const myId = me ? String(me.id) : null
+                    if (entries.length === 0 && !me) return null
+
+                    return (
+                      <div className="comment-reactions">
+                        {entries.map(([emoji, ids]) => {
+                          const isHeart = emoji === '❤️'
+                          const mine = !!myId && ids.includes(myId)
+                          return (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => toggleReaction(c.id, emoji)}
+                              disabled={!me}
+                              className={`reaction-chip${isHeart ? ' is-heart' : ''}${mine ? ' is-mine' : ''}`}
+                              title={
+                                !me
+                                  ? 'Inicia sesión para reaccionar'
+                                  : mine
+                                  ? 'Quitar mi reacción'
+                                  : 'Reaccionar'
+                              }
+                            >
+                              <span className="reaction-emoji">{emoji}</span>
+                              <span className="reaction-count">{ids.length}</span>
+                            </button>
+                          )
+                        })}
+                        {me && (
+                          <div className="reaction-picker-wrapper">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setReactionPickerId((prev) => (prev === c.id ? null : c.id))
+                              }
+                              className="reaction-add-btn"
+                              aria-label="Añadir reacción"
+                            >
+                              <span aria-hidden="true">+</span>
+                              <span className="reaction-add-icon" aria-hidden="true">☺</span>
+                            </button>
+                            {reactionPickerId === c.id && (
+                              <div className="reaction-picker" role="menu">
+                                {REACTION_PRESETS.map((emoji) => {
+                                  const active = !!myId && (reactionMap[emoji] ?? []).includes(myId)
+                                  return (
+                                    <button
+                                      key={emoji}
+                                      type="button"
+                                      onClick={() => toggleReaction(c.id, emoji)}
+                                      className={`reaction-picker-item ${active ? 'is-active' : ''}`}
+                                    >
+                                      {emoji}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })()}
 
                   {isEditing && (
                     <div className="mt-2 space-y-2">
