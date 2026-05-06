@@ -5,6 +5,8 @@ import ModalPortal from './ModalPortal'
 const MAX_COMMENT_LENGTH = 2000
 const COMMENTS_PER_PAGE = 6
 
+const REACTION_PRESETS = ['😀', '😂', '😍', '😢', '😡', '❤️', '👍', '👎', '🎉', '🔥', '💀', '✨']
+
 const TENOR_API_KEY = import.meta.env.VITE_TENOR_API_KEY
 const TENOR_CLIENT_KEY = 'daivr-dev-comments'
 const TENOR_LIMIT = 48
@@ -90,6 +92,9 @@ export default function Comments() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const [deleting, setDeleting] = useState(false)
 
+  // picker de reacciones (admin)
+  const [reactionPickerId, setReactionPickerId] = useState(null)
+
   // GIF picker (Tenor)
   const [gifPickerOpen, setGifPickerOpen] = useState(false)
   const [gifPickerMode, setGifPickerMode] = useState('new') // 'new' | 'reply'
@@ -122,6 +127,17 @@ export default function Comments() {
     const id = setInterval(load, 5000) // refresco cada 5s
     return () => clearInterval(id)
   }, [])
+
+  useEffect(() => {
+    if (reactionPickerId === null) return
+    const onDocClick = (event) => {
+      if (!event.target.closest?.('.reaction-picker-wrapper')) {
+        setReactionPickerId(null)
+      }
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [reactionPickerId])
 
 
   const totalPages = Math.max(1, Math.ceil((comments?.length ?? 0) / COMMENTS_PER_PAGE))
@@ -421,6 +437,21 @@ const handleGifSelect = (url) => {
     }
   }
 
+  const toggleReaction = async (commentId, emoji) => {
+    if (!isAdmin || !emoji) return
+    try {
+      const res = await axios.post(`/api/comments/${commentId}/reactions`, { emoji })
+      const updated = res.data.comment
+      if (updated) {
+        setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)))
+      }
+      setReactionPickerId(null)
+    } catch (e) {
+      console.error(e)
+      alert(e.response?.data?.error ?? 'Error añadiendo reacción')
+    }
+  }
+
   const deleteReply = async (commentId, replyId) => {
     const ok = window.confirm('¿Eliminar esta respuesta?')
     if (!ok) return
@@ -670,6 +701,58 @@ const handleGifSelect = (url) => {
                   {!isEditing && (
                     <div className="comment-body">
                       {renderTextWithGifs(c.text)}
+                    </div>
+                  )}
+
+                  {!isEditing && (Array.isArray(c.reactions) && c.reactions.length > 0 || isAdmin) && (
+                    <div className="comment-reactions">
+                      {(c.reactions ?? []).map((emoji) => {
+                        const isHeart = emoji === '❤️'
+                        return (
+                          <button
+                            key={emoji}
+                            type="button"
+                            onClick={() => toggleReaction(c.id, emoji)}
+                            disabled={!isAdmin}
+                            className={`reaction-chip${isHeart ? ' is-heart' : ''}`}
+                            title={isAdmin ? 'Quitar reacción' : emoji}
+                          >
+                            <span className="reaction-emoji">{emoji}</span>
+                          </button>
+                        )
+                      })}
+                      {isAdmin && (
+                        <div className="reaction-picker-wrapper">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setReactionPickerId((prev) => (prev === c.id ? null : c.id))
+                            }
+                            className="reaction-add-btn"
+                            aria-label="Añadir reacción"
+                          >
+                            <span aria-hidden="true">+</span>
+                            <span className="reaction-add-icon" aria-hidden="true">☺</span>
+                          </button>
+                          {reactionPickerId === c.id && (
+                            <div className="reaction-picker" role="menu">
+                              {REACTION_PRESETS.map((emoji) => {
+                                const active = (c.reactions ?? []).includes(emoji)
+                                return (
+                                  <button
+                                    key={emoji}
+                                    type="button"
+                                    onClick={() => toggleReaction(c.id, emoji)}
+                                    className={`reaction-picker-item ${active ? 'is-active' : ''}`}
+                                  >
+                                    {emoji}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
 

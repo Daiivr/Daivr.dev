@@ -37,10 +37,11 @@ function readComments() {
     const raw = fs.readFileSync(FILE, 'utf8')
     const data = raw ? JSON.parse(raw) : []
     if (!Array.isArray(data)) return []
-    // Aseguramos que siempre exista replies como array
+    // Aseguramos que siempre exista replies y reactions como array
     return data.map((c) => ({
       ...c,
       replies: Array.isArray(c.replies) ? c.replies : [],
+      reactions: Array.isArray(c.reactions) ? c.reactions : [],
     }))
   } catch (e) {
     console.error('Error leyendo comments.json', e)
@@ -324,6 +325,48 @@ router.put('/:commentId/replies/:replyId', async (req, res) => {
   writeComments(comments)
 
   res.json({ comment: await withAvatars(baseComment) })
+})
+
+// POST toggle reaction (admin only)
+router.post('/:id/reactions', async (req, res) => {
+  const user = getUserFromRequest(req)
+  if (!user)
+    return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
+
+  const isAdmin = !!user.isAdmin || ADMIN_IDS.includes(String(user.id))
+  if (!isAdmin) {
+    return res
+      .status(403)
+      .json({ error: 'Solo el admin puede añadir reacciones' })
+  }
+
+  const { emoji } = req.body || {}
+  if (!emoji || typeof emoji !== 'string' || emoji.length > 16) {
+    return res.status(400).json({ error: 'Emoji inválido' })
+  }
+
+  const id = Number(req.params.id)
+  const comments = readComments()
+  const index = comments.findIndex((c) => c.id === id)
+  if (index === -1) {
+    return res.status(404).json({ error: 'Comentario no encontrado' })
+  }
+
+  const comment = comments[index]
+  const reactions = Array.isArray(comment.reactions) ? [...comment.reactions] : []
+  const existingIndex = reactions.indexOf(emoji)
+
+  if (existingIndex >= 0) {
+    reactions.splice(existingIndex, 1)
+  } else {
+    reactions.push(emoji)
+  }
+
+  comment.reactions = reactions
+  comments[index] = comment
+  writeComments(comments)
+
+  res.json({ comment: await withAvatars(comment) })
 })
 
 // DELETE reply (eliminar respuesta del admin)

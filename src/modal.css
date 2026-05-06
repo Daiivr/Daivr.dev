@@ -701,37 +701,35 @@ html:not(.theme-xmas) .konami-overlay > * {
 
 html:not(.theme-xmas) .modal-card {
   border-radius: 10px !important;
-  border: 1px solid rgba(0, 255, 229, 0.22) !important;
+  border: 1px solid rgba(0, 255, 229, 0.14) !important;
   background:
-    linear-gradient(180deg, rgba(10, 14, 26, 0.96), rgba(6, 9, 18, 0.98)) !important;
+    linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(180deg, rgba(10, 14, 26, 0.92), rgba(6, 9, 18, 0.96)) !important;
   backdrop-filter: blur(8px) !important;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
     0 0 0 1px rgba(0, 0, 0, 0.4),
-    0 30px 80px -30px rgba(0, 255, 229, 0.28),
-    0 30px 80px -30px rgba(255, 43, 214, 0.28) !important;
+    0 24px 48px -28px rgba(0, 255, 229, 0.22),
+    0 28px 70px -40px rgba(255, 43, 214, 0.22) !important;
   font-family: var(--font-mono);
-  padding-top: 2.5rem !important;
+  padding-top: 38px !important;
 }
 
 /* Replace the rainbow border ring with a window chrome bar + traffic-lights */
 html:not(.theme-xmas) .modal-card::before {
   content: '';
   position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: auto !important;
-  inset: auto !important;
-  height: 28px !important;
+  inset: 0 0 auto 0 !important;
+  height: 26px !important;
   padding: 0 !important;
   border-radius: 10px 10px 0 0 !important;
   background:
-    radial-gradient(circle 4px at 14px 14px, #ff5f56 60%, transparent 62%),
-    radial-gradient(circle 4px at 30px 14px, #ffbd2e 60%, transparent 62%),
-    radial-gradient(circle 4px at 46px 14px, #27c93f 60%, transparent 62%),
-    linear-gradient(180deg, rgba(20, 26, 42, 0.96), rgba(10, 14, 26, 0.92)) !important;
-  border-bottom: 1px solid rgba(0, 255, 229, 0.18) !important;
+    radial-gradient(circle 4px at 14px 13px, #ff5f56 60%, transparent 62%),
+    radial-gradient(circle 4px at 30px 13px, #ffbd2e 60%, transparent 62%),
+    radial-gradient(circle 4px at 46px 13px, #27c93f 60%, transparent 62%),
+    linear-gradient(180deg, rgba(20, 26, 42, 0.95), rgba(10, 14, 26, 0.85)) !important;
+  border-bottom: 1px solid rgba(0, 255, 229, 0.12) !important;
   box-shadow:
     0 0 6px rgba(255, 95, 86, 0.45),
     0 0 6px rgba(39, 201, 63, 0.35),
@@ -754,7 +752,7 @@ html:not(.theme-xmas) .modal-card::after {
       115deg,
       transparent 0%,
       transparent 42%,
-      rgba(0, 255, 229, 0.08) 50%,
+      rgba(0, 255, 229, 0.06) 50%,
       transparent 58%,
       transparent 100%
     ) !important;
@@ -763,8 +761,8 @@ html:not(.theme-xmas) .modal-card::after {
   background-repeat: repeat !important;
   mix-blend-mode: screen !important;
   filter: none !important;
-  opacity: 0.55 !important;
-  animation: arcSweep 8s linear infinite !important;
+  opacity: 0.45 !important;
+  animation: arcSweep 12s linear infinite !important;
 }
 
 /* Header: title + close */
@@ -803,9 +801,13 @@ html:not(.theme-xmas) .modal-close:hover {
 
 /* Inner panel + inputs */
 html:not(.theme-xmas) .modal-panel {
+  position: relative;
   border-radius: 6px !important;
   border: 1px solid rgba(0, 255, 229, 0.18) !important;
-  background: rgba(0, 0, 0, 0.4) !important;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.016) 1px, transparent 1px) 0 0 / 14px 14px,
+    rgba(0, 0, 0, 0.4) !important;
   font-family: var(--font-mono);
 }
 
@@ -894,7 +896,7 @@ html:not(.theme-xmas) .modal-card::-webkit-scrollbar-thumb {
 /* ---------- SPLASH SCREEN ---------- */
 
 html:not(.theme-xmas) .modal-card.splash-card {
-  padding-top: 2.5rem !important;
+  padding-top: 38px !important;
 }
 html:not(.theme-xmas) .modal-card.splash-card::before {
   /* keep window chrome */
