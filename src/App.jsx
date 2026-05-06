@@ -401,10 +401,12 @@ function MusicControlButton({
 
           <div className="music-control-screen">
             <span className="music-control-scanline" aria-hidden="true" />
-            <span className="music-control-track-index">
-              {String(trackIndex + 1).padStart(2, '0')} / {String(trackCount).padStart(2, '0')}
-            </span>
-            <span className="music-control-track-name">{paused ? 'paused' : 'streaming'}</span>
+            <div className="music-control-screen-copy">
+              <span className="music-control-track-index">
+                {String(trackIndex + 1).padStart(2, '0')} / {String(trackCount).padStart(2, '0')}
+              </span>
+              <span className="music-control-track-name">{paused ? 'paused' : 'streaming'}</span>
+            </div>
             <span
               className={`music-control-bars ${paused ? 'is-paused' : ''}`}
               aria-hidden="true"
@@ -473,6 +475,11 @@ function MusicControlButton({
             <span className="music-control-volume-value">
               {String(volume).padStart(2, '0')}%
             </span>
+          </div>
+
+          <div className="music-control-deck-footer" aria-hidden="true">
+            <span>track.cache</span>
+            <span>{gameMuted ? 'game-muted' : effectiveMuted ? 'muted' : paused ? 'paused' : 'signal.ok'}</span>
           </div>
         </div>
       )}

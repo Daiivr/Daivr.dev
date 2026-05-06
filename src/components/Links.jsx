@@ -361,7 +361,7 @@ export default function Links() {
       {showModal && (
         <ModalPortal>
           <div className="modal-backdrop" onClick={closeModal}>
-            <div className="modal-card modal-md" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card modal-md link-edit-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
                 <h3 className="modal-title">Editar link</h3>
@@ -410,7 +410,7 @@ export default function Links() {
       {showExternalConfirm && pendingExternal && (
         <ModalPortal>
           <div className="modal-backdrop" onClick={closeExternalConfirm}>
-            <div className="modal-card modal-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card modal-sm link-confirm-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
                 <h3 className="modal-title">Abrir {pendingExternal.label}</h3>
@@ -428,46 +428,46 @@ export default function Links() {
               </button>
             </div>
 
-            <div className="modal-panel p-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
+            <div className="modal-panel link-confirm-panel">
+              <div className="link-confirm-identity">
+                <div className="link-confirm-main">
                   {pendingExternal.iconUrl ? (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-900/90 border border-slate-700 shadow-inner">
+                    <div className="link-confirm-icon">
                       <img
                         src={pendingExternal.iconUrl}
                         alt={pendingExternal.label}
-                        className="h-8 w-8 rounded-2xl object-cover"
+                        className="link-confirm-icon-img"
                       />
                     </div>
                   ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-900/90 border border-slate-700 shadow-inner">
-                      <span className="text-lg">🔗</span>
+                    <div className="link-confirm-icon">
+                      <span aria-hidden="true">#</span>
                     </div>
                   )}
 
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-100 truncate">
+                  <div className="link-confirm-copyblock">
+                    <p>
                       {pendingExternal.label}
                     </p>
-                    <p className="text-xs text-slate-400 truncate">
+                    <span>
                       {getHostLabel(pendingExternal.safeHref)}
-                    </p>
+                    </span>
                   </div>
                 </div>
 
-                <span className="shrink-0 rounded-full border border-slate-700/70 bg-slate-950/30 px-2 py-1 text-[10px] font-semibold tracking-wide text-slate-300">
+                <span className="link-confirm-pill">
                   NUEVA PESTAÑA
                 </span>
               </div>
 
-              <div className="mt-3 flex items-start justify-between gap-2 rounded-xl border border-slate-800/70 bg-slate-950/35 px-3 py-2">
-                <div className="min-w-0 font-mono text-[11px] text-slate-300 break-all">
+              <div className="link-confirm-url-row">
+                <div className="link-confirm-url">
                   {pendingExternal.safeHref}
                 </div>
                 <button
                   type="button"
                   onClick={copyExternalLink}
-                  className="shrink-0 rounded-lg border border-slate-700/70 bg-slate-900/60 px-2 py-1 text-[10px] font-semibold text-slate-200 hover:bg-slate-900/80"
+                  className="link-confirm-copy"
                   aria-label="Copiar enlace"
                   title="Copiar"
                 >

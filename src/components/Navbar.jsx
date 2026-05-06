@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import SidebarTrafficLight from './SidebarTrafficLight'
 
 const navLinks = [
-  { href: '#home', label: 'home' },
-  { href: '#about', label: 'about' },
-  { href: '#links', label: 'links' },
-  { href: '#discord', label: 'discord' },
-  { href: '#gallery', label: 'gallery' },
-  { href: '#comments', label: 'comments' },
+  { href: '#home', label: 'home', code: '00' },
+  { href: '#about', label: 'about', code: '01' },
+  { href: '#links', label: 'links', code: '02' },
+  { href: '#discord', label: 'discord', code: '03' },
+  { href: '#gallery', label: 'gallery', code: '04' },
+  { href: '#comments', label: 'comments', code: '05' },
 ]
 
 function getSectionOffsets() {
@@ -105,7 +105,9 @@ export default function Navbar() {
             : `nav-tab ${isActive ? 'is-active' : ''}`
         }
       >
-        <span className="relative z-10">{link.label}</span>
+        {vertical && <span className="nav-index" aria-hidden="true">{link.code}</span>}
+        <span className="nav-dot" aria-hidden="true" />
+        <span className="nav-label">{link.label}</span>
         {isActive && <span className="nav-glow" aria-hidden="true" />}
       </a>
     )
@@ -139,56 +141,68 @@ export default function Navbar() {
 
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex app-nav">
-        <a
-          href="#home"
-          onClick={handleClick('#home')}
-          className="flex items-center gap-3 px-2 py-2"
-        >
+        <a href="#home" onClick={handleClick('#home')} className="sidebar-brand">
           <span className="brand-orb brand-orb-lg" aria-hidden="true" />
-          <div className="leading-tight">
-            <div className="text-[12px] uppercase tracking-[0.22em] text-slate-400">
+          <div className="sidebar-brand-copy">
+            <div className="sidebar-brand-kicker">
               ~/portfolio
             </div>
-            <div className="text-base font-semibold tracking-tight">
+            <div className="sidebar-brand-title">
               daivr.dev
             </div>
           </div>
         </a>
 
-        <div ref={navStackRef} className="nav-stack mt-2 flex flex-col gap-2">
-          <span
-            className="nav-route-indicator"
-            style={{
-              transform: `translateY(${routeIndicator.top}px)`,
-              height: `${routeIndicator.height}px`,
-            }}
-            aria-hidden="true"
-          />
-          {navLinks.map((l) => (
-            <LinkItem key={l.href} link={l} vertical />
-          ))}
+        <div className="sidebar-status-panel" aria-hidden="true">
+          <span>route.sys</span>
+          <strong>online</strong>
         </div>
 
-        <div className="mt-6 -ml-4 flex justify-start">
+        <div className="sidebar-nav-panel">
+          <div className="sidebar-nav-top" aria-hidden="true">
+            <span>routes</span>
+            <span>{String(navLinks.length).padStart(2, '0')}</span>
+          </div>
+          <div ref={navStackRef} className="nav-stack">
+            <span
+              className="nav-route-indicator"
+              style={{
+                transform: `translateY(${routeIndicator.top}px)`,
+                height: `${routeIndicator.height}px`,
+              }}
+              aria-hidden="true"
+            />
+            {navLinks.map((l) => (
+              <LinkItem key={l.href} link={l} vertical />
+            ))}
+          </div>
+        </div>
+
+        <div className="sidebar-art-dock">
+          <div className="sidebar-art-label" aria-hidden="true">
+            <span>signal.obj</span>
+            <span>idle</span>
+          </div>
           <SidebarTrafficLight />
         </div>
 
-        <div className="mt-auto px-2 pt-6">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-            <p className="text-xs text-slate-300 leading-relaxed">
-              {'// portfolio · projects, links & a live discord feed.'}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="mini-chip">React</span>
-              <span className="mini-chip">Node</span>
-              <span className="mini-chip">C#</span>
-              <span className="mini-chip">SysBot</span>
-            </div>
+        <div className="sidebar-system-panel" aria-hidden="true">
+          <div className="sidebar-system-top">
+            <span>stack.cache</span>
+            <span>ready</span>
+          </div>
+          <div className="sidebar-system-tags">
+            <span>React</span>
+            <span>Node</span>
+            <span>C#</span>
+            <span>SysBot</span>
           </div>
         </div>
 
         <div className="sidebar-credit">
-          <span className="sidebar-credit-pill">© {new Date().getFullYear()} · Made by Dai</span>
+          <span className="sidebar-credit-pill">
+            © {new Date().getFullYear()} · Made by Dai
+          </span>
         </div>
 
       </aside>

@@ -893,6 +893,337 @@ html:not(.theme-xmas) .modal-card::-webkit-scrollbar-thumb {
   border-radius: 2px;
 }
 
+/* ---------- V5 modal polish: closer to the upgraded cards ---------- */
+
+html:not(.theme-xmas) .modal-backdrop {
+  align-items: center;
+  overflow-y: auto;
+  background:
+    radial-gradient(900px 560px at 50% 45%, rgba(0, 255, 229, 0.12), transparent 68%),
+    radial-gradient(620px 460px at 68% 42%, rgba(255, 43, 214, 0.12), transparent 70%),
+    radial-gradient(720px 520px at 32% 65%, rgba(255, 182, 39, 0.055), transparent 68%),
+    linear-gradient(180deg, rgba(2, 4, 10, 0.82), rgba(2, 4, 10, 0.97)) !important;
+  backdrop-filter: blur(15px) saturate(1.12) contrast(1.03) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(1.12) contrast(1.03) !important;
+}
+
+html:not(.theme-xmas) .modal-backdrop::before {
+  opacity: 0.42;
+}
+
+html:not(.theme-xmas) .modal-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(0, 255, 229, 0.12) 48%, rgba(255, 43, 214, 0.10) 50%, transparent 56%) 50% 58% / 100% 1px no-repeat,
+    radial-gradient(ellipse at center, transparent 48%, rgba(0, 0, 0, 0.42) 100%);
+  opacity: 0.82;
+}
+
+html:not(.theme-xmas) .modal-card {
+  border-radius: 12px !important;
+  border-color: rgba(0, 255, 229, 0.24) !important;
+  background:
+    radial-gradient(520px 260px at 12% 0%, rgba(0, 255, 229, 0.09), transparent 64%),
+    radial-gradient(440px 260px at 90% 18%, rgba(255, 43, 214, 0.075), transparent 68%),
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(180deg, rgba(8, 13, 26, 0.97), rgba(4, 8, 17, 0.985)) !important;
+  padding: 50px 24px 22px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    inset 0 0 0 1px rgba(0, 255, 229, 0.035),
+    0 0 0 1px rgba(0, 0, 0, 0.82),
+    0 22px 70px -28px rgba(0, 255, 229, 0.58),
+    0 28px 90px -36px rgba(255, 43, 214, 0.42),
+    0 46px 130px -42px rgba(0, 0, 0, 0.95) !important;
+  animation: modalTerminalPop 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html:not(.theme-xmas) .modal-card::before {
+  height: 32px !important;
+  border-radius: 12px 12px 0 0 !important;
+  background:
+    radial-gradient(circle 3px at 16px 16px, #ff5f56 58%, transparent 62%),
+    radial-gradient(circle 3px at 31px 16px, #ffbd2e 58%, transparent 62%),
+    radial-gradient(circle 3px at 46px 16px, #27c93f 58%, transparent 62%),
+    linear-gradient(90deg, transparent 0%, rgba(0, 255, 229, 0.18) 55%, rgba(255, 43, 214, 0.16) 78%, transparent 100%) 0 100% / 100% 1px no-repeat,
+    linear-gradient(180deg, rgba(19, 26, 43, 0.98), rgba(8, 12, 22, 0.93)) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04),
+    0 0 12px rgba(0, 255, 229, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55) !important;
+}
+
+html:not(.theme-xmas) .modal-card::after {
+  background:
+    linear-gradient(135deg, rgba(0, 255, 229, 0.22), transparent 18%) top left / 78px 78px no-repeat,
+    linear-gradient(315deg, rgba(255, 43, 214, 0.18), transparent 18%) bottom right / 78px 78px no-repeat,
+    linear-gradient(115deg, transparent 0%, transparent 42%, rgba(0, 255, 229, 0.07) 50%, rgba(255, 43, 214, 0.045) 54%, transparent 64%, transparent 100%) !important;
+  background-size: 78px 78px, 78px 78px, 220% 100% !important;
+  animation: modalArcSweep 10s linear infinite !important;
+  opacity: 0.72 !important;
+}
+
+html:not(.theme-xmas) .modal-header {
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(0, 255, 229, 0.12);
+}
+
+html:not(.theme-xmas) .modal-title {
+  margin-bottom: 4px;
+  color: var(--arc-cyan);
+  font-size: 0.95rem;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+}
+
+html:not(.theme-xmas) .modal-text {
+  max-width: 56ch;
+  color: rgba(220, 231, 255, 0.74);
+  line-height: 1.55;
+}
+
+html:not(.theme-xmas) .modal-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px !important;
+  background:
+    linear-gradient(180deg, rgba(0, 255, 229, 0.11), rgba(0, 255, 229, 0.035)) !important;
+  box-shadow:
+    inset 0 0 12px rgba(0, 255, 229, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 10px 28px rgba(0, 0, 0, 0.35) !important;
+}
+
+html:not(.theme-xmas) .modal-panel {
+  border-color: rgba(0, 255, 229, 0.22) !important;
+  background:
+    radial-gradient(320px 180px at 18% 0%, rgba(0, 255, 229, 0.075), transparent 66%),
+    linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.016) 1px, transparent 1px) 0 0 / 14px 14px,
+    rgba(1, 6, 16, 0.7) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.018),
+    inset 0 0 30px rgba(0, 255, 229, 0.035),
+    0 18px 42px rgba(0, 0, 0, 0.32);
+}
+
+html:not(.theme-xmas) .modal-input,
+html:not(.theme-xmas) .modal-card input[type="text"],
+html:not(.theme-xmas) .modal-card input[type="url"],
+html:not(.theme-xmas) .modal-card textarea {
+  min-height: 40px;
+  border-radius: 7px !important;
+  padding: 0.68rem 0.82rem;
+}
+
+html:not(.theme-xmas) .modal-actions {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0, 255, 229, 0.10);
+}
+
+html:not(.theme-xmas) .modal-btn-cancel,
+html:not(.theme-xmas) .modal-btn-save,
+html:not(.theme-xmas) .modal-btn-danger {
+  min-height: 36px;
+  border-radius: 7px !important;
+  padding: 0.58rem 1.05rem;
+  font-size: 0.68rem;
+}
+
+.link-confirm-modal {
+  --modal-max: 28rem;
+}
+
+.link-confirm-panel {
+  padding: 14px;
+}
+
+.link-confirm-identity,
+.link-confirm-main {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.link-confirm-identity {
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.link-confirm-main {
+  gap: 12px;
+}
+
+.link-confirm-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 229, 0.20);
+  background:
+    radial-gradient(circle at 35% 25%, rgba(0, 255, 229, 0.18), transparent 60%),
+    rgba(3, 8, 18, 0.82);
+  color: var(--arc-cyan);
+  font-family: var(--font-mono);
+  font-weight: 900;
+  box-shadow:
+    inset 0 0 16px rgba(0, 255, 229, 0.045),
+    0 0 22px rgba(0, 255, 229, 0.10);
+}
+
+.link-confirm-icon-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.link-confirm-copyblock {
+  min-width: 0;
+}
+
+.link-confirm-copyblock p,
+.link-confirm-copyblock span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-confirm-copyblock p {
+  margin: 0;
+  color: rgba(236, 245, 255, 0.96);
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.link-confirm-copyblock span {
+  display: block;
+  margin-top: 3px;
+  color: rgba(106, 122, 153, 0.95);
+  font-size: 0.70rem;
+  font-weight: 700;
+}
+
+.link-confirm-pill {
+  flex: 0 0 auto;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 43, 214, 0.24);
+  background: rgba(255, 43, 214, 0.07);
+  color: rgba(255, 226, 252, 0.84);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  padding: 5px 7px;
+}
+
+.link-confirm-url-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(106, 122, 153, 0.22);
+  background: rgba(0, 0, 0, 0.32);
+  padding: 9px;
+}
+
+.link-confirm-url {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: rgba(220, 231, 255, 0.78);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.link-confirm-copy {
+  min-height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 229, 0.22);
+  background: rgba(0, 255, 229, 0.06);
+  color: rgba(230, 241, 255, 0.92);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 0 9px;
+  transition: border-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
+}
+
+.link-confirm-copy:hover {
+  border-color: var(--arc-cyan);
+  color: var(--arc-cyan);
+  box-shadow: 0 0 14px rgba(0, 255, 229, 0.20);
+}
+
+.danger-confirm-modal {
+  border-color: rgba(255, 84, 112, 0.32) !important;
+}
+
+.danger-confirm-modal .modal-title {
+  color: var(--arc-red) !important;
+  text-shadow: 0 0 8px rgba(255, 84, 112, 0.28) !important;
+}
+
+@keyframes modalTerminalPop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes modalArcSweep {
+  from { background-position: top left, bottom right, 0% 0%; }
+  to { background-position: top left, bottom right, -120% 0%; }
+}
+
+@media (max-width: 560px) {
+  html:not(.theme-xmas) .modal-backdrop {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  html:not(.theme-xmas) .modal-card {
+    padding: 46px 16px 16px !important;
+  }
+
+  html:not(.theme-xmas) .modal-header,
+  .link-confirm-identity {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  html:not(.theme-xmas) .modal-actions {
+    justify-content: stretch;
+  }
+
+  html:not(.theme-xmas) .modal-actions > button {
+    flex: 1 1 0;
+  }
+
+  .link-confirm-url-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---------- SPLASH SCREEN ---------- */
 
 html:not(.theme-xmas) .modal-card.splash-card {
@@ -1063,6 +1394,325 @@ html:not(.theme-xmas) .splash-enter-btn {
   letter-spacing: 0.1em;
 }
 
+/* V5 splash polish */
+html:not(.theme-xmas) .splash-card {
+  --modal-max: 48rem;
+}
+
+html:not(.theme-xmas) .splash-card.modal-card {
+  padding: 38px 24px 24px !important;
+}
+
+html:not(.theme-xmas) .splash-shell {
+  min-height: min(460px, calc(100dvh - 8rem));
+  border-radius: 8px;
+  border-color: rgba(0, 255, 229, 0.24);
+  background:
+    radial-gradient(680px 360px at 18% 18%, rgba(0, 255, 229, 0.14), transparent 64%),
+    radial-gradient(620px 340px at 88% 22%, rgba(255, 43, 214, 0.13), transparent 68%),
+    radial-gradient(500px 220px at 50% 100%, rgba(255, 182, 39, 0.055), transparent 70%),
+    rgba(2, 4, 10, 0.72);
+  padding: 14px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    inset 0 0 42px rgba(0, 255, 229, 0.035);
+}
+
+html:not(.theme-xmas) .splash-shell::after {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border-radius: 7px;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0, 255, 229, 0.28), transparent 18%) top left / 90px 1px no-repeat,
+    linear-gradient(180deg, rgba(0, 255, 229, 0.28), transparent 18%) top left / 1px 90px no-repeat,
+    linear-gradient(270deg, rgba(255, 43, 214, 0.22), transparent 18%) bottom right / 90px 1px no-repeat,
+    linear-gradient(0deg, rgba(255, 43, 214, 0.22), transparent 18%) bottom right / 1px 90px no-repeat;
+  opacity: 0.95;
+  z-index: 1;
+}
+
+html:not(.theme-xmas) .splash-topbar {
+  min-height: 34px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 229, 0.13);
+  background: rgba(1, 6, 16, 0.42);
+  padding: 8px 10px;
+}
+
+html:not(.theme-xmas) .splash-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+html:not(.theme-xmas) .splash-brand::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--arc-cyan);
+  box-shadow: var(--arc-glow-cyan);
+}
+
+html:not(.theme-xmas) .splash-display {
+  position: relative;
+  overflow: hidden;
+  min-height: 340px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 255, 229, 0.16);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.016) 1px, transparent 1px),
+    rgba(1, 6, 16, 0.42);
+  background-size: 14px 14px, 14px 14px, 100% 100%;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.016),
+    inset 0 0 34px rgba(0, 255, 229, 0.025);
+}
+
+html:not(.theme-xmas) .splash-display::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 48%, transparent 42%, rgba(0, 0, 0, 0.20) 100%),
+    linear-gradient(90deg, transparent, rgba(0, 255, 229, 0.13), rgba(255, 43, 214, 0.10), transparent) 50% 68% / 80% 1px no-repeat;
+  opacity: 0.8;
+}
+
+.splash-corner {
+  position: absolute;
+  z-index: 2;
+  width: 72px;
+  height: 72px;
+  pointer-events: none;
+}
+
+.splash-corner-tl {
+  left: 12px;
+  top: 12px;
+  border-left: 1px solid rgba(0, 255, 229, 0.35);
+  border-top: 1px solid rgba(0, 255, 229, 0.35);
+}
+
+.splash-corner-br {
+  right: 12px;
+  bottom: 12px;
+  border-right: 1px solid rgba(255, 43, 214, 0.30);
+  border-bottom: 1px solid rgba(255, 43, 214, 0.30);
+}
+
+html:not(.theme-xmas) .splash-stage {
+  position: relative;
+  z-index: 1;
+  height: 340px;
+}
+
+html:not(.theme-xmas) .splash-phase-welcome {
+  justify-content: center;
+  gap: 12px;
+  padding: 26px 116px 22px;
+}
+
+.splash-title-block {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+html:not(.theme-xmas) .splash-kicker {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 43, 214, 0.18);
+  background: rgba(255, 43, 214, 0.045);
+  padding: 5px 9px;
+  font-size: 0.62rem;
+}
+
+html:not(.theme-xmas) .splash-title {
+  position: relative;
+  margin: 0;
+  font-size: clamp(1.55rem, 4vw, 2.35rem);
+}
+
+html:not(.theme-xmas) .splash-title::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: min(280px, 72vw);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 229, 0.55), rgba(255, 43, 214, 0.42), transparent);
+  opacity: 0.75;
+}
+
+html:not(.theme-xmas) .splash-copy {
+  max-width: 39ch;
+  margin: 8px 0 0;
+  color: rgba(220, 231, 255, 0.86);
+}
+
+.splash-readout {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  gap: 7px;
+  min-width: 78px;
+  transform: translateY(-50%);
+  border-radius: 7px;
+  border: 1px solid rgba(0, 255, 229, 0.14);
+  background: rgba(1, 6, 16, 0.48);
+  padding: 10px;
+  text-align: left;
+}
+
+.splash-readout-left {
+  left: 22px;
+}
+
+.splash-readout-right {
+  right: 22px;
+}
+
+.splash-readout span,
+.splash-readout strong {
+  display: block;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.splash-readout span {
+  color: var(--arc-magenta);
+  font-size: 0.56rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.splash-readout strong {
+  color: rgba(230, 241, 255, 0.92);
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+html:not(.theme-xmas) .splash-tags {
+  margin-top: 4px;
+  max-width: 520px;
+}
+
+html:not(.theme-xmas) .splash-actions {
+  margin-top: 4px;
+  gap: 9px;
+}
+
+html:not(.theme-xmas) .splash-enter-btn {
+  min-width: 126px;
+  min-height: 42px;
+  box-shadow:
+    0 0 18px rgba(0, 255, 229, 0.48),
+    0 16px 34px rgba(0, 0, 0, 0.34),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25) !important;
+}
+
+.splash-boot-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.splash-boot-strip span {
+  border-radius: 5px;
+  border: 1px solid rgba(0, 255, 229, 0.18);
+  background: rgba(0, 255, 229, 0.045);
+  color: rgba(210, 255, 248, 0.72);
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  padding: 5px 7px;
+  text-transform: uppercase;
+}
+
+html:not(.theme-xmas) .splash-loader-bars {
+  display: none;
+}
+
+html:not(.theme-xmas) .splash-phase-loading {
+  gap: 14px;
+}
+
+html:not(.theme-xmas) .splash-loader-title {
+  border-radius: 5px;
+  border: 1px solid rgba(0, 255, 229, 0.18);
+  background: rgba(0, 255, 229, 0.045);
+  padding: 6px 10px;
+}
+
+@media (max-width: 720px) {
+  html:not(.theme-xmas) .splash-card.modal-card {
+    padding: 38px 14px 14px !important;
+  }
+
+  html:not(.theme-xmas) .splash-shell {
+    min-height: auto;
+    padding: 10px;
+  }
+
+  html:not(.theme-xmas) .splash-display,
+  html:not(.theme-xmas) .splash-stage {
+    min-height: 420px;
+    height: 420px;
+  }
+
+  html:not(.theme-xmas) .splash-phase-welcome {
+    padding: 26px 18px 20px;
+  }
+
+  .splash-readout {
+    position: static;
+    grid-template-columns: auto auto;
+    justify-content: center;
+    min-width: 0;
+    transform: none;
+    padding: 7px 9px;
+  }
+
+  .splash-readout-left {
+    order: -2;
+  }
+
+  .splash-readout-right {
+    order: -1;
+  }
+
+  .splash-readout span,
+  .splash-readout strong {
+    font-size: 0.58rem;
+  }
+
+  html:not(.theme-xmas) .splash-copy {
+    max-width: 31ch;
+  }
+
+  .splash-boot-strip {
+    max-width: 280px;
+  }
+}
+
 /* ---------- KONAMI GAME OVERLAY ---------- */
 
 html:not(.theme-xmas) .konami-overlay {
@@ -1207,5 +1857,156 @@ html:not(.theme-xmas) .konami-window > .absolute.inset-0.pointer-events-none {
     radial-gradient(circle at top left, rgba(0, 255, 229, 0.18), transparent 60%),
     radial-gradient(circle at bottom right, rgba(255, 43, 214, 0.18), transparent 60%) !important;
   opacity: 0.55;
+}
+
+/* ---------- Mobile comfort pass ---------- */
+
+@media (max-width: 768px) {
+  html:not(.theme-xmas) .modal-backdrop {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  html:not(.theme-xmas) .modal-card {
+    width: 100% !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px);
+    padding: 44px 14px 14px !important;
+  }
+
+  html:not(.theme-xmas) .modal-header {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  html:not(.theme-xmas) .modal-title {
+    font-size: 0.86rem;
+  }
+
+  html:not(.theme-xmas) .modal-text {
+    font-size: 0.70rem;
+  }
+
+  html:not(.theme-xmas) .modal-actions {
+    gap: 9px;
+  }
+
+  html:not(.theme-xmas) .modal-btn-cancel,
+  html:not(.theme-xmas) .modal-btn-save,
+  html:not(.theme-xmas) .modal-btn-danger {
+    min-width: 0;
+    padding-inline: 0.76rem;
+  }
+
+  .gallery-preview-modal {
+    width: 100% !important;
+  }
+
+  .gallery-preview-stage {
+    max-height: 52dvh;
+  }
+
+  .gif-picker-modal form {
+    display: grid !important;
+    grid-template-columns: 1fr;
+  }
+
+  .gif-picker-modal .modal-panel {
+    max-height: 52dvh;
+  }
+
+  .link-confirm-identity {
+    gap: 10px;
+  }
+
+  .link-confirm-pill {
+    align-self: flex-start;
+  }
+
+  html:not(.theme-xmas) .splash-card.modal-card {
+    width: calc(100vw - 24px) !important;
+    padding: 38px 10px 10px !important;
+  }
+
+  html:not(.theme-xmas) .splash-shell {
+    min-height: auto;
+    padding: 9px;
+  }
+
+  html:not(.theme-xmas) .splash-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  html:not(.theme-xmas) .splash-display,
+  html:not(.theme-xmas) .splash-stage {
+    min-height: min(420px, calc(100dvh - 150px));
+    height: min(420px, calc(100dvh - 150px));
+  }
+
+  html:not(.theme-xmas) .splash-phase-welcome {
+    overflow-y: auto;
+    padding: 18px 12px;
+  }
+
+  html:not(.theme-xmas) .splash-title {
+    font-size: clamp(1.1rem, 7vw, 1.55rem);
+  }
+
+  html:not(.theme-xmas) .splash-tags,
+  .splash-boot-strip {
+    gap: 6px;
+  }
+
+  .splash-readout {
+    width: 100%;
+  }
+
+  .splash-corner {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 420px) {
+  html:not(.theme-xmas) .modal-card {
+    max-width: calc(100vw - 16px) !important;
+  }
+
+  html:not(.theme-xmas) .modal-backdrop {
+    padding: 8px;
+  }
+
+  html:not(.theme-xmas) .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  html:not(.theme-xmas) .modal-actions > * {
+    width: 100%;
+  }
+
+  .gallery-preview-actions {
+    flex-direction: column !important;
+  }
+
+  .link-confirm-panel {
+    padding: 11px;
+  }
+
+  .link-confirm-identity,
+  .link-confirm-main {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .link-confirm-url-row {
+    grid-template-columns: 1fr;
+  }
+
+  html:not(.theme-xmas) .splash-display,
+  html:not(.theme-xmas) .splash-stage {
+    min-height: min(450px, calc(100dvh - 132px));
+    height: min(450px, calc(100dvh - 132px));
+  }
 }
 

@@ -158,6 +158,8 @@ export default function Gallery() {
 
   const displayLabel = (fileObj) =>
     fileObj.displayName || fileObj.originalName || fileObj.filename
+  const downloadName = (fileObj) =>
+    fileObj.originalName || fileObj.filename || displayLabel(fileObj)
   const totalSizeKb = files.reduce(
     (sum, f) => sum + ((f.size ?? (f.sizeKB != null ? f.sizeKB * 1024 : 0)) / 1024),
     0,
@@ -276,7 +278,7 @@ export default function Gallery() {
         <ModalPortal>
           <div className="modal-backdrop" onClick={closePreview}>
             <div
-              className="modal-card modal-fit"
+              className="modal-card modal-fit gallery-preview-modal"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="modal-header">
@@ -333,7 +335,28 @@ export default function Gallery() {
                   </div>
                 </div>
               </div>
-              <div className="modal-actions">
+              <div className="modal-actions gallery-preview-actions">
+                <a
+                  href={previewFile.url}
+                  download={downloadName(previewFile)}
+                  className="modal-btn-save gallery-download-btn"
+                >
+                  <svg
+                    className="gallery-download-icon"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M10 3.5v8.1m0 0 3.2-3.2M10 11.6 6.8 8.4M4.5 13.2v1.9c0 .8.6 1.4 1.4 1.4h8.2c.8 0 1.4-.6 1.4-1.4v-1.9"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                    />
+                  </svg>
+                  Descargar
+                </a>
                 <button
                   type="button"
                   onClick={closePreview}
@@ -352,7 +375,7 @@ export default function Gallery() {
         <ModalPortal>
           <div className="modal-backdrop" onClick={cancelUploadModal}>
             <div
-              className="modal-card modal-lg"
+              className="modal-card modal-lg gallery-upload-modal"
               onClick={(e) => e.stopPropagation()}
             >
             <div className="modal-header">

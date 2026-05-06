@@ -5,6 +5,7 @@ const formatDisplayName = (name) => (name ? String(name).replace(/#0$/, '') : ''
 const DISCORD_FALLBACK_AVATAR = 'https://cdn.discordapp.com/embed/avatars/0.png'
 
 const INTRO_TAGS = ['bots', 'projects', 'night-coding', 'pixel-vibes']
+const BOOT_STATS = ['sysbot:ready', 'discord:live', 'lofi:on']
 
 export default function Splash({ onEnter }) {
   const [closing, setClosing] = useState(false)
@@ -82,18 +83,22 @@ export default function Splash({ onEnter }) {
               </span>
             </header>
 
-            <div className="splash-stage">
-              <LoadingContent
-                phase={phase}
-                avatarUrl={me?.avatarUrl || null}
-                isLoggedIn={Boolean(me?.id)}
-                displayName={displayName}
-              />
-              <WelcomeContent
-                phase={phase}
-                onEnter={handleEnter}
-                displayName={displayName}
-              />
+            <div className="splash-display">
+              <span className="splash-corner splash-corner-tl" aria-hidden="true" />
+              <span className="splash-corner splash-corner-br" aria-hidden="true" />
+              <div className="splash-stage">
+                <LoadingContent
+                  phase={phase}
+                  avatarUrl={me?.avatarUrl || null}
+                  isLoggedIn={Boolean(me?.id)}
+                  displayName={displayName}
+                />
+                <WelcomeContent
+                  phase={phase}
+                  onEnter={handleEnter}
+                  displayName={displayName}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -176,15 +181,26 @@ function WelcomeContent({ phase, onEnter, displayName }) {
           : 'pointer-events-none opacity-0 translate-y-3')
       }
     >
-      <p className="splash-kicker">~/personal $</p>
-      <h1 className="splash-title">
-        <span className="bg-gradient-to-r from-fuchsia-300 via-rose-300 to-sky-300 bg-clip-text text-transparent">
-          {displayName}
-        </span>
-      </h1>
-      <p className="splash-copy">
-        Personal hub for projects, links and a live discord feed.
-      </p>
+      <div className="splash-readout splash-readout-left" aria-hidden="true">
+        <span>init</span>
+        <strong>03:00</strong>
+      </div>
+      <div className="splash-readout splash-readout-right" aria-hidden="true">
+        <span>access</span>
+        <strong>open</strong>
+      </div>
+
+      <div className="splash-title-block">
+        <p className="splash-kicker">~/personal $ launch</p>
+        <h1 className="splash-title">
+          <span className="bg-gradient-to-r from-fuchsia-300 via-rose-300 to-sky-300 bg-clip-text text-transparent">
+            {displayName}
+          </span>
+        </h1>
+        <p className="splash-copy">
+          Personal hub for projects, links and a live discord feed.
+        </p>
+      </div>
 
       <div className="splash-tags">
         {INTRO_TAGS.map((tag) => (
@@ -205,6 +221,12 @@ function WelcomeContent({ phase, onEnter, displayName }) {
         <p className="splash-hint">
           {'// tip: try the konami code once inside.'}
         </p>
+      </div>
+
+      <div className="splash-boot-strip" aria-hidden="true">
+        {BOOT_STATS.map((stat) => (
+          <span key={stat}>{stat}</span>
+        ))}
       </div>
     </section>
   )

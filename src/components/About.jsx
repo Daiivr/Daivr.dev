@@ -5,20 +5,55 @@ export default function About() {
     <section id="about" className="section-shell">
       <div className="grid gap-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         {/* Sobre mí */}
-        <div className="section-card">
-          <h2 className="text-sm font-semibold text-slate-100">about.md</h2>
-          <p className="code-meta mt-1"><span className="dot" />readme · 2 paragraphs · utf-8</p>
-          <p className="mt-3 text-sm text-slate-300 leading-relaxed">
-            Soy <span className="text-sky-300">Dai</span>: dev full-stack basada en Alaska,
-            con un café frío al lado y demasiadas pestañas abiertas. Construyo bots
-            de Discord, herramientas SysBot y webs mimadas — me gusta romper cosas
-            con código y luego dejarlas mejor que como las encontré.
-          </p>
-          <p className="mt-2 text-sm text-slate-300 leading-relaxed">
-            EN/ES. Grindo XP en Visual Studio entre anime y lo-fi, casi siempre
-            perdida en Fallout, Minecraft, VRChat o DBD. Esta página es mi hub:
-            proyectos, links, screenshots y presencia de Discord en vivo.
-          </p>
+        <div className="section-card about-card">
+          <div className="about-card-header">
+            <div>
+              <h2 className="section-title">about.md</h2>
+              <p className="about-card-subtitle">
+                <span className="dot" /> readme · 2 paragraphs · utf-8
+              </p>
+            </div>
+            <span className="about-card-status">
+              <span aria-hidden="true" />
+              active
+            </span>
+          </div>
+
+          <div className="about-copy-panel">
+            <p>
+              Soy <span>Dai</span>: dev full-stack basada en Alaska, con un café
+              frío al lado y demasiadas pestañas abiertas. Construyo bots de
+              Discord, herramientas SysBot y webs mimadas; me gusta romper cosas
+              con código y luego dejarlas mejor que como las encontré.
+            </p>
+            <p>
+              EN/ES. Grindo XP en Visual Studio entre anime y lo-fi, casi siempre
+              perdida en Fallout, Minecraft, VRChat o DBD. Esta página es mi hub:
+              proyectos, links, screenshots y presencia de Discord en vivo.
+            </p>
+          </div>
+
+          <div className="about-signal-grid" aria-label="About quick facts">
+            <div className="about-signal-card">
+              <span>focus</span>
+              <strong>bots + tools</strong>
+            </div>
+            <div className="about-signal-card">
+              <span>runtime</span>
+              <strong>night build</strong>
+            </div>
+            <div className="about-signal-card">
+              <span>mode</span>
+              <strong>lo-fi loop</strong>
+            </div>
+          </div>
+
+          <div className="about-footer-panel">
+            <div className="about-footer-top">
+              <span>session.trace</span>
+              <span>stable</span>
+            </div>
+          </div>
         </div>
 
         {/* Mini ficha */}

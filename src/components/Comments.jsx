@@ -1122,7 +1122,7 @@ const handleGifSelect = (url) => {
         <ModalPortal>
           <div className="modal-backdrop" onClick={closeGifPicker}>
             <div
-              className="modal-card modal-xl"
+              className="modal-card modal-xl gif-picker-modal"
               onClick={(event) => event.stopPropagation()}
             >
             <div className="modal-header">
@@ -1213,7 +1213,7 @@ const handleGifSelect = (url) => {
       {confirmDeleteId && (
         <ModalPortal>
           <div className="modal-backdrop" onClick={closeDeleteConfirm}>
-            <div className="modal-card modal-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card modal-sm danger-confirm-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
                 <h3 className="modal-title">¿Eliminar este comentario?</h3>
