@@ -1859,154 +1859,26 @@ html:not(.theme-xmas) .konami-window > .absolute.inset-0.pointer-events-none {
   opacity: 0.55;
 }
 
-/* ---------- Mobile comfort pass ---------- */
+/* ---------- Mobile optimization pass: preserve layout, reduce work ---------- */
 
 @media (max-width: 768px) {
   html:not(.theme-xmas) .modal-backdrop {
-    align-items: flex-start;
-    padding: 12px;
+    backdrop-filter: blur(10px) saturate(1.02) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(1.02) !important;
   }
 
-  html:not(.theme-xmas) .modal-card {
-    width: 100% !important;
-    max-width: calc(100vw - 24px) !important;
+  html:not(.theme-xmas) .modal-card::after,
+  html:not(.theme-xmas) .splash-aurora {
+    animation: none !important;
+  }
+
+  html:not(.theme-xmas) .modal-card,
+  html:not(.theme-xmas) .splash-card.modal-card {
     max-height: calc(100dvh - 24px);
-    padding: 44px 14px 14px !important;
-  }
-
-  html:not(.theme-xmas) .modal-header {
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  html:not(.theme-xmas) .modal-title {
-    font-size: 0.86rem;
-  }
-
-  html:not(.theme-xmas) .modal-text {
-    font-size: 0.70rem;
-  }
-
-  html:not(.theme-xmas) .modal-actions {
-    gap: 9px;
-  }
-
-  html:not(.theme-xmas) .modal-btn-cancel,
-  html:not(.theme-xmas) .modal-btn-save,
-  html:not(.theme-xmas) .modal-btn-danger {
-    min-width: 0;
-    padding-inline: 0.76rem;
-  }
-
-  .gallery-preview-modal {
-    width: 100% !important;
-  }
-
-  .gallery-preview-stage {
-    max-height: 52dvh;
-  }
-
-  .gif-picker-modal form {
-    display: grid !important;
-    grid-template-columns: 1fr;
   }
 
   .gif-picker-modal .modal-panel {
-    max-height: 52dvh;
-  }
-
-  .link-confirm-identity {
-    gap: 10px;
-  }
-
-  .link-confirm-pill {
-    align-self: flex-start;
-  }
-
-  html:not(.theme-xmas) .splash-card.modal-card {
-    width: calc(100vw - 24px) !important;
-    padding: 38px 10px 10px !important;
-  }
-
-  html:not(.theme-xmas) .splash-shell {
-    min-height: auto;
-    padding: 9px;
-  }
-
-  html:not(.theme-xmas) .splash-topbar {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  html:not(.theme-xmas) .splash-display,
-  html:not(.theme-xmas) .splash-stage {
-    min-height: min(420px, calc(100dvh - 150px));
-    height: min(420px, calc(100dvh - 150px));
-  }
-
-  html:not(.theme-xmas) .splash-phase-welcome {
-    overflow-y: auto;
-    padding: 18px 12px;
-  }
-
-  html:not(.theme-xmas) .splash-title {
-    font-size: clamp(1.1rem, 7vw, 1.55rem);
-  }
-
-  html:not(.theme-xmas) .splash-tags,
-  .splash-boot-strip {
-    gap: 6px;
-  }
-
-  .splash-readout {
-    width: 100%;
-  }
-
-  .splash-corner {
-    width: 48px;
-    height: 48px;
-  }
-}
-
-@media (max-width: 420px) {
-  html:not(.theme-xmas) .modal-card {
-    max-width: calc(100vw - 16px) !important;
-  }
-
-  html:not(.theme-xmas) .modal-backdrop {
-    padding: 8px;
-  }
-
-  html:not(.theme-xmas) .modal-actions {
-    flex-direction: column-reverse;
-  }
-
-  html:not(.theme-xmas) .modal-actions > * {
-    width: 100%;
-  }
-
-  .gallery-preview-actions {
-    flex-direction: column !important;
-  }
-
-  .link-confirm-panel {
-    padding: 11px;
-  }
-
-  .link-confirm-identity,
-  .link-confirm-main {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .link-confirm-url-row {
-    grid-template-columns: 1fr;
-  }
-
-  html:not(.theme-xmas) .splash-display,
-  html:not(.theme-xmas) .splash-stage {
-    min-height: min(450px, calc(100dvh - 132px));
-    height: min(450px, calc(100dvh - 132px));
+    max-height: min(20rem, 54dvh);
   }
 }
 

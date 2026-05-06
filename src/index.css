@@ -6557,215 +6557,44 @@ html:not(.theme-xmas) .sidebar-credit-pill {
   }
 }
 
-/* ---------- Mobile comfort pass ---------- */
+/* ---------- Mobile optimization pass: preserve layout, reduce work ---------- */
 
 @media (max-width: 768px) {
-  html {
-    scroll-padding-top: 96px;
-  }
-
   body {
     background-attachment: scroll;
   }
 
-  .app-topbar {
-    backdrop-filter: blur(14px) saturate(1.05);
-  }
-
-  .app-topbar .max-w-6xl > .flex {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .app-topbar a[href="#home"] {
-    width: fit-content;
-  }
-
-  .nav-rail {
-    display: flex !important;
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .nav-rail::-webkit-scrollbar {
+  .cursor-aura,
+  .signal-sweep {
     display: none;
   }
 
-  html:not(.theme-xmas) .nav-rail {
-    border-radius: 9px;
-    padding: 5px;
+  .crt-overlay {
+    opacity: 0.30;
   }
 
-  .nav-tab {
-    flex: 0 0 auto;
-    min-height: 34px;
-    padding-inline: 12px;
+  html:not(.theme-xmas) .hero-card,
+  html:not(.theme-xmas) .section-card,
+  html:not(.theme-xmas) .bento-card,
+  html:not(.theme-xmas) .gallery-tile,
+  html:not(.theme-xmas) .link-card {
+    will-change: auto;
   }
 
-  .section-shell,
-  #discord,
-  #gallery {
-    padding-inline: 12px !important;
-    padding-block: 18px !important;
+  html:not(.theme-xmas) .hero-card {
+    transform: translate3d(0, var(--reveal-y, 0px), 0) scale(var(--reveal-scale, 1));
+    transform-style: flat;
   }
 
-  .section-card,
-  .hero-card,
-  .bento-card {
-    border-radius: 12px !important;
-    padding: 16px !important;
+  html:not(.theme-xmas) .hero-card > .hero-card-content {
+    transform: none;
   }
 
-  .hero-grid {
-    gap: 14px;
-  }
-
-  .hero-card-content {
-    min-height: auto !important;
-    gap: 18px;
-  }
-
-  .hero-card-content > .flex.items-start {
-    align-items: center;
-    gap: 12px;
-  }
-
-  .hero-avatar-wrap img {
-    width: 54px !important;
-    height: 54px !important;
-  }
-
-  html:not(.theme-xmas) .hero-title {
-    font-size: clamp(0.98rem, 5vw, 1.28rem);
-    line-height: 1.32;
-  }
-
-  .terminal-micro-row,
-  .hero-console-strip,
-  .terminal-readout-grid {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .terminal-micro-row::-webkit-scrollbar,
-  .hero-console-strip::-webkit-scrollbar,
-  .terminal-readout-grid::-webkit-scrollbar {
-    display: none;
-  }
-
-  .hero-center-stack {
-    max-width: 100% !important;
-  }
-
-  .hero-tagline {
-    font-size: 0.74rem !important;
-    line-height: 1.62 !important;
-    text-align: left !important;
-  }
-
-  .hero-system-panel {
-    margin-top: 14px;
-    padding: 10px;
-  }
-
-  .hero-telemetry-graph {
-    height: 86px;
-  }
-
-  .hero-meta-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  .chip,
-  .mini-chip,
-  .tag-chip {
-    min-height: 32px;
-    font-size: 0.58rem !important;
-    padding-inline: 7px !important;
-  }
-
-  .about-copy-panel {
-    padding: 14px;
-  }
-
-  .about-copy-panel p {
-    font-size: 0.78rem;
-    line-height: 1.62;
-  }
-
-  .profile-grid,
-  .about-signal-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .links-panel-header,
-  .comments-panel-header,
-  .gallery-panel-header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .links-panel-status,
-  .gallery-panel-stats,
-  .comments-meta {
-    max-width: 100%;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .links-panel-status::-webkit-scrollbar,
-  .gallery-panel-stats::-webkit-scrollbar,
-  .comments-meta::-webkit-scrollbar {
-    display: none;
-  }
-
-  .links-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .link-tile-anchor {
-    min-height: 60px;
-    grid-template-columns: 28px 42px minmax(0, 1fr);
-  }
-
-  .link-tile-action {
-    display: none;
-  }
-
-  .discord-card-shell {
-    gap: 14px;
-  }
-
-  .discord-profile-panel,
-  .discord-activity-panel {
-    padding: 14px;
-  }
-
-  .discord-avatar-stage {
-    transform: scale(0.92);
-    transform-origin: center;
-  }
-
-  .discord-activity-card,
-  .discord-spotify-card {
-    grid-template-columns: 64px minmax(0, 1fr);
-    gap: 12px;
-  }
-
-  .discord-activity-art,
-  .discord-spotify-art {
-    width: 64px;
-    height: 64px;
+  .gallery-image,
+  .discord-avatar,
+  .discord-avatar-decoration,
+  .traffic-img {
+    content-visibility: auto;
   }
 
   .gallery-grid {
@@ -6773,112 +6602,29 @@ html:not(.theme-xmas) .sidebar-credit-pill {
     gap: 12px;
   }
 
-  .gallery-tile {
-    border-radius: 10px;
-  }
-
-  .gallery-caption {
-    min-height: 30px;
-    padding: 7px 8px;
-  }
-
-  .gallery-caption span:first-child {
-    font-size: 0.56rem;
-  }
-
-  .comments-userbar,
-  .comments-auth-zone,
-  .comments-login-btn,
-  .comments-secondary-btn {
-    width: 100%;
-  }
-
-  .comments-login-btn,
-  .comments-secondary-btn {
-    justify-content: center;
-  }
-
-  .comment-card {
-    gap: 10px;
-  }
-
-  .music-control-shell {
-    right: 12px !important;
-    bottom: 12px !important;
-  }
-
   .music-control-panel {
-    right: 0;
-    width: min(340px, calc(100vw - 24px));
-    max-height: calc(100dvh - 96px);
+    max-height: calc(100dvh - 88px);
     overflow-y: auto;
-  }
-
-  .arc-toggle-lofi .arc-toggle-inner {
-    min-height: 34px;
-    padding: 0.34rem 0.56rem !important;
   }
 }
 
-@media (max-width: 430px) {
-  .app-main {
-    padding-inline: 10px;
-    padding-top: 12px;
-  }
-
-  .section-shell,
-  #discord,
-  #gallery {
-    padding-inline: 4px !important;
-  }
-
-  .section-card,
-  .hero-card,
-  .bento-card {
-    padding: 13px !important;
-  }
-
-  .brand-orb {
-    --orb-size: 26px;
-    --aura: 10px;
-  }
-
-  .nav-tab {
-    font-size: 0.68rem !important;
-    padding-inline: 10px;
-  }
-
-  .hero-card-content > .flex.items-start {
-    align-items: flex-start;
-  }
-
-  .hero-avatar-wrap img {
-    width: 48px !important;
-    height: 48px !important;
-  }
-
-  .hero-meta-grid,
+@media (max-width: 340px) {
   .gallery-grid {
     grid-template-columns: 1fr;
   }
+}
 
-  .hero-system-panel {
-    display: none;
+@media (hover: none) and (pointer: coarse) {
+  html:not(.theme-xmas) .section-card:hover,
+  html:not(.theme-xmas) .bento-card:hover,
+  html:not(.theme-xmas) .hero-card:hover,
+  html:not(.theme-xmas) .link-card:hover,
+  html:not(.theme-xmas) .gallery-tile:hover {
+    transform: none;
   }
 
-  .discord-activity-card,
-  .discord-spotify-card {
-    grid-template-columns: 1fr;
-  }
-
-  .discord-activity-art,
-  .discord-spotify-art {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-  }
-
-  .music-control-panel {
-    width: calc(100vw - 20px);
+  .gallery-hud,
+  .gallery-corner {
+    transition: none;
   }
 }
