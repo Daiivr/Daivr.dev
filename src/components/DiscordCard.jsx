@@ -54,6 +54,7 @@ export default function DiscordCard() {
   const [now, setNow] = useState(Date.now())
   const [gameImageUrl, setGameImageUrl] = useState(null)
   const [badgeTooltip, setBadgeTooltip] = useState(null)
+  const [streak, setStreak] = useState(null)
 
   // WebSocket Lanyard
   useEffect(() => {
@@ -105,6 +106,25 @@ export default function DiscordCard() {
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(id)
+  }, [])
+
+  // streak local (server-tracked vía Lanyard polling)
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      try {
+        const res = await axios.get('/api/discord-streak')
+        if (!cancelled) setStreak(res.data || null)
+      } catch (err) {
+        if (!cancelled) setStreak(null)
+      }
+    }
+    load()
+    const id = setInterval(load, 60_000)
+    return () => {
+      cancelled = true
+      clearInterval(id)
+    }
   }, [])
 
   const user = data?.discord_user
@@ -409,6 +429,19 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
                     Jugando hace {fallbackElapsed || gameSessionLabel}
                   </div>
                 )}
+                {streak?.alive &&
+                  streak.streak > 1 &&
+                  streak.game === mainActivity.name && (
+                    <div className="discord-activity-streak-row">
+                      <span
+                        className="discord-streak-chip"
+                        title={`Has jugado ${mainActivity.name} ${streak.streak} días seguidos`}
+                      >
+                        <span aria-hidden="true">⚡</span>
+                        {streak.streak}x Streak
+                      </span>
+                    </div>
+                  )}
               </div>
             </div>
           )}

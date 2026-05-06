@@ -11,6 +11,10 @@ const { router: galleryRouter } = require('./routes/gallery')
 const { router: linksRouter } = require('./routes/links')
 const { router: visitsRouter } = require('./routes/visits')
 const { router: siteSettingsRouter } = require('./routes/siteSettings')
+const {
+  router: discordStreakRouter,
+  startPoller: startStreakPoller,
+} = require('./routes/discordStreak')
 const { getUserFromRequest } = require('./utils/session')
 
 const app = express()
@@ -98,6 +102,7 @@ app.use('/api/gallery', galleryRouter)
 app.use('/api/links', linksRouter)
 app.use('/api/visits', visitsRouter)
 app.use('/api/site-settings', siteSettingsRouter)
+app.use('/api/discord-streak', discordStreakRouter)
 
 
 app.get('/api/tenor-search', async (req, res) => {
@@ -220,4 +225,5 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log('API server running on http://localhost:' + PORT)
+  startStreakPoller()
 })
