@@ -5595,7 +5595,7 @@ html:not(.theme-xmas) .nav-tab.is-active::after {
   position: absolute;
   top: -8px;
   left: 14px;
-  z-index: 2;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: 4px;
