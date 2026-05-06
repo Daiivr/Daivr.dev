@@ -1,291 +1,238 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 
-/**
- * Fireflies background
- * - Luciérnagas que aparecen, se mueven y desaparecen con fade suave
- * - Huyen del mouse cuando este se acerca
- * - Colores tomados del degradado de fondo (cyan / rosa) para encajar con el tema
- */
+const PALETTE = [
+  {
+    core: 'rgba(0, 255, 229, 0.95)',
+    halo: 'rgba(0, 255, 229, 0.34)',
+    trail: 'rgba(0, 255, 229, 0.26)',
+  },
+  {
+    core: 'rgba(255, 43, 214, 0.95)',
+    halo: 'rgba(255, 43, 214, 0.30)',
+    trail: 'rgba(255, 43, 214, 0.24)',
+  },
+  {
+    core: 'rgba(255, 182, 39, 0.9)',
+    halo: 'rgba(255, 182, 39, 0.24)',
+    trail: 'rgba(255, 182, 39, 0.20)',
+  },
+]
 
-let FIREFLY_ID = 0
-
-function createFirefly(viewport, now) {
-  const w = viewport.w || window.innerWidth || 0
-  const h = viewport.h || window.innerHeight || 0
-  const palette = [
-    {
-      core: 'rgba(0, 255, 229, 0.95)',
-      halo: 'rgba(0, 255, 229, 0.58)',
-      trail: 'rgba(0, 255, 229, 0.55)',
-    },
-    {
-      core: 'rgba(255, 43, 214, 0.95)',
-      halo: 'rgba(255, 43, 214, 0.50)',
-      trail: 'rgba(255, 43, 214, 0.46)',
-    },
-    {
-      core: 'rgba(255, 182, 39, 0.92)',
-      halo: 'rgba(255, 182, 39, 0.36)',
-      trail: 'rgba(255, 182, 39, 0.38)',
-    },
-  ]
-  const color = palette[Math.floor(Math.random() * palette.length)]
-
-  // vida más larga para que el fade se note (ms)
-  const life = 24000 + Math.random() * 18000 // 24–42s
-
+function createFirefly(width, height, now) {
+  const color = PALETTE[Math.floor(Math.random() * PALETTE.length)]
   return {
-    id: `firefly-${FIREFLY_ID++}`,
-    x: Math.random() * w,
-    y: Math.random() * h,
-    // movimiento lento y suave
-    // movimiento más lento y flotante
-    vx: (Math.random() - 0.3) * 0.2,
-    vy: (Math.random() - 0.3) * 0.2,
-    size: 1.2 + Math.random() * 1.8,
-    life,
-    createdAt: now,
-    // parpadeo suave (se usa en CSS)
-    flicker: 7 + Math.random() * 4,
-    delay: Math.random() * -8,
-    alpha: 0,
-    progress: 0,
-    core: color.core,
-    halo: color.halo,
-    trail: color.trail,
-    trailLength: 18 + Math.random() * 32,
-    trailAngle: Math.random() * 360,
+    x: Math.random() * width,
+    y: Math.random() * height,
+    vx: (Math.random() - 0.45) * 0.12,
+    vy: (Math.random() - 0.45) * 0.12,
+    size: 1.3 + Math.random() * 2.1,
+    life: 26000 + Math.random() * 18000,
+    createdAt: now - Math.random() * 12000,
+    flickerOffset: Math.random() * Math.PI * 2,
+    trailLength: 16 + Math.random() * 30,
+    color,
   }
-}
-
-function updateFireflies(prev, { timestamp, dtFactor, viewport, mouse, count }) {
-  const maxSpeed = 0.10
-  const wanderStrength = 0.004 // qué tanto cambian de dirección
-  const mouseRadius = 120
-  const mouseRadiusSq = mouseRadius * mouseRadius
-  const repelStrength = 0.06
-
-  const updated = []
-
-  for (const f of prev) {
-    const age = timestamp - f.createdAt
-
-    // si ya terminó su vida lo dejamos ir (se repondrá luego)
-    if (age >= f.life) {
-      continue
-    }
-
-    let progress = age / f.life
-    if (progress < 0) progress = 0
-    if (progress > 1) progress = 1
-
-    // fade in / fade out muy suave según la vida
-    let alpha
-    if (progress < 0.25) {
-      // 0 → 0.25 de la vida: aparecer
-      alpha = progress / 0.25
-    } else if (progress > 0.75) {
-      // 0.75 → 1: desaparecer
-      alpha = (1 - progress) / 0.25
-    } else {
-      alpha = 1
-    }
-
-    let { x, y, vx, vy } = f
-
-    // repulsión del mouse
-    if (mouse.x != null && mouse.y != null) {
-      const dx = x - mouse.x
-      const dy = y - mouse.y
-      const distSq = dx * dx + dy * dy
-
-      if (distSq > 0.0001 && distSq < mouseRadiusSq) {
-        const dist = Math.sqrt(distSq)
-        const force = (mouseRadiusSq - distSq) / mouseRadiusSq
-        vx += (dx / dist) * force * repelStrength
-        vy += (dy / dist) * force * repelStrength
-      }
-    }
-
-    // pequeño movimiento aleatorio para que no sigan una línea recta
-    vx += (Math.random() - 0.5) * wanderStrength
-    vy += (Math.random() - 0.5) * wanderStrength
-
-    // limitar velocidad máxima
-    const speed = Math.hypot(vx, vy)
-    if (speed > maxSpeed) {
-      vx = (vx / speed) * maxSpeed
-      vy = (vy / speed) * maxSpeed
-    }
-
-    // aplicar movimiento (dtFactor hace que se vean suaves aunque baje el FPS)
-    const speedScale = 15 // velocidad global más lenta
-    x += vx * dtFactor * speedScale
-    y += vy * dtFactor * speedScale
-
-    const w = viewport.w || window.innerWidth || 0
-    const h = viewport.h || window.innerHeight || 0
-
-    // envolver bordes para que nunca desaparezcan por salirse de pantalla
-    const margin = 40
-    if (x < -margin) x = w + margin
-    else if (x > w + margin) x = -margin
-    if (y < -margin) y = h + margin
-    else if (y > h + margin) y = -margin
-
-    updated.push({
-      ...f,
-      x,
-      y,
-      vx,
-      vy,
-      alpha,
-      progress,
-    })
-  }
-
-  // crear nuevas para mantener siempre el mismo número
-  const missing = Math.max(0, count - updated.length)
-  const now = timestamp
-  for (let i = 0; i < missing; i++) {
-    updated.push(createFirefly(viewport, now))
-  }
-
-  return updated
 }
 
 export default function Fireflies() {
-  const [fireflies, setFireflies] = useState([])
-  const [count, setCount] = useState(24)
-  const mouseRef = useRef({ x: null, y: null })
-  const viewportRef = useRef({ w: 0, h: 0 })
-  const lastTimeRef = useRef(null)
+  const canvasRef = useRef(null)
 
-  // Performance: en mobile bajamos el conteo; si el user tiene "reduce motion", las apagamos.
   useEffect(() => {
-    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
-    const compute = () => {
-      if (mq && mq.matches) {
-        setCount(0)
-        return
-      }
-      const w = window.innerWidth || 1024
-      const next = w < 420 ? 16 : w < 768 ? 24 : 34
-      setCount(next)
+    const canvas = canvasRef.current
+    if (!canvas) return undefined
+
+    const motionQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+    if (motionQuery?.matches) return undefined
+
+    const ctx = canvas.getContext('2d', { alpha: true })
+    if (!ctx) return undefined
+
+    const fireflies = []
+    const mouse = { x: null, y: null }
+    const viewport = { width: 0, height: 0, dpr: 1, count: 0 }
+    let rafId = 0
+    let lastFrame = performance.now()
+    let lastDraw = 0
+    let scrollingUntil = 0
+
+    const computeCount = () => {
+      const width = window.innerWidth || 1024
+      if (width < 420) return 10
+      if (width < 768) return 16
+      return 24
     }
 
-    compute()
-    window.addEventListener('resize', compute)
-    mq?.addEventListener?.('change', compute)
+    const resize = () => {
+      viewport.width = window.innerWidth || 1
+      viewport.height = window.innerHeight || 1
+      viewport.dpr = Math.min(window.devicePixelRatio || 1, 1.5)
+      viewport.count = computeCount()
+
+      canvas.width = Math.ceil(viewport.width * viewport.dpr)
+      canvas.height = Math.ceil(viewport.height * viewport.dpr)
+      canvas.style.width = `${viewport.width}px`
+      canvas.style.height = `${viewport.height}px`
+      ctx.setTransform(viewport.dpr, 0, 0, viewport.dpr, 0, 0)
+
+      const now = performance.now()
+      while (fireflies.length < viewport.count) {
+        fireflies.push(createFirefly(viewport.width, viewport.height, now))
+      }
+      fireflies.length = viewport.count
+    }
+
+    const handlePointerMove = (event) => {
+      mouse.x = event.clientX
+      mouse.y = event.clientY
+    }
+
+    const clearMouse = () => {
+      mouse.x = null
+      mouse.y = null
+    }
+
+    const markScrolling = () => {
+      scrollingUntil = performance.now() + 180
+    }
+
+    const updateFirefly = (firefly, now, dtFactor) => {
+      const age = now - firefly.createdAt
+      if (age >= firefly.life) {
+        Object.assign(firefly, createFirefly(viewport.width, viewport.height, now))
+      }
+
+      const progress = Math.min(Math.max((now - firefly.createdAt) / firefly.life, 0), 1)
+      let alpha = 1
+      if (progress < 0.25) alpha = progress / 0.25
+      if (progress > 0.75) alpha = (1 - progress) / 0.25
+
+      if (mouse.x != null && mouse.y != null) {
+        const dx = firefly.x - mouse.x
+        const dy = firefly.y - mouse.y
+        const distSq = dx * dx + dy * dy
+        const radiusSq = 120 * 120
+        if (distSq > 0.001 && distSq < radiusSq) {
+          const dist = Math.sqrt(distSq)
+          const force = (radiusSq - distSq) / radiusSq
+          firefly.vx += (dx / dist) * force * 0.035
+          firefly.vy += (dy / dist) * force * 0.035
+        }
+      }
+
+      firefly.vx += (Math.random() - 0.5) * 0.0025
+      firefly.vy += (Math.random() - 0.5) * 0.0025
+
+      const speed = Math.hypot(firefly.vx, firefly.vy)
+      if (speed > 0.085) {
+        firefly.vx = (firefly.vx / speed) * 0.085
+        firefly.vy = (firefly.vy / speed) * 0.085
+      }
+
+      firefly.x += firefly.vx * dtFactor * 15
+      firefly.y += firefly.vy * dtFactor * 15
+
+      const margin = 42
+      if (firefly.x < -margin) firefly.x = viewport.width + margin
+      else if (firefly.x > viewport.width + margin) firefly.x = -margin
+      if (firefly.y < -margin) firefly.y = viewport.height + margin
+      else if (firefly.y > viewport.height + margin) firefly.y = -margin
+
+      return alpha
+    }
+
+    const drawFirefly = (firefly, alpha, now) => {
+      const flicker = 0.72 + Math.sin(now / 850 + firefly.flickerOffset) * 0.18
+      const opacity = Math.max(0, alpha * flicker)
+      const radius = firefly.size * 2.5
+      const angle = Math.atan2(firefly.vy, firefly.vx)
+      const trailX = Math.cos(angle) * firefly.trailLength
+      const trailY = Math.sin(angle) * firefly.trailLength
+
+      const trail = ctx.createLinearGradient(
+        firefly.x - trailX,
+        firefly.y - trailY,
+        firefly.x,
+        firefly.y,
+      )
+      trail.addColorStop(0, 'rgba(0, 0, 0, 0)')
+      trail.addColorStop(1, firefly.color.trail)
+      ctx.globalAlpha = opacity * 0.6
+      ctx.strokeStyle = trail
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(firefly.x - trailX, firefly.y - trailY)
+      ctx.lineTo(firefly.x, firefly.y)
+      ctx.stroke()
+
+      const glow = ctx.createRadialGradient(
+        firefly.x,
+        firefly.y,
+        0,
+        firefly.x,
+        firefly.y,
+        radius * 5,
+      )
+      glow.addColorStop(0, firefly.color.core)
+      glow.addColorStop(0.22, firefly.color.halo)
+      glow.addColorStop(1, 'rgba(0, 0, 0, 0)')
+      ctx.globalAlpha = opacity
+      ctx.fillStyle = glow
+      ctx.beginPath()
+      ctx.arc(firefly.x, firefly.y, radius * 5, 0, Math.PI * 2)
+      ctx.fill()
+
+      ctx.globalAlpha = opacity
+      ctx.fillStyle = firefly.color.core
+      ctx.beginPath()
+      ctx.arc(firefly.x, firefly.y, Math.max(1, radius * 0.45), 0, Math.PI * 2)
+      ctx.fill()
+    }
+
+    const tick = (now) => {
+      const dt = now - lastFrame
+      lastFrame = now
+
+      const targetFrameMs = now < scrollingUntil ? 1000 / 12 : 1000 / 24
+      if (now - lastDraw >= targetFrameMs) {
+        const dtFactor = Math.min(Math.max(dt / 16.67, 0.4), 2.2)
+        ctx.clearRect(0, 0, viewport.width, viewport.height)
+        ctx.globalCompositeOperation = 'lighter'
+
+        for (const firefly of fireflies) {
+          const alpha = updateFirefly(firefly, now, dtFactor)
+          drawFirefly(firefly, alpha, now)
+        }
+
+        ctx.globalAlpha = 1
+        ctx.globalCompositeOperation = 'source-over'
+        lastDraw = now
+      }
+
+      rafId = requestAnimationFrame(tick)
+    }
+
+    resize()
+    rafId = requestAnimationFrame(tick)
+
+    window.addEventListener('resize', resize)
+    window.addEventListener('pointermove', handlePointerMove, { passive: true })
+    window.addEventListener('pointerleave', clearMouse)
+    window.addEventListener('scroll', markScrolling, { passive: true })
 
     return () => {
-      window.removeEventListener('resize', compute)
-      mq?.removeEventListener?.('change', compute)
+      cancelAnimationFrame(rafId)
+      window.removeEventListener('resize', resize)
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerleave', clearMouse)
+      window.removeEventListener('scroll', markScrolling)
     }
   }, [])
 
-  useEffect(() => {
-    const updateViewport = () => {
-      viewportRef.current = {
-        w: window.innerWidth,
-        h: window.innerHeight,
-      }
-    }
-
-    updateViewport()
-
-    const handleMouseMove = (e) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY }
-    }
-
-    const handleMouseLeave = () => {
-      mouseRef.current = { x: null, y: null }
-    }
-
-    window.addEventListener('resize', updateViewport)
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseleave', handleMouseLeave)
-
-    const now = (typeof performance !== 'undefined' && performance.now)
-      ? performance.now()
-      : Date.now()
-
-    // iniciar con un grupo de luciérnagas ya activas
-    setFireflies(() => {
-      const initial = []
-      for (let i = 0; i < count; i++) {
-        // damos un "offset" a createdAt para que no todas estén en el mismo punto del fade
-        const offsetNow = now - Math.random() * 8000
-        initial.push(createFirefly(viewportRef.current, offsetNow))
-      }
-      return initial
-    })
-
-    let rafId
-
-    const tick = (timestamp) => {
-      if (lastTimeRef.current == null) {
-        lastTimeRef.current = timestamp
-      }
-      const dt = timestamp - lastTimeRef.current
-      lastTimeRef.current = timestamp
-
-      // normalizar dt a algo razonable por si hay lag
-      const dtFactor = Math.min(Math.max(dt / 16.67, 0.4), 2.2)
-
-      setFireflies((prev) =>
-        updateFireflies(prev, {
-          timestamp,
-          dtFactor,
-          viewport: viewportRef.current,
-          mouse: mouseRef.current,
-          count,
-        }),
-      )
-
-      rafId = window.requestAnimationFrame(tick)
-    }
-
-    rafId = window.requestAnimationFrame(tick)
-
-    return () => {
-      window.removeEventListener('resize', updateViewport)
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseleave', handleMouseLeave)
-      if (rafId) {
-        window.cancelAnimationFrame(rafId)
-      }
-    }
-  }, [count])
-
-  if (count <= 0) return null
-
   return (
-    <div
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+    <canvas
+      ref={canvasRef}
+      className="firefly-canvas pointer-events-none fixed inset-0 -z-10"
       aria-hidden="true"
-    >
-      {fireflies.map((f) => (
-        <div
-          key={f.id}
-          className="firefly"
-          style={{
-            left: `${f.x}px`,
-            top: `${f.y}px`,
-            width: `${f.size * 4}px`,
-            height: `${f.size * 4}px`,
-            // alpha controlado en JS para que aparezcan / desaparezcan con fade suave
-            opacity: f.alpha,
-            animationDuration: `${f.flicker}s`,
-            animationDelay: `${f.delay}s`,
-            '--firefly-core': f.core,
-            '--firefly-halo': f.halo,
-            '--firefly-trail': f.trail,
-            '--firefly-trail-length': `${f.trailLength}px`,
-            '--firefly-trail-angle': `${f.trailAngle}deg`,
-          }}
-        />
-      ))}
-    </div>
+    />
   )
 }

@@ -23,7 +23,10 @@ function getSectionOffsets() {
 
 export default function Navbar() {
   const [active, setActive] = useState('#home')
+  const [routeIndicator, setRouteIndicator] = useState({ top: 0, height: 0 })
   const isClickScrolling = useRef(false)
+  const navStackRef = useRef(null)
+  const navPillRefs = useRef({})
 
   useEffect(() => {
     const updateActive = () => {
@@ -50,6 +53,23 @@ export default function Navbar() {
     }
   }, [])
 
+  useEffect(() => {
+    const updateIndicator = () => {
+      const stack = navStackRef.current
+      const item = navPillRefs.current[active]
+      if (!stack || !item) return
+
+      setRouteIndicator({
+        top: item.offsetTop,
+        height: item.offsetHeight,
+      })
+    }
+
+    updateIndicator()
+    window.addEventListener('resize', updateIndicator)
+    return () => window.removeEventListener('resize', updateIndicator)
+  }, [active])
+
   const handleClick = (href) => (e) => {
     e.preventDefault()
     const el = document.querySelector(href)
@@ -71,6 +91,13 @@ export default function Navbar() {
     return (
       <a
         href={link.href}
+        ref={
+          vertical
+            ? (node) => {
+                if (node) navPillRefs.current[link.href] = node
+              }
+            : undefined
+        }
         onClick={handleClick(link.href)}
         className={
           vertical
@@ -128,7 +155,15 @@ export default function Navbar() {
           </div>
         </a>
 
-        <div className="mt-2 flex flex-col gap-2">
+        <div ref={navStackRef} className="nav-stack mt-2 flex flex-col gap-2">
+          <span
+            className="nav-route-indicator"
+            style={{
+              transform: `translateY(${routeIndicator.top}px)`,
+              height: `${routeIndicator.height}px`,
+            }}
+            aria-hidden="true"
+          />
           {navLinks.map((l) => (
             <LinkItem key={l.href} link={l} vertical />
           ))}

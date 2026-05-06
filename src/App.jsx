@@ -546,6 +546,152 @@ function ChristmasToggleButton({ visible, enabled, saving, onToggle }) {
   )
 }
 
+function ArcadeVisualEffects({ visible }) {
+  const auraRef = useRef(null)
+
+  useEffect(() => {
+    const aura = auraRef.current
+    if (!aura || !visible) return undefined
+
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+    if (prefersReducedMotion) return undefined
+
+    let frame = 0
+    let nextX = window.innerWidth / 2
+    let nextY = window.innerHeight / 2
+
+    const moveAura = () => {
+      frame = 0
+      aura.style.setProperty('--cursor-x', `${nextX}px`)
+      aura.style.setProperty('--cursor-y', `${nextY}px`)
+      aura.classList.add('is-visible')
+    }
+
+    const handlePointerMove = (event) => {
+      if (event.pointerType && event.pointerType !== 'mouse') return
+      nextX = event.clientX
+      nextY = event.clientY
+      if (!frame) frame = requestAnimationFrame(moveAura)
+    }
+
+    const hideAura = () => {
+      aura.classList.remove('is-visible')
+    }
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: true })
+    window.addEventListener('pointerleave', hideAura)
+
+    return () => {
+      if (frame) cancelAnimationFrame(frame)
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerleave', hideAura)
+    }
+  }, [visible])
+
+  useEffect(() => {
+    if (!visible) return undefined
+
+    let scrollTimeout = 0
+    const markScrolling = () => {
+      document.documentElement.classList.add('is-scrolling')
+      window.clearTimeout(scrollTimeout)
+      scrollTimeout = window.setTimeout(() => {
+        document.documentElement.classList.remove('is-scrolling')
+      }, 180)
+    }
+
+    window.addEventListener('scroll', markScrolling, { passive: true })
+
+    return () => {
+      window.clearTimeout(scrollTimeout)
+      window.removeEventListener('scroll', markScrolling)
+      document.documentElement.classList.remove('is-scrolling')
+    }
+  }, [visible])
+
+  useEffect(() => {
+    if (!visible) return undefined
+
+    const revealSelector = [
+      '.hero-card',
+      '.bento-card',
+      '.section-card',
+      '.link-card',
+      '.gallery-tile',
+    ].join(',')
+    const tracked = new WeakSet()
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible')
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      {
+        rootMargin: '0px 0px -8% 0px',
+        threshold: 0.14,
+      },
+    )
+
+    const registerReveals = () => {
+      const nodes = Array.from(document.querySelectorAll(revealSelector))
+      nodes.forEach((node, index) => {
+        if (tracked.has(node)) return
+        tracked.add(node)
+        node.classList.add('reveal-ready')
+        node.style.setProperty('--reveal-delay', `${(index % 5) * 55}ms`)
+        observer.observe(node)
+      })
+    }
+
+    let registerFrame = 0
+    const scheduleRegisterReveals = () => {
+      if (registerFrame) return
+      registerFrame = requestAnimationFrame(() => {
+        registerFrame = 0
+        registerReveals()
+      })
+    }
+
+    registerReveals()
+
+    const mutationObserver = new MutationObserver(scheduleRegisterReveals)
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+    })
+
+    return () => {
+      if (registerFrame) cancelAnimationFrame(registerFrame)
+      mutationObserver.disconnect()
+      observer.disconnect()
+    }
+  }, [visible])
+
+  return (
+    <>
+      <div
+        ref={auraRef}
+        className={`cursor-aura ${visible ? '' : 'is-hidden'}`}
+        aria-hidden="true"
+      />
+      <div
+        className={`crt-overlay ${visible ? 'is-visible' : 'is-hidden'}`}
+        aria-hidden="true"
+      />
+      <div
+        className={`signal-sweep ${visible ? 'is-visible' : 'is-hidden'}`}
+        aria-hidden="true"
+      />
+    </>
+  )
+}
+
 export default function App() {
   const [showSplash, setShowSplash] = useState(true)
   const [playAudio, setPlayAudio] = useState(false)
@@ -759,6 +905,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="app-bg" aria-hidden="true" />
+      <ArcadeVisualEffects visible={!showSplash} />
       <BackgroundAudio
         play={playAudio}
         muted={effectiveAudioMuted}

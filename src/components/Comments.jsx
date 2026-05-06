@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
+import ModalPortal from './ModalPortal'
 
 const MAX_COMMENT_LENGTH = 2000
 const COMMENTS_PER_PAGE = 6
@@ -442,29 +443,26 @@ const handleGifSelect = (url) => {
 
   return (
     <section id="comments" className="mx-auto max-w-6xl px-4 py-8">
-      <div className="section-card">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div className="section-card comments-panel">
+        <div className="comments-panel-header">
           <div>
             <h2 className="section-title">Comentarios</h2>
-            <p className="mt-1 text-xs text-slate-400">
-              Deja un mensajito si estás conectado con tu cuenta de Discord.
-            </p>
+            <p className="comments-panel-subtitle">discord-auth messages · guestbook stream</p>
           </div>
-          <div className="text-xs">
+          <div className="comments-auth-zone">
             {me ? (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1">
+              <div className="comments-userbar">
+                <div className="comments-user-pill">
                   <img
                     src={me.avatarUrl}
                     onError={(e) => (e.currentTarget.src = 'https://cdn.discordapp.com/embed/avatars/0.png')}
-                    className="h-5 w-5 rounded-full"
                     alt={formatUsername(me.username)}
                   />
-                  <span className="text-slate-100">
+                  <span>
                     {formatUsername(me.username)}
                   </span>
                   {isAdmin && (
-                    <span className="rounded-full bg-amber-500/90 px-2 py-0.5 text-[10px] font-semibold text-slate-900">
+                    <span className="comments-admin-pill">
                       Admin
                     </span>
                   )}
@@ -472,7 +470,7 @@ const handleGifSelect = (url) => {
                 <button
                   type="button"
                   onClick={logout}
-                  className="rounded-full bg-slate-700 px-3 py-1 text-[11px] text-slate-200 hover:bg-slate-600"
+                  className="comments-secondary-btn"
                 >
                   Cerrar sesión
                 </button>
@@ -481,7 +479,7 @@ const handleGifSelect = (url) => {
               <button
                 type="button"
                 onClick={login}
-                className="rounded-full bg-sky-500 px-3 py-1 text-[11px] font-semibold text-slate-900"
+                className="comments-login-btn"
               >
                 Conectarse con Discord
               </button>
@@ -560,7 +558,7 @@ const handleGifSelect = (url) => {
 </form>
         )}
 
-        <div className="mt-5 space-y-3">
+        <div className="comments-stream">
           {loading && (
             <p className="text-[11px] text-slate-500">Cargando comentarios…</p>
           )}
@@ -591,33 +589,34 @@ const handleGifSelect = (url) => {
             return (
               <article
                 key={c.id}
-                className="flex gap-3 rounded-2xl border border-slate-800/80 bg-slate-950/60 px-3 py-2 text-xs"
+                className="comment-card"
               >
                 <img
                   src={c.author.avatarUrl}
                     onError={(e) => (e.currentTarget.src = 'https://cdn.discordapp.com/embed/avatars/0.png')}
-                  className="mt-1 h-7 w-7 rounded-full"
+                  className="comment-avatar"
                   alt={formatUsername(c.author.username)}
+                  loading="lazy"
+                  decoding="async"
                 />
-                <div className="flex-1">
-                  <header className="flex items-center gap-2 text-[11px] text-slate-400">
-                    <span className="flex items-center gap-1.5">
-                      <span className="font-semibold text-slate-100">
+                <div className="comment-content">
+                  <header className="comment-header">
+                    <span className="comment-author-line">
+                      <span className="comment-author">
                         {formatUsername(c.author.username)}
                       </span>
                       {isAuthorAdmin && (
-                        <span className="rounded-full border border-emerald-400/70 bg-emerald-500/15 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-200 shadow-sm shadow-emerald-500/30">
+                        <span className="comment-admin-badge">
                           Admin
                         </span>
                       )}
                     </span>
-                    <span>·</span>
-                    <span className="relative inline-flex items-center group">
+                    <span className="comment-time group">
                       <span className="cursor-default">
                         {formatDiscordTimestamp(c.createdAt)}
                       </span>
                       {fullDateLabel && (
-                        <span className="pointer-events-none absolute left-1/2 bottom-full z-20 mb-1 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-xl border border-slate-700/80 bg-slate-950/95 px-2.5 py-1 text-[10px] text-slate-100 shadow-lg shadow-sky-500/20 opacity-0 transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100">
+                        <span className="comment-date-tooltip">
                           {fullDateLabel}
                         </span>
                       )}
@@ -628,7 +627,7 @@ const handleGifSelect = (url) => {
                       </span>
                     )}
                     {(canEdit || canDelete) && (
-                      <div className="ml-auto flex items-center gap-1">
+                      <div className="comment-actions">
                         {canEdit && (
                           <button
                             type="button"
@@ -669,7 +668,7 @@ const handleGifSelect = (url) => {
                   </header>
 
                   {!isEditing && (
-                    <div className="mt-1 text-slate-200 text-[13px]">
+                    <div className="comment-body">
                       {renderTextWithGifs(c.text)}
                     </div>
                   )}
@@ -742,6 +741,8 @@ const handleGifSelect = (url) => {
                     onError={(e) => (e.currentTarget.src = 'https://cdn.discordapp.com/embed/avatars/0.png')}
                               alt={formatUsername(r.author?.username)}
                               className="mt-0.5 h-5 w-5 rounded-full"
+                              loading="lazy"
+                              decoding="async"
                             />
                             <div className="flex-1">
                               <div className="flex items-start justify-between gap-2">
@@ -913,11 +914,12 @@ const handleGifSelect = (url) => {
       
 
       {gifPickerOpen && (
-        <div className="modal-backdrop" onClick={closeGifPicker}>
-          <div
-            className="modal-card modal-xl"
-            onClick={(event) => event.stopPropagation()}
-          >
+        <ModalPortal>
+          <div className="modal-backdrop" onClick={closeGifPicker}>
+            <div
+              className="modal-card modal-xl"
+              onClick={(event) => event.stopPropagation()}
+            >
             <div className="modal-header">
               <div>
                 <h3 className="modal-title">Elige un GIF</h3>
@@ -998,13 +1000,15 @@ const handleGifSelect = (url) => {
                 Cerrar
               </button>
             </div>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
-{confirmDeleteId && (
-        <div className="modal-backdrop" onClick={closeDeleteConfirm}>
-          <div className="modal-card modal-sm" onClick={(e) => e.stopPropagation()}>
+      {confirmDeleteId && (
+        <ModalPortal>
+          <div className="modal-backdrop" onClick={closeDeleteConfirm}>
+            <div className="modal-card modal-sm" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
                 <h3 className="modal-title">¿Eliminar este comentario?</h3>
@@ -1039,8 +1043,9 @@ const handleGifSelect = (url) => {
                 {deleting ? 'Eliminando…' : 'Eliminar'}
               </button>
             </div>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </section>
   )

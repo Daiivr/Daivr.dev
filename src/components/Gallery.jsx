@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import ModalPortal from './ModalPortal'
 
 const OWNER_ID = '271701484922601472'
 
@@ -157,20 +158,27 @@ export default function Gallery() {
 
   const displayLabel = (fileObj) =>
     fileObj.displayName || fileObj.originalName || fileObj.filename
+  const totalSizeKb = files.reduce(
+    (sum, f) => sum + ((f.size ?? (f.sizeKB != null ? f.sizeKB * 1024 : 0)) / 1024),
+    0,
+  )
 
   return (
     <section id="gallery" className="mx-auto max-w-6xl px-4 py-8">
-      <div className="section-card">
-        <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="section-card gallery-panel">
+        <header className="gallery-panel-header">
           <div>
             <h2 className="section-title">Galería</h2>
-            <p className="mt-1 text-xs text-slate-400">
-              Mi pequeña vitrina de imágenes.
-            </p>
+            <p className="gallery-panel-subtitle">curated captures · local media vault</p>
+          </div>
+          <div className="gallery-panel-stats" aria-hidden="true">
+            <span>{files.length} files</span>
+            <span>{totalSizeKb >= 1024 ? `${(totalSizeKb / 1024).toFixed(1)}mb` : `${totalSizeKb.toFixed(0)}kb`}</span>
+            <span>preview:on</span>
           </div>
         </header>
 
-        <div className="mt-4 space-y-4">
+        <div className="gallery-panel-body">
           {loadingMe && <p className="text-xs text-slate-500">Cargando…</p>}
 
           {isOwner && (
@@ -207,28 +215,39 @@ export default function Gallery() {
             </form>
           )}
 
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {files.map((f) => {
+          <div className="gallery-grid">
+            {files.map((f, index) => {
               const label = displayLabel(f)
+              const sizeKb = ((f.size ?? (f.sizeKB != null ? f.sizeKB * 1024 : 0)) / 1024)
+              const extension =
+                (f.filename || '').split('.').pop()?.slice(0, 4).toUpperCase() || 'IMG'
               return (
                 <figure
                   key={f.filename}
-                  className="group relative overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/60 shadow-[0_18px_50px_rgba(15,23,42,0.9)] transition-transform hover:-translate-y-1 hover:border-sky-500/80"
+                  className="gallery-tile group"
                 >
                   <button
                     type="button"
                     onClick={() => openPreview(f)}
-                    className="block w-full focus:outline-none"
+                    className="gallery-media-button"
                   >
                     <img
                       src={f.url}
                       alt={label}
-                      className="h-40 w-full object-cover sm:h-44"
+                      className="gallery-image"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </button>
-                  <figcaption className="flex items-center justify-between px-3 py-1.5 text-[10px] text-slate-400">
-                    <span className="truncate">{label}</span>
-                    <span>{((f.size ?? (f.sizeKB != null ? f.sizeKB * 1024 : 0)) / 1024).toFixed(0)}kb</span>
+                  <div className="gallery-hud" aria-hidden="true">
+                    <span>{`IMG_${String(index + 1).padStart(2, '0')}`}</span>
+                    <span>{extension}</span>
+                  </div>
+                  <span className="gallery-corner gallery-corner-tl" aria-hidden="true" />
+                  <span className="gallery-corner gallery-corner-br" aria-hidden="true" />
+                  <figcaption className="gallery-caption">
+                    <span>{label}</span>
+                    <span>{sizeKb.toFixed(0)}kb</span>
                   </figcaption>
                   {isOwner && (
                     <button
@@ -254,85 +273,88 @@ export default function Gallery() {
 
       {/* Modal de vista previa grande */}
       {previewFile && (
-        <div className="modal-backdrop" onClick={closePreview}>
-          <div
-            className="modal-card modal-fit"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-header">
-              <div>
-                <h3 className="modal-title">Vista previa</h3>
-              </div>
-              <button
-                type="button"
-                onClick={closePreview}
-                className="modal-close"
-                aria-label="Cerrar"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/*
-              Ajuste: este modal se “encoge” al tamaño real de la imagen (con límites de viewport)
-              para evitar los espacios laterales cuando la imagen es vertical.
-            */}
-            <div className="text-center">
-              <div className="inline-block max-w-[85vw] text-left">
-                <div className="modal-panel inline-block overflow-hidden rounded-2xl">
-                  <img
-                    src={previewFile.url}
-                    alt={displayLabel(previewFile)}
-                    className="block h-auto w-auto max-h-[70vh] max-w-full object-contain bg-slate-950"
-                  />
+        <ModalPortal>
+          <div className="modal-backdrop" onClick={closePreview}>
+            <div
+              className="modal-card modal-fit"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div>
+                  <h3 className="modal-title">Vista previa</h3>
                 </div>
+                <button
+                  type="button"
+                  onClick={closePreview}
+                  className="modal-close"
+                  aria-label="Cerrar"
+                >
+                  ✕
+                </button>
+              </div>
 
-                <div className="mt-3 flex items-start justify-between gap-4 text-[11px] text-slate-400">
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate font-medium text-slate-200">
-                      {displayLabel(previewFile)}
+              {/*
+                Ajuste: este modal se “encoge” al tamaño real de la imagen (con límites de viewport)
+                para evitar los espacios laterales cuando la imagen es vertical.
+              */}
+              <div className="gallery-preview-wrap">
+                <div className="gallery-preview-inner">
+                  <div className="modal-panel gallery-preview-stage">
+                    <img
+                      src={previewFile.url}
+                      alt={displayLabel(previewFile)}
+                      className="gallery-preview-image"
+                    />
+                  </div>
+
+                  <div className="gallery-preview-meta">
+                    <div className="gallery-preview-name">
+                      <div>
+                        {displayLabel(previewFile)}
+                      </div>
+                      {previewFile.description && (
+                        <p>
+                          {previewFile.description}
+                        </p>
+                      )}
                     </div>
-                    {previewFile.description && (
-                      <p className="mt-1 whitespace-pre-wrap text-slate-400">
-                        {previewFile.description}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end gap-1 text-right">
-                    {previewFile.createdAt && (
-                      <span className="text-[10px] text-slate-500">
-                        Subida el {new Date(previewFile.createdAt).toLocaleDateString('es-ES', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: '2-digit',
-                        })}
-                      </span>
-                    )}
-                    <span>{(previewFile.size / 1024).toFixed(0)}kb</span>
+                    <div className="gallery-preview-details">
+                      {previewFile.createdAt && (
+                        <span>
+                          Subida el {new Date(previewFile.createdAt).toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: '2-digit',
+                          })}
+                        </span>
+                      )}
+                      <span>{(previewFile.size / 1024).toFixed(0)}kb</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="modal-actions">
-              <button
-                type="button"
-                onClick={closePreview}
-                className="modal-btn-cancel"
-              >
-                Cerrar
-              </button>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  onClick={closePreview}
+                  className="modal-btn-cancel"
+                >
+                  Cerrar
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Modal para renombrar antes de subir */}
       {showUploadModal && file && (
-        <div className="modal-backdrop" onClick={cancelUploadModal}>
-          <div
-            className="modal-card modal-lg"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <ModalPortal>
+          <div className="modal-backdrop" onClick={cancelUploadModal}>
+            <div
+              className="modal-card modal-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="modal-header">
               <div>
                 <h3 className="modal-title">Preparar imagen</h3>
@@ -408,8 +430,9 @@ export default function Gallery() {
                 Continuar
               </button>
             </div>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </section>
   )

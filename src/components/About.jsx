@@ -22,66 +22,70 @@ export default function About() {
         </div>
 
         {/* Mini ficha */}
-        <div className="section-card flex flex-col justify-center">
-          <h3 className="text-[11px] font-semibold tracking-[0.18em] text-slate-200 uppercase">
-            profile.json
-          </h3>
+        <div className="section-card profile-card">
+          <div className="profile-card-header">
+            <div>
+              <h3 className="section-title">profile.json</h3>
+              <p className="profile-card-subtitle">identity · stack · active projects</p>
+            </div>
+            <span className="profile-status-pill">
+              <span aria-hidden="true" />
+              live
+            </span>
+          </div>
 
-          <dl className="mt-4 grid grid-cols-2 gap-4 text-xs md:text-sm text-slate-200">
-            <div className="space-y-1">
-              <dt className="text-[10px] uppercase tracking-wide text-slate-400">
-                location
-              </dt>
-              <dd className="text-[12px] font-medium text-slate-100">
-                Alaska · snow + <span className="rgb-text">RGB</span>
+          <dl className="profile-grid">
+            <div className="profile-field">
+              <dt>location</dt>
+              <dd>
+                Alaska
+                <span>snow + <span className="rgb-text">RGB</span></span>
               </dd>
             </div>
 
-            <div className="space-y-1">
-              <dt className="text-[10px] uppercase tracking-wide text-slate-400">
-                role
-              </dt>
-              <dd className="text-[12px] font-medium text-slate-100">
-                dev · gamer · bot wrangler
+            <div className="profile-field">
+              <dt>role</dt>
+              <dd>
+                Developer
+                <span>bots · games · tools</span>
               </dd>
             </div>
 
-            <div className="space-y-1">
-              <dt className="text-[10px] uppercase tracking-wide text-slate-400">
-                stack
-              </dt>
-              <dd className="text-[12px] font-medium text-slate-100">
-                TS · React · C# · Unity · Node
+            <div className="profile-field">
+              <dt>stack</dt>
+              <dd>
+                TS · React · C#
+                <span>Unity · Node</span>
               </dd>
             </div>
 
-            <div className="space-y-1">
-              <dt className="text-[10px] uppercase tracking-wide text-slate-400">
-                mood
-              </dt>
-              <dd className="text-[12px] font-medium text-slate-100">
-                grinding XP @ 03:00
-              </dd>
-            </div>
-
-            <div className="col-span-2 space-y-1">
-              <dt className="text-[10px] uppercase tracking-wide text-slate-400">
-                projects
-              </dt>
-              <dd className="flex flex-wrap gap-2">
-                <span className="tag-chip">DaiBot</span>
-                <a
-                  href="https://github.com/Daiivr/PokeNexo"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="tag-chip"
-                >
-                  PokeNexo
-                </a>
-                <span className="tag-chip">Emoji Bank</span>
+            <div className="profile-field">
+              <dt>mood</dt>
+              <dd>
+                Grinding XP
+                <span>03:00 build window</span>
               </dd>
             </div>
           </dl>
+
+          <div className="profile-projects">
+            <div className="profile-projects-top">
+              <span>projects</span>
+              <span>3 pinned</span>
+            </div>
+            <div className="profile-project-list">
+              <span className="profile-project-chip">DaiBot</span>
+              <a
+                href="https://github.com/Daiivr/PokeNexo"
+                target="_blank"
+                rel="noreferrer"
+                className="profile-project-chip"
+              >
+                PokeNexo
+              </a>
+              <span className="profile-project-chip">Emoji Bank</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>

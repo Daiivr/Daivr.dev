@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import ModalPortal from './ModalPortal'
 
 export default function Links() {
   const [links, setLinks] = useState([])
@@ -73,6 +74,13 @@ export default function Links() {
         .replace(/^www\./, '')
         .split('/')[0]
     }
+  }
+
+  const getLinkMetaLabel = (hrefNormalized) => {
+    if (!hrefNormalized) return 'route'
+    if (hrefNormalized.startsWith('#')) return 'anchor'
+    if (hrefNormalized.startsWith('/')) return 'local'
+    return getHostLabel(hrefNormalized)
   }
 
   const openExternalConfirm = (e, link) => {
@@ -219,12 +227,17 @@ export default function Links() {
 
   return (
     <section id="links" className="section-shell">
-      <div className="section-card">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="section-title">links.sh</h2>
-          <span className="section-kicker">
-            ./run · external · new tab
-          </span>
+      <div className="section-card links-panel">
+        <div className="links-panel-header">
+          <div>
+            <h2 className="section-title">links.sh</h2>
+            <p className="links-panel-subtitle">verified destinations · launch safely</p>
+          </div>
+          <div className="links-panel-status" aria-hidden="true">
+            <span>./run</span>
+            <span>external</span>
+            <span>new_tab</span>
+          </div>
         </div>
 
         {/* Form para agregar link – solo admin */}
@@ -260,7 +273,7 @@ export default function Links() {
           </form>
         )}
 
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <div className="links-grid">
           {loading && (
             <p className="text-[11px] text-slate-500">Cargando links…</p>
           )}
@@ -274,11 +287,12 @@ export default function Links() {
           {links.map((link, index) => {
             const safeHref = normalizeHref(link.href)
             const isExternal = isExternalHref(safeHref)
+            const metaLabel = getLinkMetaLabel(safeHref)
 
             return (
             <div
               key={link.id}
-              className="link-card group relative flex items-center justify-between overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/70 px-4 py-3 text-sm hover:scale-[1.02] hover:shadow-xl transition-all duration-300"
+              className="link-card group"
               draggable={isAdmin}
               onDragStart={() => handleDragStart(index)}
               onDragOver={(e) => handleDragOver(e, index)}
@@ -288,26 +302,39 @@ export default function Links() {
                 href={safeHref}
                 target={isExternal ? '_blank' : undefined}
                 rel={isExternal ? 'noreferrer' : undefined}
-                className="relative flex flex-1 items-center gap-3"
+                className="link-tile-anchor"
                 onClick={(e) => openExternalConfirm(e, link)}
               >
-                {link.iconUrl && (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-slate-900/90 border border-slate-700 shadow-inner">
+                <span className="link-tile-index" aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+
+                <span className="link-tile-icon">
+                  {link.iconUrl ? (
                     <img
                       src={link.iconUrl}
                       alt={link.label}
-                      className="h-6 w-6 rounded-xl object-cover icon-anim"
+                      className="icon-anim"
+                      loading="lazy"
+                      decoding="async"
                     />
-                  </div>
-                )}
+                  ) : (
+                    <span aria-hidden="true">{isExternal ? '↗' : '#'}</span>
+                  )}
+                </span>
 
-                <div>
-                  <p className="font-medium text-slate-100">{link.label}</p>
-                </div>
+                <span className="link-tile-copy">
+                  <span className="link-tile-title">{link.label}</span>
+                  <span className="link-tile-meta">{metaLabel}</span>
+                </span>
+
+                <span className="link-tile-action" aria-hidden="true">
+                  {isExternal ? 'open' : 'go'}
+                </span>
               </a>
 
               {isAdmin && (
-                <div className="flex items-center gap-2 ml-3">
+                <div className="link-admin-actions">
                   <button
                     type="button"
                     onClick={() => openEditModal(link)}
@@ -332,8 +359,9 @@ export default function Links() {
 
       {/* Modal de edición */}
       {showModal && (
-        <div className="modal-backdrop" onClick={closeModal}>
-          <div className="modal-card modal-md" onClick={(e) => e.stopPropagation()}>
+        <ModalPortal>
+          <div className="modal-backdrop" onClick={closeModal}>
+            <div className="modal-card modal-md" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
                 <h3 className="modal-title">Editar link</h3>
@@ -373,14 +401,16 @@ export default function Links() {
                 Guardar
               </button>
             </div>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Confirmación: salir a página externa */}
       {showExternalConfirm && pendingExternal && (
-        <div className="modal-backdrop" onClick={closeExternalConfirm}>
-          <div className="modal-card modal-sm" onClick={(e) => e.stopPropagation()}>
+        <ModalPortal>
+          <div className="modal-backdrop" onClick={closeExternalConfirm}>
+            <div className="modal-card modal-sm" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
                 <h3 className="modal-title">Abrir {pendingExternal.label}</h3>
@@ -454,8 +484,9 @@ export default function Links() {
                 Abrir
               </button>
             </div>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </section>
   )

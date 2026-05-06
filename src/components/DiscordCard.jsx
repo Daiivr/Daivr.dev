@@ -170,6 +170,15 @@ const formatDuration = (ms) => {
 const rawSessionMs = data?.kv?.session_duration_ms || 0
   const gameSessionLabel = formatDuration(rawSessionMs)
 
+  const activityCount = activities.filter((activity) => activity.type !== 4).length
+  const profileName = user?.global_name || user?.username || 'Cargando...'
+  const username = user?.username || '...'
+  const presenceLabel = presence || (connected ? 'offline' : 'connecting')
+  const avatarUrl =
+    user?.id && user?.avatar
+      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=512`
+      : 'https://cdn.discordapp.com/embed/avatars/0.png'
+
 
   useEffect(() => {
     if (!mainActivity || !mainActivity.name) {
@@ -258,91 +267,88 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
 
   return (
     <section id="discord" className="mx-auto max-w-6xl px-4 py-6">
-      <div className="section-card flex flex-col gap-6 md:flex-row">
-        <div className="discord-profile-panel w-full md:w-64 flex flex-col items-center">
-          
-
-
-        <div className="relative group">
-          <div className="relative h-28 w-28">
-            <img
-              src={
-                user?.id && user?.avatar
-                  ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=512`
-                  : 'https://cdn.discordapp.com/embed/avatars/0.png'
-              }
-              alt={user?.username || 'Discord avatar'}
-              className="h-28 w-28 rounded-full object-cover shadow-xl"
-            />
-            {user?.avatar_decoration_data?.asset && (
-              <img
-                src={`https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.png`}
-                alt="Avatar decoration"
-                className="pointer-events-none absolute inset-0 h-28 w-28 scale-[1.14]"
-              />
-            )}
+      <div className="section-card discord-card-shell">
+        <div className="discord-profile-panel">
+          <div className="discord-profile-topline">
+            <span>discord.presence</span>
+            <span className={`discord-live-dot is-${presenceLabel}`} />
           </div>
 
-          <span
-            className={`absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 border-slate-900 ${statusColor}`}
-          />
-        </div>
-
-          <p className="text-lg font-semibold text-slate-100 mt-4 flex items-center justify-center gap-2">
-            <span>{user?.global_name || user?.username || 'Cargando…'}</span>
-            {hasGuildTag && (
-              <span
-                className="inline-flex items-center gap-1 rounded border border-slate-700/80 bg-slate-800/70 px-1.5 py-[2px] align-middle backdrop-blur-sm leading-none"
-                title={`Server Tag · ${primaryGuild.tag}`}
-              >
+          <div className="discord-avatar-stage">
+            <div className="discord-avatar-ring">
+              <img
+                src={avatarUrl}
+                alt={username || 'Discord avatar'}
+                className="discord-avatar"
+                decoding="async"
+              />
+              {user?.avatar_decoration_data?.asset && (
                 <img
-                  src={guildBadgeUrl}
-                  alt=""
-                  className="h-3 w-3"
-                  loading="lazy"
+                  src={`https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.png`}
+                  alt="Avatar decoration"
+                  className="discord-avatar-decoration"
                 />
-                <span className="text-[10px] font-bold uppercase tracking-wide text-slate-100">
-                  {primaryGuild.tag}
-                </span>
-              </span>
-            )}
-          </p>
-          <p className="text-sm text-slate-400">@{user?.username || '...'}</p>
+              )}
+            </div>
+            <span className={`discord-status-dot ${statusColor}`} />
+          </div>
 
-          <p className="mt-2 text-xs text-slate-500 inline-flex items-center justify-center gap-1.5">
+          <div className="discord-identity">
+            <div className="discord-display-name">
+              <span>{profileName}</span>
+              {hasGuildTag && (
+                <span
+                  className="discord-guild-pill"
+                  title={`Server Tag · ${primaryGuild.tag}`}
+                >
+                  <img src={guildBadgeUrl} alt="" loading="lazy" />
+                  <span>{primaryGuild.tag}</span>
+                </span>
+              )}
+            </div>
+            <p>@{username}</p>
+          </div>
+
+          <div className="discord-presence-row">
+            <span className="discord-presence-key">{presenceLabel}</span>
+            <span className="discord-presence-value">
+              {connected ? 'lanyard.live' : 'connecting'}
+            </span>
+          </div>
+
+          <div className="discord-custom-status">
             {customStatus?.emoji?.id && (
               <img
                 src={`https://cdn.discordapp.com/emojis/${customStatus.emoji.id}.${
                   customStatus.emoji.animated ? 'gif' : 'png'
                 }?size=32&quality=lossless`}
                 alt={customStatus.emoji.name || ''}
-                className="inline-block h-4 w-4 align-middle"
                 loading="lazy"
               />
             )}
             {customStatus?.emoji?.name && !customStatus?.emoji?.id && (
-              <span className="align-middle">{customStatus.emoji.name}</span>
+              <span>{customStatus.emoji.name}</span>
             )}
-            <span>
+            <p>
               {customStatus?.state ||
-                (presence === 'online' && 'Construyendo cosas y rompiéndolas otra vez ✨') ||
-                (presence === 'idle' && 'AFK pero de buen humor 💤') ||
-                (presence === 'dnd' && 'Modo sweat, no molestar 🔥') ||
-                (presence === 'offline' && 'Desconectado (o invis) 👻') ||
-                (!connected && 'Conectando a Lanyard…')}
-            </span>
-          </p>
+                (presence === 'online' && 'Construyendo cosas y rompiéndolas otra vez') ||
+                (presence === 'idle' && 'AFK pero de buen humor') ||
+                (presence === 'dnd' && 'Modo focus activo') ||
+                (presence === 'offline' && 'Desconectado o invisible') ||
+                (!connected && 'Conectando a Lanyard...')}
+            </p>
+          </div>
 
           {(() => {
             const badges = getUserBadges(user)
             if (!badges.length) return null
             return (
-              <div className="discord-badge-row mt-4 flex justify-center">
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/60 px-3 py-1.5 shadow-sm">
+              <div className="discord-badge-row">
+                <div className="discord-badge-dock">
                   {badges.map((badge) => (
                     <div
                       key={badge.label}
-                      className="discord-badge-item relative inline-flex h-5 w-5 items-center justify-center"
+                      className="discord-badge-item"
                       tabIndex={0}
                       onMouseEnter={(event) => showBadgeTooltip(badge, event.currentTarget)}
                       onMouseLeave={hideBadgeTooltip}
@@ -352,7 +358,6 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
                       <img
                         src={badge.icon}
                         alt={badge.label}
-                        className="h-5 w-5"
                         loading="lazy"
                       />
                     </div>
@@ -361,69 +366,74 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
               </div>
             )
           })()}
-
         </div>
 
-        <div className="flex-1 bg-slate-900/40 rounded-2xl p-5 border border-slate-800">
-          <div className="flex items-center justify-between">
-            <h3 className="text-slate-200 font-semibold">Actividad</h3>
-            <span className="text-xs text-slate-400">
-              {activities.length} activa{activities.length === 1 ? '' : 's'}
+        <div className="discord-activity-panel">
+          <div className="discord-activity-header">
+            <div>
+              <p className="discord-activity-kicker">activity.stream</p>
+              <h3>Actividad</h3>
+            </div>
+            <span>
+              {activityCount} activa{activityCount === 1 ? '' : 's'}
             </span>
           </div>
 
           {mainActivity && (
-            <div className="mt-4 flex gap-4 items-center">
+            <div className="discord-activity-card">
               {(hasRichPresenceImage || gameImageUrl) && (
-                <img
-                  src={
-                    hasRichPresenceImage
-                      ? `https://cdn.discordapp.com/app-assets/${mainActivity.application_id}/${mainActivity.assets.large_image}.png`
-                      : gameImageUrl
-                  }
-                  className="h-16 w-16 rounded-xl object-cover border border-slate-800"
-                  alt={mainActivity.name}
-                />
+                <div className="discord-activity-art">
+                  <img
+                    src={
+                      hasRichPresenceImage
+                        ? `https://cdn.discordapp.com/app-assets/${mainActivity.application_id}/${mainActivity.assets.large_image}.png`
+                        : gameImageUrl
+                    }
+                    alt={mainActivity.name}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
               )}
-              <div className="text-sm">
-                <p className="text-slate-100 font-medium">{mainActivity.name}</p>
+              <div className="discord-activity-copy">
+                <p className="discord-activity-name">{mainActivity.name}</p>
                 {mainActivity.details && (
-                  <p className="text-slate-400 text-xs">{mainActivity.details}</p>
+                  <p className="discord-activity-detail">{mainActivity.details}</p>
                 )}
                 {mainActivity.state && (
-                  <p className="text-slate-500 text-xs">{mainActivity.state}</p>
+                  <p className="discord-activity-state">{mainActivity.state}</p>
                 )}
                 {(fallbackElapsed || gameSessionLabel) && (
-                  <p className="text-emerald-400 text-xs mt-1">
+                  <div className="discord-activity-session">
+                    <span />
                     Jugando hace {fallbackElapsed || gameSessionLabel}
-                  </p>
+                  </div>
                 )}
               </div>
             </div>
           )}
 
           {spotify && (
-            <div className="mt-6 grid gap-4 sm:grid-cols-[auto,1fr] items-center">
-              <div className="relative">
-                <div className="absolute inset-0 rounded-xl bg-emerald-500/40 blur-lg" />
+            <div className="discord-spotify-card">
+              <div className="discord-spotify-art">
                 <img
                   src={spotify.album_art_url}
                   alt={spotify.song}
-                  className="relative h-20 w-20 rounded-xl object-cover border border-slate-800 shadow-lg"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
-              <div>
-                <p className="text-slate-100 text-sm font-semibold">Spotify</p>
-                <p className="text-slate-200 text-sm">{spotify.song}</p>
-                <p className="text-slate-400 text-xs mb-2">{spotify.artist}</p>
-                <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+              <div className="discord-spotify-copy">
+                <p className="discord-activity-kicker">spotify.now</p>
+                <p className="discord-spotify-song">{spotify.song}</p>
+                <p className="discord-spotify-artist">{spotify.artist}</p>
+                <div className="discord-spotify-progress">
                   <div
-                    className="h-full bg-gradient-to-r from-emerald-400 via-fuchsia-400 to-slate-500 transition-all"
                     style={{ width: `${getSpotifyProgress()}%` }}
                   />
                 </div>
                 {spotifyTimes && (
-                  <div className="mt-1 flex justify-between text-[11px] text-slate-400">
+                  <div className="discord-spotify-time">
                     <span>{spotifyTimes.currentLabel}</span>
                     <span>{spotifyTimes.totalLabel}</span>
                   </div>
@@ -433,7 +443,7 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
           )}
 
           {!mainActivity && !spotify && (
-            <p className="mt-4 text-xs text-slate-500">
+            <p className="discord-empty-activity">
               Ahora mismo no hay actividades visibles (juego / Spotify / etc).
             </p>
           )}
