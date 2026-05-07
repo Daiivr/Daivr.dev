@@ -18,7 +18,6 @@ const DEFAULT_LOFI_VOLUME_PERCENT = 20
 const MATRIX_RAIN_CHARS =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*+-/<>=?[]{}'
 const SECTION_ROUTES = ['#home', '#about', '#links', '#discord', '#gallery', '#comments']
-const SECTION_DECK_MEDIA_QUERY = '(min-width: 769px)'
 const LOFI_TRACKS = [
   {
     id: 'DkbPMHFumss',
@@ -864,10 +863,7 @@ export default function App() {
     detail: 'neon link established',
   })
   const [secretEnding, setSecretEnding] = useState(false)
-  const [isSectionDeckMode, setIsSectionDeckMode] = useState(() => {
-    if (typeof window === 'undefined') return true
-    return window.matchMedia(SECTION_DECK_MEDIA_QUERY).matches
-  })
+  const [isSectionDeckMode] = useState(false)
   const [activeSectionIndex, setActiveSectionIndex] = useState(() => {
     if (typeof window === 'undefined') return 0
     const hashIndex = SECTION_ROUTES.indexOf(window.location.hash)
@@ -973,15 +969,6 @@ export default function App() {
     root.classList.toggle('theme-xmas', !!christmasEnabled)
     return () => root.classList.remove('theme-xmas')
   }, [christmasEnabled])
-
-  useEffect(() => {
-    const media = window.matchMedia(SECTION_DECK_MEDIA_QUERY)
-    const handleChange = () => setIsSectionDeckMode(media.matches)
-
-    handleChange()
-    media.addEventListener('change', handleChange)
-    return () => media.removeEventListener('change', handleChange)
-  }, [])
 
   useEffect(() => {
     return () => {
