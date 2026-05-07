@@ -557,9 +557,17 @@ const handleGifSelect = (url) => {
               <span className="comments-count-pill">
                 {comments.length} {comments.length === 1 ? 'comentario' : 'comentarios'}
               </span>
-              <span className="comments-live-pill" title="Auto-refresca cada 5s">
+              <span
+                className="comments-live-pill"
+                aria-label="Live: auto-refresca cada 5 segundos"
+                tabIndex="0"
+              >
                 <span className="comments-live-dot" aria-hidden="true" />
                 LIVE
+                <span className="comments-live-tooltip" role="tooltip">
+                  <span>live sync</span>
+                  <strong>Auto-refresca cada 5s</strong>
+                </span>
               </span>
             </div>
           </div>
@@ -602,74 +610,88 @@ const handleGifSelect = (url) => {
         </div>
 
         {me && (
+          <form onSubmit={send} className="comments-composer">
+            <div className="comments-composer-top" aria-hidden="true">
+              <span>compose.msg</span>
+              <span>discord-auth</span>
+            </div>
 
-<form onSubmit={send} className="mt-4 flex flex-col gap-2">
-  <div className="relative w-full">
-    <textarea
-      ref={textareaRef}
-      value={newTextInput}
-      onChange={handleNewChange}
-      rows={3}
-      placeholder="Escribe algo bonito (o un shitpost controlado)…"
-      className="comment-textarea w-full rounded-2xl border border-slate-700/80 bg-slate-950/70 px-3 pb-7 pt-3 text-[13px] text-slate-100 shadow-[0_0_0_1px_rgba(15,23,42,0.9)] placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
-    />
-    <div className="pointer-events-none absolute inset-x-3 bottom-2 flex items-center justify-end text-[11px] text-slate-400">
-      <div className="mr-auto h-px w-full max-w-[calc(100%-11rem)] bg-gradient-to-r from-slate-600/40 via-slate-500/50 to-transparent" />
-      <div className="flex items-center gap-2 rounded-full bg-slate-900/95 px-3 py-1 shadow-[0_0_0_1px_rgba(15,23,42,0.9)]">
-        <span className="text-[10px] text-slate-300">
-          {newTextInput.length}/{MAX_COMMENT_LENGTH} caracteres
-        </span>
-        {remainingNew <= 50 && (
-          <span className={remainingNew < 0 ? 'text-rose-300' : 'text-amber-200'}>
-            {remainingNew < 0
-              ? 'Has superado el límite.'
-              : `Te quedan ${remainingNew} caracteres.`}
-          </span>
-        )}
-      </div>
-    </div>
-  </div>
+            <div className="comments-input-frame">
+              <span className="comments-input-prompt" aria-hidden="true">
+                &gt;
+              </span>
+              <textarea
+                ref={textareaRef}
+                value={newTextInput}
+                onChange={handleNewChange}
+                rows={3}
+                placeholder="Escribe algo bonito (o un shitpost controlado)..."
+                className="comment-textarea comments-composer-textarea"
+              />
+              <span className="comments-input-corners" aria-hidden="true" />
+              <div className="comments-composer-meter" aria-hidden="true">
+                <span
+                  style={{
+                    '--chars-used': `${Math.min(
+                      100,
+                      (newTextInput.length / MAX_COMMENT_LENGTH) * 100,
+                    )}%`,
+                  }}
+                />
+              </div>
+              <div className="comments-composer-count">
+                <span>
+                  {newTextInput.length}/{MAX_COMMENT_LENGTH}
+                </span>
+                <strong>chars</strong>
+                {remainingNew <= 50 && (
+                  <em className={remainingNew < 0 ? 'is-danger' : 'is-warn'}>
+                    {remainingNew < 0
+                      ? 'limite excedido'
+                      : `${remainingNew} restantes`}
+                  </em>
+                )}
+              </div>
+            </div>
 
-  {newGifUrls.length > 0 && (
-    <div className="mt-3 rounded-2xl border border-slate-800/80 bg-slate-950/80 px-3 py-2">
-      <p className="mb-1 text-[11px] text-slate-400">Vista previa de GIF(s):</p>
-      <div className="relative inline-block rounded-xl bg-slate-950/60 px-1 py-1">
-        <button
-          type="button"
-          onClick={handleRemovePreviewGif}
-          className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900/90 text-[11px] text-slate-200 shadow-md transition hover:bg-rose-500 hover:text-slate-50"
-          aria-label="Quitar GIF"
-        >
-          ✕
-        </button>
-        <img
-          src={newGifUrls[0]}
-          alt="GIF de vista previa"
-          className="max-w-xs h-auto rounded-xl border border-slate-700/80"
-        />
-      </div>
-    </div>
-  )}
+            {newGifUrls.length > 0 && (
+              <div className="comments-gif-preview">
+                <p className="comments-gif-preview-label">gif.preview</p>
+                <div className="comments-gif-preview-shell">
+                  <button
+                    type="button"
+                    onClick={handleRemovePreviewGif}
+                    className="comments-gif-remove"
+                    aria-label="Quitar GIF"
+                  >
+                    x
+                  </button>
+                  <img
+                    src={newGifUrls[0]}
+                    alt="GIF de vista previa"
+                    className="comments-gif-preview-image"
+                  />
+                </div>
+              </div>
+            )}
 
-  <div className="mt-2 flex items-center justify-end gap-2">
-    <button
-      type="button"
-      onClick={openGifPickerForNew}
-      className="flex items-center gap-1 rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-1 text-[11px] text-slate-200 transition hover:border-sky-400 hover:text-sky-200"
-    >
-      <span role="img" aria-label="GIF">
-        🎞️
-      </span>
-      <span>GIF</span>
-    </button>
-    <button
-      type="submit"
-      className="rounded-full bg-fuchsia-500 px-3 py-1 text-[11px] font-semibold text-slate-900 hover:bg-fuchsia-400"
-    >
-      Enviar
-    </button>
-  </div>
-</form>
+            <div className="comments-composer-actions">
+              <button
+                type="button"
+                onClick={openGifPickerForNew}
+                className="comments-composer-gif-btn"
+              >
+                <span aria-hidden="true" />
+                GIF
+              </button>
+              <button
+                type="submit"
+                className="comments-composer-send-btn"
+              >
+                Enviar
+              </button>
+            </div>
+          </form>
         )}
 
         <div className="comments-stream">

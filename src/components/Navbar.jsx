@@ -22,7 +22,10 @@ function getSectionOffsets() {
 }
 
 export default function Navbar() {
-  const [active, setActive] = useState('#home')
+  const [active, setActive] = useState(() => {
+    const hash = typeof window !== 'undefined' ? window.location.hash : ''
+    return navLinks.some((link) => link.href === hash) ? hash : '#home'
+  })
   const [routeIndicator, setRouteIndicator] = useState({ top: 0, height: 0 })
   const isClickScrolling = useRef(false)
   const navStackRef = useRef(null)
@@ -30,6 +33,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const updateActive = () => {
+      if (document.querySelector('.section-deck')) return
       if (isClickScrolling.current) return
 
       const y = window.scrollY + 140 // offset (sticky/mobile + breathing room)
@@ -54,6 +58,19 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
+    const handleActiveSection = (event) => {
+      const href = event.detail?.href
+      if (href && navLinks.some((link) => link.href === href)) {
+        setActive(href)
+      }
+    }
+
+    window.addEventListener('daivr:active-section', handleActiveSection)
+    return () =>
+      window.removeEventListener('daivr:active-section', handleActiveSection)
+  }, [])
+
+  useEffect(() => {
     const updateIndicator = () => {
       const stack = navStackRef.current
       const item = navPillRefs.current[active]
@@ -72,6 +89,17 @@ export default function Navbar() {
 
   const handleClick = (href) => (e) => {
     e.preventDefault()
+
+    if (document.querySelector('.section-deck')) {
+      setActive(href)
+      window.dispatchEvent(
+        new CustomEvent('daivr:navigate-section', {
+          detail: { href },
+        }),
+      )
+      return
+    }
+
     const el = document.querySelector(href)
     if (!el) return
 

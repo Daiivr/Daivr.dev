@@ -9,11 +9,16 @@ import Comments from './components/Comments'
 import Splash from './components/Splash'
 import Fireflies from './components/Fireflies'
 import Snowfall from './components/Snowfall'
+import CommandPalette from './components/CommandPalette'
 
 const KONAMI_VOLUME_STORAGE_KEY = 'daivr_konami_volume'
 const DEFAULT_KONAMI_VOLUME_PERCENT = 8
 const LOFI_VOLUME_STORAGE_KEY = 'daivr_lofi_volume'
 const DEFAULT_LOFI_VOLUME_PERCENT = 20
+const MATRIX_RAIN_CHARS =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*+-/<>=?[]{}'
+const SECTION_ROUTES = ['#home', '#about', '#links', '#discord', '#gallery', '#comments']
+const SECTION_DECK_MEDIA_QUERY = '(min-width: 769px)'
 const LOFI_TRACKS = [
   {
     id: 'DkbPMHFumss',
@@ -46,6 +51,28 @@ const clampLofiVolumePercent = (value) => {
   if (num < 0) return 0
   if (num > 100) return 100
   return Math.round(num)
+}
+
+const clampIndex = (value, max) => {
+  if (!Number.isFinite(value)) return 0
+  if (value < 0) return 0
+  if (value > max) return max
+  return value
+}
+
+const isInteractiveTarget = (target) => {
+  if (!target || typeof target.closest !== 'function') return false
+  return Boolean(
+    target.closest('input, textarea, select, button, a, [contenteditable="true"]'),
+  )
+}
+
+const canScrollPanel = (panel, deltaY) => {
+  if (!panel || Math.abs(deltaY) < 4) return false
+  const maxScroll = panel.scrollHeight - panel.clientHeight
+  if (maxScroll <= 2) return false
+  if (deltaY > 0) return panel.scrollTop < maxScroll - 2
+  return panel.scrollTop > 2
 }
 
 function KonamiGameOverlay({ open, activeGame, me, onClose }) {
@@ -699,6 +726,122 @@ function ArcadeVisualEffects({ visible }) {
   )
 }
 
+function SecretTerminalRain({ ending = false }) {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d', { alpha: true })
+    if (!canvas || !ctx) return undefined
+
+    let frame = 0
+    let lastTime = performance.now()
+    let width = 0
+    let height = 0
+    let columns = []
+
+    const resetColumn = (column, startAbove = true) => {
+      column.y = startAbove
+        ? -Math.random() * height * 0.7
+        : Math.random() * height
+      column.speed = 2.2 + Math.random() * 3.8
+      column.size = width < 640 ? 13 + Math.random() * 4 : 12 + Math.random() * 6
+      column.trail = 12 + Math.floor(Math.random() * (width < 640 ? 8 : 15))
+      column.alpha = 0.35 + Math.random() * 0.48
+    }
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      width = window.innerWidth
+      height = window.innerHeight
+      canvas.width = Math.floor(width * dpr)
+      canvas.height = Math.floor(height * dpr)
+      canvas.style.width = `${width}px`
+      canvas.style.height = `${height}px`
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+      const gap = width < 640 ? 18 : 16
+      const count = Math.ceil(width / gap) + 2
+      columns = Array.from({ length: count }, (_, index) => {
+        const column = {
+          x: index * gap + (Math.random() - 0.5) * gap,
+          y: 0,
+          speed: 0,
+          size: 0,
+          trail: 0,
+          alpha: 0,
+        }
+        resetColumn(column, false)
+        return column
+      })
+    }
+
+    const drawGlyph = (glyph, x, y, index, column) => {
+      const trailFade = Math.max(0.08, 1 - index / column.trail)
+      const isHead = index < 2
+      ctx.fillStyle = isHead
+        ? `rgba(236, 255, 238, ${0.86 * column.alpha})`
+        : `rgba(57, 255, 20, ${trailFade * column.alpha})`
+      ctx.shadowColor = isHead
+        ? 'rgba(236, 255, 238, 0.75)'
+        : 'rgba(57, 255, 20, 0.58)'
+      ctx.shadowBlur = isHead ? 13 : 7
+      ctx.fillText(glyph, x, y)
+    }
+
+    const tick = (time) => {
+      const delta = Math.min(2.2, (time - lastTime) / 16.67)
+      lastTime = time
+
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.fillStyle = 'rgba(1, 6, 14, 0.17)'
+      ctx.fillRect(0, 0, width, height)
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'top'
+
+      columns.forEach((column) => {
+        column.y += column.speed * delta
+        ctx.font = `900 ${column.size}px "JetBrains Mono", Consolas, monospace`
+
+        for (let index = 0; index < column.trail; index += 1) {
+          const y = column.y - index * column.size * 1.18
+          if (y < -column.size || y > height + column.size) continue
+
+          const charIndex =
+            (Math.floor(Math.random() * MATRIX_RAIN_CHARS.length) + index) %
+            MATRIX_RAIN_CHARS.length
+          drawGlyph(MATRIX_RAIN_CHARS[charIndex], column.x, y, index, column)
+        }
+
+        if (column.y - column.trail * column.size > height + 60) {
+          resetColumn(column)
+        }
+      })
+
+      ctx.shadowBlur = 0
+      frame = requestAnimationFrame(tick)
+    }
+
+    resize()
+    frame = requestAnimationFrame(tick)
+    window.addEventListener('resize', resize)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', resize)
+    }
+  }, [])
+
+  return (
+    <div
+      className={`secret-terminal-rain ${ending ? 'is-ending' : ''}`}
+      aria-hidden="true"
+    >
+      <canvas ref={canvasRef} className="secret-terminal-rain-canvas" />
+    </div>
+  )
+}
+
 export default function App() {
   const [showSplash, setShowSplash] = useState(true)
   const [playAudio, setPlayAudio] = useState(false)
@@ -714,7 +857,33 @@ export default function App() {
   const [christmasSaving, setChristmasSaving] = useState(false)
   const [showGameOverlay, setShowGameOverlay] = useState(false)
   const [activeGame, setActiveGame] = useState(null)
+  const [secretPulse, setSecretPulse] = useState(false)
+  const [secretEffect, setSecretEffect] = useState('vibe')
+  const [secretToast, setSecretToast] = useState({
+    title: 'sudo vibe accepted',
+    detail: 'neon link established',
+  })
+  const [secretEnding, setSecretEnding] = useState(false)
+  const [isSectionDeckMode, setIsSectionDeckMode] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return window.matchMedia(SECTION_DECK_MEDIA_QUERY).matches
+  })
+  const [activeSectionIndex, setActiveSectionIndex] = useState(() => {
+    if (typeof window === 'undefined') return 0
+    const hashIndex = SECTION_ROUTES.indexOf(window.location.hash)
+    return hashIndex >= 0 ? hashIndex : 0
+  })
+  const [previousSectionIndex, setPreviousSectionIndex] = useState(null)
+  const [sectionDirection, setSectionDirection] = useState('forward')
   const konamiIndexRef = useRef(0)
+  const secretPulseTimeoutRef = useRef(0)
+  const secretEndTimeoutRef = useRef(0)
+  const sectionTransitionTimeoutRef = useRef(0)
+  const sectionWheelLockRef = useRef(false)
+  const activeSectionIndexRef = useRef(activeSectionIndex)
+  const sectionPanelRefs = useRef([])
+  const touchStartYRef = useRef(null)
+  const touchStartXRef = useRef(null)
 
   useEffect(() => {
     try {
@@ -804,6 +973,23 @@ export default function App() {
     root.classList.toggle('theme-xmas', !!christmasEnabled)
     return () => root.classList.remove('theme-xmas')
   }, [christmasEnabled])
+
+  useEffect(() => {
+    const media = window.matchMedia(SECTION_DECK_MEDIA_QUERY)
+    const handleChange = () => setIsSectionDeckMode(media.matches)
+
+    handleChange()
+    media.addEventListener('change', handleChange)
+    return () => media.removeEventListener('change', handleChange)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(secretPulseTimeoutRef.current)
+      window.clearTimeout(secretEndTimeoutRef.current)
+      window.clearTimeout(sectionTransitionTimeoutRef.current)
+    }
+  }, [])
 
 
   useEffect(() => {
@@ -909,8 +1095,445 @@ export default function App() {
     setAudioMuted((prev) => !prev)
   }
 
+  const toggleLofiPlay = () => {
+    setPlayAudio(true)
+    setAudioPaused((prev) => !prev)
+  }
+
+  const goToSectionIndex = useCallback((targetIndex) => {
+    const nextIndex = clampIndex(targetIndex, SECTION_ROUTES.length - 1)
+    const currentIndex = activeSectionIndexRef.current
+    if (nextIndex === currentIndex) return
+
+    activeSectionIndexRef.current = nextIndex
+    setPreviousSectionIndex(currentIndex)
+    setSectionDirection(nextIndex > currentIndex ? 'forward' : 'backward')
+    setActiveSectionIndex(nextIndex)
+
+    requestAnimationFrame(() => {
+      const nextPanel = sectionPanelRefs.current[nextIndex]
+      if (nextPanel) nextPanel.scrollTop = 0
+    })
+
+    window.clearTimeout(sectionTransitionTimeoutRef.current)
+    sectionTransitionTimeoutRef.current = window.setTimeout(() => {
+      setPreviousSectionIndex(null)
+    }, 780)
+  }, [])
+
+  const scrollToSection = useCallback(
+    (href) => {
+      const nextIndex = SECTION_ROUTES.indexOf(href)
+      if (nextIndex < 0) return
+      if (!isSectionDeckMode) {
+        const section = document.querySelector(href)
+        if (!section) return
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        window.history.replaceState(null, '', href)
+        return
+      }
+      goToSectionIndex(nextIndex)
+    },
+    [goToSectionIndex, isSectionDeckMode],
+  )
+
+  useEffect(() => {
+    if (!isSectionDeckMode) return
+
+    const href = SECTION_ROUTES[activeSectionIndex] || SECTION_ROUTES[0]
+    window.history.replaceState(null, '', href)
+    window.dispatchEvent(
+      new CustomEvent('daivr:active-section', {
+        detail: { href, index: activeSectionIndex },
+      }),
+    )
+  }, [activeSectionIndex, isSectionDeckMode])
+
+  useEffect(() => {
+    if (!isSectionDeckMode) return undefined
+
+    const handleSectionNavigate = (event) => {
+      const href = event.detail?.href
+      const nextIndex = SECTION_ROUTES.indexOf(href)
+      if (nextIndex >= 0) goToSectionIndex(nextIndex)
+    }
+
+    window.addEventListener('daivr:navigate-section', handleSectionNavigate)
+    return () =>
+      window.removeEventListener('daivr:navigate-section', handleSectionNavigate)
+  }, [goToSectionIndex, isSectionDeckMode])
+
+  useEffect(() => {
+    if (!isSectionDeckMode || showSplash || showGameOverlay) return undefined
+
+    const handleKeyDown = (event) => {
+      if (event.defaultPrevented || isInteractiveTarget(event.target)) return
+
+      const currentIndex = activeSectionIndexRef.current
+      if (['ArrowDown', 'PageDown', ' '].includes(event.key)) {
+        event.preventDefault()
+        goToSectionIndex(currentIndex + 1)
+      }
+
+      if (['ArrowUp', 'PageUp'].includes(event.key)) {
+        event.preventDefault()
+        goToSectionIndex(currentIndex - 1)
+      }
+
+      if (event.key === 'Home') {
+        event.preventDefault()
+        goToSectionIndex(0)
+      }
+
+      if (event.key === 'End') {
+        event.preventDefault()
+        goToSectionIndex(SECTION_ROUTES.length - 1)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [goToSectionIndex, isSectionDeckMode, showGameOverlay, showSplash])
+
+  const handleDeckWheel = useCallback(
+    (event) => {
+      if (!isSectionDeckMode || showSplash || showGameOverlay) return
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return
+
+      const currentIndex = activeSectionIndexRef.current
+      const activePanel = sectionPanelRefs.current[currentIndex]
+      if (canScrollPanel(activePanel, event.deltaY)) return
+
+      event.preventDefault()
+      if (sectionWheelLockRef.current) return
+
+      sectionWheelLockRef.current = true
+      goToSectionIndex(currentIndex + (event.deltaY > 0 ? 1 : -1))
+      window.setTimeout(() => {
+        sectionWheelLockRef.current = false
+      }, 760)
+    },
+    [goToSectionIndex, isSectionDeckMode, showGameOverlay, showSplash],
+  )
+
+  const handleDeckTouchStart = useCallback((event) => {
+    const touch = event.touches?.[0]
+    if (!touch) return
+    touchStartYRef.current = touch.clientY
+    touchStartXRef.current = touch.clientX
+  }, [])
+
+  const handleDeckTouchEnd = useCallback(
+    (event) => {
+      if (!isSectionDeckMode || showSplash || showGameOverlay) return
+      const touch = event.changedTouches?.[0]
+      if (!touch || touchStartYRef.current === null) return
+
+      const deltaY = touchStartYRef.current - touch.clientY
+      const deltaX = (touchStartXRef.current ?? touch.clientX) - touch.clientX
+      touchStartYRef.current = null
+      touchStartXRef.current = null
+
+      if (Math.abs(deltaY) < 44 || Math.abs(deltaY) <= Math.abs(deltaX)) return
+
+      const currentIndex = activeSectionIndexRef.current
+      const activePanel = sectionPanelRefs.current[currentIndex]
+      if (canScrollPanel(activePanel, deltaY)) return
+
+      goToSectionIndex(currentIndex + (deltaY > 0 ? 1 : -1))
+    },
+    [goToSectionIndex, isSectionDeckMode, showGameOverlay, showSplash],
+  )
+
+  const triggerSecretTerminal = useCallback((options = {}) => {
+    const {
+      effect = 'vibe',
+      title = 'sudo vibe accepted',
+      detail = 'neon link established',
+      duration = 4200,
+    } = options
+
+    window.clearTimeout(secretPulseTimeoutRef.current)
+    window.clearTimeout(secretEndTimeoutRef.current)
+    setSecretEffect(effect)
+    setSecretToast({ title, detail })
+    setSecretEnding(false)
+    setSecretPulse(false)
+
+    requestAnimationFrame(() => {
+      setSecretPulse(true)
+    })
+
+    const exitMs = Math.min(620, Math.max(260, Math.floor(duration * 0.2)))
+    const activeMs = Math.max(0, duration - exitMs)
+
+    secretPulseTimeoutRef.current = window.setTimeout(() => {
+      setSecretEnding(true)
+    }, activeMs)
+
+    secretEndTimeoutRef.current = window.setTimeout(() => {
+      setSecretPulse(false)
+      setSecretEnding(false)
+    }, duration)
+  }, [])
+
+  const launchSecretGame = (game) => {
+    const nextGame = game === 'cube' ? 'cube' : 'drive'
+    const isCube = nextGame === 'cube'
+
+    triggerSecretTerminal({
+      effect: 'game',
+      title: `sudo ${isCube ? 'cube' : 'drive'} accepted`,
+      detail: `${isCube ? 'The Cube' : 'Drive Mad'} booting`,
+      duration: 3600,
+    })
+
+    setAudioControlsOpen(false)
+    setActiveGame(nextGame)
+    setShowGameOverlay(true)
+  }
+
+  const launchRandomSecretGame = () => {
+    const games = ['cube', 'drive']
+    launchSecretGame(games[Math.floor(Math.random() * games.length)])
+  }
+
+  const secretCommands = [
+    {
+      id: 'secret-vibe',
+      label: 'sudo vibe',
+      detail: 'pulse the neon layer',
+      icon: '!!',
+      aliases: ['vibe', 'vive', 'neon', 'pulse'],
+      keywords: ['secret', 'effect', 'visual'],
+      action: () =>
+        triggerSecretTerminal({
+          effect: 'vibe',
+          title: 'sudo vibe accepted',
+          detail: 'neon link established',
+        }),
+    },
+    {
+      id: 'secret-cube',
+      label: 'sudo cube',
+      detail: 'open The Cube minigame',
+      icon: 'CB',
+      aliases: ['cube', 'the cube', 'minigame cube'],
+      keywords: ['secret', 'konami', 'game'],
+      action: () => launchSecretGame('cube'),
+    },
+    {
+      id: 'secret-drive',
+      label: 'sudo drive',
+      detail: 'open Drive Mad minigame',
+      icon: 'DR',
+      aliases: ['drive', 'drive mad', 'car game'],
+      keywords: ['secret', 'konami', 'game'],
+      action: () => launchSecretGame('drive'),
+    },
+    {
+      id: 'secret-konami',
+      label: 'sudo konami',
+      detail: 'launch a random minigame',
+      icon: 'K0',
+      aliases: ['konami', 'random game', 'minigame'],
+      keywords: ['secret', 'cube', 'drive'],
+      action: launchRandomSecretGame,
+    },
+    {
+      id: 'secret-overclock',
+      label: 'sudo overclock',
+      detail: 'boost music and CRT intensity',
+      icon: 'OC',
+      aliases: ['overclock', 'boost', 'turbo'],
+      keywords: ['secret', 'audio', 'effect'],
+      action: () => {
+        setPlayAudio(true)
+        setAudioMuted(false)
+        setAudioPaused(false)
+        setAudioVolume((prev) => Math.max(prev, 32))
+        triggerSecretTerminal({
+          effect: 'overclock',
+          title: 'sudo overclock accepted',
+          detail: 'render loop boosted for a few seconds',
+        })
+      },
+    },
+    {
+      id: 'secret-matrix',
+      label: 'sudo matrix',
+      detail: 'drop a terminal rain overlay',
+      icon: 'MX',
+      aliases: ['matrix', 'rain', 'terminal rain'],
+      keywords: ['secret', 'visual', 'effect'],
+      action: () =>
+        triggerSecretTerminal({
+          effect: 'matrix',
+          title: 'sudo matrix accepted',
+          detail: 'terminal rain injected',
+          duration: 5200,
+        }),
+    },
+    {
+      id: 'secret-lofi',
+      label: 'sudo lofi',
+      detail: 'open the deck and start music',
+      icon: 'LF',
+      aliases: ['lofi', 'music', 'radio'],
+      keywords: ['secret', 'audio', 'deck'],
+      action: () => {
+        setPlayAudio(true)
+        setAudioMuted(false)
+        setAudioPaused(false)
+        setAudioControlsOpen(true)
+        setNextAudioTrack()
+        triggerSecretTerminal({
+          effect: 'lofi',
+          title: 'sudo lofi accepted',
+          detail: 'audio deck patched into signal',
+        })
+      },
+    },
+    {
+      id: 'secret-help',
+      label: 'help secrets',
+      detail: 'show hidden terminal commands',
+      icon: '??',
+      aliases: ['secrets', 'secret help', 'sudo help', 'help'],
+      keywords: ['secret', 'commands'],
+      action: () =>
+        triggerSecretTerminal({
+          effect: 'scan',
+          title: 'secret commands',
+          detail: 'sudo cube / sudo drive / sudo konami / sudo overclock / sudo matrix / sudo lofi',
+          duration: 6000,
+        }),
+    },
+  ]
+
+  const paletteCommands = [
+    {
+      id: 'route-home',
+      label: 'Go home',
+      detail: 'profile terminal',
+      category: 'route',
+      icon: '00',
+      keywords: ['inicio', 'hero', 'login', 'profile'],
+      action: () => scrollToSection('#home'),
+    },
+    {
+      id: 'route-about',
+      label: 'Open about',
+      detail: 'about.md',
+      category: 'route',
+      icon: '01',
+      keywords: ['bio', 'readme', 'profile'],
+      action: () => scrollToSection('#about'),
+    },
+    {
+      id: 'route-links',
+      label: 'Open links',
+      detail: 'links.sh',
+      category: 'route',
+      icon: '02',
+      keywords: ['discord', 'github', 'steam', 'twitch'],
+      action: () => scrollToSection('#links'),
+    },
+    {
+      id: 'route-discord',
+      label: 'Open Discord',
+      detail: 'live presence card',
+      category: 'route',
+      icon: '03',
+      keywords: ['presence', 'activity', 'status'],
+      action: () => scrollToSection('#discord'),
+    },
+    {
+      id: 'route-gallery',
+      label: 'Open gallery',
+      detail: 'image vault',
+      category: 'route',
+      icon: '04',
+      keywords: ['photos', 'pictures', 'media'],
+      action: () => scrollToSection('#gallery'),
+    },
+    {
+      id: 'route-comments',
+      label: 'Open comments',
+      detail: 'guestbook stream',
+      category: 'route',
+      icon: '05',
+      keywords: ['messages', 'guestbook'],
+      action: () => scrollToSection('#comments'),
+    },
+    {
+      id: 'audio-panel',
+      label: 'Toggle audio deck',
+      detail: audioControlsOpen ? 'close LoFi controls' : 'open LoFi controls',
+      category: 'audio',
+      icon: 'AU',
+      keywords: ['music', 'lofi', 'controls', 'panel'],
+      action: () => setAudioControlsOpen((prev) => !prev),
+    },
+    {
+      id: 'audio-play',
+      label: audioPaused ? 'Play LoFi' : 'Pause LoFi',
+      detail: currentAudioTrack.title,
+      category: 'audio',
+      icon: audioPaused ? 'PL' : 'PA',
+      keywords: ['music', 'lofi', 'play', 'pause'],
+      action: toggleLofiPlay,
+    },
+    {
+      id: 'audio-next',
+      label: 'Next LoFi track',
+      detail: currentAudioTrack.subtitle,
+      category: 'audio',
+      icon: 'NX',
+      keywords: ['music', 'lofi', 'next', 'track'],
+      action: setNextAudioTrack,
+    },
+    {
+      id: 'audio-mute',
+      label: effectiveAudioMuted ? 'Unmute LoFi' : 'Mute LoFi',
+      detail: `volume ${String(audioVolume).padStart(2, '0')}%`,
+      category: 'audio',
+      icon: effectiveAudioMuted ? 'UN' : 'MT',
+      keywords: ['music', 'lofi', 'mute', 'volume'],
+      action: toggleLofiMute,
+    },
+    ...(me && me.isAdmin
+      ? [
+          {
+            id: 'theme-xmas',
+            label: christmasEnabled ? 'Disable Xmas mode' : 'Enable Xmas mode',
+            detail: christmasSaving ? 'saving settings' : 'admin theme switch',
+            category: 'admin',
+            icon: 'XM',
+            keywords: ['christmas', 'xmas', 'snow', 'theme'],
+            action: toggleChristmasTheme,
+          },
+        ]
+      : []),
+  ]
+
+  const deckSections = [
+    { href: '#home', label: 'home', node: <Hero startTyping={!showSplash} /> },
+    { href: '#about', label: 'about', node: <About /> },
+    { href: '#links', label: 'links', node: <Links /> },
+    { href: '#discord', label: 'discord', node: <DiscordCard /> },
+    { href: '#gallery', label: 'gallery', node: <Gallery /> },
+    { href: '#comments', label: 'comments', node: <Comments /> },
+  ]
+
+  const secretShellClass = secretPulse
+    ? `secret-terminal-active secret-terminal-${secretEffect} ${
+        secretEnding ? 'secret-terminal-ending' : ''
+      }`
+    : ''
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${secretShellClass}`}>
       <div className="app-bg" aria-hidden="true" />
       <ArcadeVisualEffects visible={!showSplash} />
       <BackgroundAudio
@@ -939,7 +1562,7 @@ export default function App() {
         trackCount={LOFI_TRACKS.length}
         onOpenChange={setAudioControlsOpen}
         onToggleMute={toggleLofiMute}
-        onTogglePlay={() => setAudioPaused((prev) => !prev)}
+        onTogglePlay={toggleLofiPlay}
         onVolumeChange={handleLofiVolumeChange}
         onNext={setNextAudioTrack}
         onPrevious={setPreviousAudioTrack}
@@ -950,17 +1573,91 @@ export default function App() {
         saving={christmasSaving}
         onToggle={toggleChristmasTheme}
       />
+      <CommandPalette
+        enabled={!showSplash && !showGameOverlay}
+        commands={paletteCommands}
+        secretCommands={secretCommands}
+      />
+      {secretPulse && secretEffect === 'matrix' && (
+        <SecretTerminalRain ending={secretEnding} />
+      )}
+      {secretPulse && (
+        <div
+          className={`secret-terminal-toast ${secretEnding ? 'is-ending' : ''}`}
+          role="status"
+          aria-live="polite"
+        >
+          <span>{secretToast.title}</span>
+          <strong>{secretToast.detail}</strong>
+        </div>
+      )}
       {showSplash && <Splash onEnter={handleEnter} />}
       <Navbar />
-      <main className="app-main">
-        <Hero startTyping={!showSplash} />
-        <div className="space-y-10">
-          <About />
-          <Links />
-          <DiscordCard />
-          <Gallery />
-          <Comments />
-        </div>
+      <main className={`app-main ${isSectionDeckMode ? 'section-deck-main' : ''}`}>
+        {isSectionDeckMode ? (
+          <div
+            className="section-deck"
+            onWheel={handleDeckWheel}
+            onTouchStart={handleDeckTouchStart}
+            onTouchEnd={handleDeckTouchEnd}
+          >
+            {deckSections.map((section, index) => {
+              const isActive = index === activeSectionIndex
+              const isLeaving = index === previousSectionIndex
+              const itemClass = [
+                'section-deck-item',
+                isActive ? 'is-active' : '',
+                isLeaving ? 'is-leaving' : '',
+                sectionDirection === 'forward' ? 'is-forward' : 'is-backward',
+              ]
+                .filter(Boolean)
+                .join(' ')
+
+              return (
+                <div
+                  key={section.href}
+                  ref={(node) => {
+                    if (node) sectionPanelRefs.current[index] = node
+                  }}
+                  className={itemClass}
+                  aria-hidden={!isActive}
+                >
+                  {section.node}
+                </div>
+              )
+            })}
+
+            <div className="section-deck-hud" aria-label="Section navigation">
+              <div className="section-deck-counter" aria-hidden="true">
+                <span>{String(activeSectionIndex).padStart(2, '0')}</span>
+                <strong>{deckSections[activeSectionIndex]?.label}</strong>
+              </div>
+              <div className="section-deck-dots">
+                {deckSections.map((section, index) => (
+                  <button
+                    key={section.href}
+                    type="button"
+                    className={index === activeSectionIndex ? 'is-active' : ''}
+                    onClick={() => goToSectionIndex(index)}
+                    aria-label={`Open ${section.label} section`}
+                    aria-current={index === activeSectionIndex ? 'step' : undefined}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Hero startTyping={!showSplash} />
+            <div className="space-y-10">
+              <About />
+              <Links />
+              <DiscordCard />
+              <Gallery />
+              <Comments />
+            </div>
+          </>
+        )}
       </main>
       <footer className="app-footer">
         <div className="footer-shell mx-auto flex max-w-6xl flex-col items-center gap-2 sm:flex-row sm:justify-between sm:gap-3">

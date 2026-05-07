@@ -1517,7 +1517,7 @@ html:not(.theme-xmas) .splash-stage {
 html:not(.theme-xmas) .splash-phase-welcome {
   justify-content: center;
   gap: 12px;
-  padding: 26px 116px 22px;
+  padding: 26px 42px 22px;
 }
 
 .splash-title-block {
@@ -1559,52 +1559,6 @@ html:not(.theme-xmas) .splash-copy {
   max-width: 39ch;
   margin: 8px 0 0;
   color: rgba(220, 231, 255, 0.86);
-}
-
-.splash-readout {
-  position: absolute;
-  top: 50%;
-  display: grid;
-  gap: 7px;
-  min-width: 78px;
-  transform: translateY(-50%);
-  border-radius: 7px;
-  border: 1px solid rgba(0, 255, 229, 0.14);
-  background: rgba(1, 6, 16, 0.48);
-  padding: 10px;
-  text-align: left;
-}
-
-.splash-readout-left {
-  left: 22px;
-}
-
-.splash-readout-right {
-  right: 22px;
-}
-
-.splash-readout span,
-.splash-readout strong {
-  display: block;
-  overflow: hidden;
-  font-family: var(--font-mono);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.splash-readout span {
-  color: var(--arc-magenta);
-  font-size: 0.56rem;
-  font-weight: 850;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.splash-readout strong {
-  color: rgba(230, 241, 255, 0.92);
-  font-size: 0.74rem;
-  font-weight: 850;
-  letter-spacing: 0.04em;
 }
 
 html:not(.theme-xmas) .splash-tags {
@@ -1680,28 +1634,6 @@ html:not(.theme-xmas) .splash-loader-title {
 
   html:not(.theme-xmas) .splash-phase-welcome {
     padding: 26px 18px 20px;
-  }
-
-  .splash-readout {
-    position: static;
-    grid-template-columns: auto auto;
-    justify-content: center;
-    min-width: 0;
-    transform: none;
-    padding: 7px 9px;
-  }
-
-  .splash-readout-left {
-    order: -2;
-  }
-
-  .splash-readout-right {
-    order: -1;
-  }
-
-  .splash-readout span,
-  .splash-readout strong {
-    font-size: 0.58rem;
   }
 
   html:not(.theme-xmas) .splash-copy {

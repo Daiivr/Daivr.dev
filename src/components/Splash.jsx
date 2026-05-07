@@ -181,15 +181,6 @@ function WelcomeContent({ phase, onEnter, displayName }) {
           : 'pointer-events-none opacity-0 translate-y-3')
       }
     >
-      <div className="splash-readout splash-readout-left" aria-hidden="true">
-        <span>init</span>
-        <strong>03:00</strong>
-      </div>
-      <div className="splash-readout splash-readout-right" aria-hidden="true">
-        <span>access</span>
-        <strong>open</strong>
-      </div>
-
       <div className="splash-title-block">
         <p className="splash-kicker">~/personal $ launch</p>
         <h1 className="splash-title">
