@@ -1531,9 +1531,16 @@ export default function App() {
         secretEnding ? 'secret-terminal-ending' : ''
       }`
     : ''
+  const appShellClass = [
+    'app-shell',
+    isSectionDeckMode ? 'is-section-deck-mode' : '',
+    secretShellClass,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
-    <div className={`app-shell ${secretShellClass}`}>
+    <div className={appShellClass}>
       <div className="app-bg" aria-hidden="true" />
       <ArcadeVisualEffects visible={!showSplash} />
       <BackgroundAudio

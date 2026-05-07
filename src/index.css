@@ -772,8 +772,14 @@ body {
 .section-deck-main {
   width: 100%;
   max-width: 72rem;
+  height: 100dvh;
   min-height: 100dvh;
+  overflow: hidden;
   padding-bottom: 0;
+}
+
+.app-shell.is-section-deck-mode .app-footer {
+  display: none;
 }
 
 .section-deck {
@@ -805,7 +811,7 @@ body {
   inset: 0;
   z-index: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   overflow-x: hidden;
   overflow-y: auto;
@@ -836,6 +842,7 @@ body {
 .section-deck-item > section {
   width: 100%;
   flex: 0 0 auto;
+  margin-block: auto;
 }
 
 .section-deck-item.is-active {
