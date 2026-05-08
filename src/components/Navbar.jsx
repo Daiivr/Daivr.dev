@@ -10,6 +10,24 @@ const navLinks = [
   { href: '#comments', label: 'comments', code: '05' },
 ]
 
+function BrandLogo({ large = false }) {
+  return (
+    <span
+      className={`brand-logo${large ? ' brand-logo-lg' : ''}`}
+      aria-hidden="true"
+    >
+      <span className="brand-logo-leds">
+        <i />
+        <i />
+        <i />
+      </span>
+      <span className="brand-logo-mark">D</span>
+      <span className="brand-logo-cursor" />
+      <span className="brand-logo-scan" />
+    </span>
+  )
+}
+
 function getSectionOffsets() {
   return navLinks
     .map((l) => {
@@ -152,7 +170,7 @@ export default function Navbar() {
               onClick={handleClick('#home')}
               className="inline-flex items-center gap-2"
             >
-              <span className="brand-orb" aria-hidden="true" />
+              <BrandLogo />
               <span className="text-sm font-semibold tracking-tight">
                 daivr.dev
               </span>
@@ -170,7 +188,7 @@ export default function Navbar() {
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex app-nav">
         <a href="#home" onClick={handleClick('#home')} className="sidebar-brand">
-          <span className="brand-orb brand-orb-lg" aria-hidden="true" />
+          <BrandLogo large />
           <div className="sidebar-brand-copy">
             <div className="sidebar-brand-kicker">
               ~/portfolio

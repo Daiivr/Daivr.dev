@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import axios from 'axios'
-import nitroRubyBadge from '../assets/discord-badge-nitro-ruby.svg'
+import nitroRubyBadge from '../assets/discord-badge-nitro-ruby-card.png'
+import nitroRubyTooltipBadge from '../assets/discord-badge-nitro-ruby-tooltip.svg'
+import originallyKnownBadge from '../assets/discord-badge-originally-known-as.png'
 import serverBoostBadge from '../assets/discord-badge-boost.svg'
 
 const DISCORD_ID = '271701484922601472'
@@ -31,12 +33,20 @@ const BADGES = [
 const CUSTOM_BADGES = [
   {
     icon: nitroRubyBadge,
+    tooltipIcon: nitroRubyTooltipBadge,
     label: "NITRO RUBY",
     sublabel: "Subscriber since 9/6/20",
+    variant: "nitro-ruby",
   },
   {
     icon: serverBoostBadge,
     label: "Server boosting since Sep 12, 2020",
+  },
+  {
+    icon: originallyKnownBadge,
+    label: "Originally known as Dai \u2601",
+    sublabel: "#4505",
+    tooltipWidth: 210,
   },
 ]
 
@@ -259,14 +269,33 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
       totalLabel: formatTime(total),
     }
   })()
+  const hasGameStreak = Boolean(
+    streak?.alive &&
+      streak.streak > 1 &&
+      mainActivity?.name &&
+      streak.game === mainActivity.name,
+  )
+  const hasActivitySession = Boolean(fallbackElapsed || gameSessionLabel)
+  const showInlineStreak = hasGameStreak && hasRichPresenceImage && hasActivitySession
 
   const showBadgeTooltip = (badge, element) => {
     const rect = element.getBoundingClientRect()
+    const anchorX = rect.left + rect.width / 2
+    const isNitroRuby = badge.variant === 'nitro-ruby'
+    const tooltipWidth = isNitroRuby ? 244 : (badge.tooltipWidth || 140)
+    const viewportPadding = 12
+    const minLeft = viewportPadding + tooltipWidth / 2
+    const maxLeft = Math.max(minLeft, window.innerWidth - viewportPadding - tooltipWidth / 2)
+    const left = Math.min(Math.max(anchorX, minLeft), maxLeft)
+
     setBadgeTooltip({
       label: badge.label,
       sublabel: badge.sublabel,
-      left: rect.left + rect.width / 2,
-      top: rect.top - 8,
+      icon: badge.tooltipIcon || badge.icon,
+      variant: badge.variant,
+      arrowOffset: anchorX - left,
+      left,
+      top: rect.top - 14,
     })
   }
 
@@ -319,10 +348,23 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
               {hasGuildTag && (
                 <span
                   className="discord-guild-pill"
-                  title={`Server Tag · ${primaryGuild.tag}`}
+                  tabIndex="0"
+                  aria-label={`Server tag: ${primaryGuild.tag}`}
                 >
                   <img src={guildBadgeUrl} alt="" loading="lazy" />
                   <span>{primaryGuild.tag}</span>
+                  <span className="discord-guild-tooltip" role="tooltip">
+                    <span className="discord-guild-tooltip-kicker">
+                      server.tag
+                    </span>
+                    <span className="discord-guild-tooltip-main">
+                      <img src={guildBadgeUrl} alt="" loading="lazy" />
+                      <strong>{primaryGuild.tag}</strong>
+                    </span>
+                    <span className="discord-guild-tooltip-sub">
+                      Primary guild identity
+                    </span>
+                  </span>
                 </span>
               )}
             </div>
@@ -423,15 +465,22 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
                 {mainActivity.state && (
                   <p className="discord-activity-state">{mainActivity.state}</p>
                 )}
-                {(fallbackElapsed || gameSessionLabel) && (
+                {hasActivitySession && (
                   <div className="discord-activity-session">
                     <span />
                     Jugando hace {fallbackElapsed || gameSessionLabel}
+                    {showInlineStreak && (
+                      <span
+                        className="discord-streak-chip discord-streak-chip-inline"
+                        title={`Has jugado ${mainActivity.name} ${streak.streak} días seguidos`}
+                      >
+                        <span aria-hidden="true">⚡</span>
+                        {streak.streak}x Streak
+                      </span>
+                    )}
                   </div>
                 )}
-                {streak?.alive &&
-                  streak.streak > 1 &&
-                  streak.game === mainActivity.name && (
+                {hasGameStreak && !showInlineStreak && (
                     <div className="discord-activity-streak-row">
                       <span
                         className="discord-streak-chip"
@@ -485,10 +534,24 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
       {badgeTooltip &&
         createPortal(
           <div
-            className="discord-floating-tooltip"
-            style={{ left: `${badgeTooltip.left}px`, top: `${badgeTooltip.top}px` }}
+            className={`discord-floating-tooltip ${
+              badgeTooltip.variant ? `is-${badgeTooltip.variant}` : ''
+            }`}
+            style={{
+              left: `${badgeTooltip.left}px`,
+              top: `${badgeTooltip.top}px`,
+              '--tooltip-arrow-offset': `${badgeTooltip.arrowOffset || 0}px`,
+            }}
             role="tooltip"
           >
+            {badgeTooltip.variant === 'nitro-ruby' && (
+              <img
+                className="discord-nitro-tooltip-badge"
+                src={badgeTooltip.icon}
+                alt=""
+                aria-hidden="true"
+              />
+            )}
             <span className="discord-badge-tooltip-label">
               {badgeTooltip.label}
             </span>

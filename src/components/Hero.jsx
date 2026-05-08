@@ -344,6 +344,7 @@ export default function Hero({ startTyping }) {
     () => buildGraphFillPath(graphPath),
     [graphPath],
   )
+  const heroTerminalText = tagline || (startTyping ? '' : TAGLINE_TEXT)
   const telemetryDelta = useMemo(() => {
     const previous = hudHistory[hudHistory.length - 2] || smoothHudStats
     const currentLoad = getTelemetryLoad(smoothHudStats, previous)
@@ -425,11 +426,14 @@ export default function Hero({ startTyping }) {
             {/* Typed text: centered in the big top box */}
             <div className="flex flex-1 items-center justify-center px-3 sm:px-6">
               <div className="hero-center-stack w-full max-w-[48ch]">
-                <p className="hero-tagline mt-0 text-center">
-                  <span>{tagline || (startTyping ? '' : TAGLINE_TEXT)}</span>
-                  {!hasTyped && startTyping && (
-                    <span className="ml-[2px] inline-block h-4 w-[2px] align-middle bg-slate-100/70 animate-pulse" />
-                  )}
+                <p className="hero-tagline hero-typing-line mt-0 text-center">
+                  <span className="hero-typing-copy">{heroTerminalText}</span>
+                  <span
+                    className={`hero-typing-caret ${
+                      !hasTyped && startTyping ? 'is-typing' : 'is-idle'
+                    }`}
+                    aria-hidden="true"
+                  />
                 </p>
 
                 <div className="hero-system-panel" aria-hidden="true">
