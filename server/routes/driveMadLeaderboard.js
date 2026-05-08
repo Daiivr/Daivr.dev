@@ -5,12 +5,28 @@ const { getUserFromRequest } = require('../utils/session')
 
 const router = express.Router()
 
+const LOCAL_DATA_DIR = path.join(__dirname, '..', '..', 'data')
+const RENDER_DATA_DIR = '/var/data'
+
+function getRenderDataDir() {
+  try {
+    return fs.existsSync(RENDER_DATA_DIR) && fs.statSync(RENDER_DATA_DIR).isDirectory()
+      ? RENDER_DATA_DIR
+      : null
+  } catch {
+    return null
+  }
+}
+
 const DATA_DIR =
   process.env.DRIVE_MAD_DATA_DIR ||
   process.env.GAME_DATA_DIR ||
-  path.join(__dirname, '..', '..', 'data')
+  process.env.DATA_DIR ||
+  getRenderDataDir() ||
+  LOCAL_DATA_DIR
 
 const FILE = path.join(DATA_DIR, 'drive-mad-leaderboard.json')
+const LEGACY_FILE = path.join(LOCAL_DATA_DIR, 'drive-mad-leaderboard.json')
 const MAX_LEVEL = 10000
 const MAX_TIME_MS = 24 * 60 * 60 * 1000
 
@@ -20,7 +36,11 @@ function ensureStorage() {
       fs.mkdirSync(DATA_DIR, { recursive: true })
     }
     if (!fs.existsSync(FILE)) {
-      fs.writeFileSync(FILE, JSON.stringify({ scores: [] }, null, 2), 'utf8')
+      if (path.resolve(FILE) !== path.resolve(LEGACY_FILE) && fs.existsSync(LEGACY_FILE)) {
+        fs.copyFileSync(LEGACY_FILE, FILE)
+      } else {
+        fs.writeFileSync(FILE, JSON.stringify({ scores: [] }, null, 2), 'utf8')
+      }
     }
   } catch (err) {
     console.error('Error creando storage de Drive Mad leaderboard', err)

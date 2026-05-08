@@ -5,12 +5,29 @@ const axios = require('axios')
 
 const router = express.Router()
 
+const LOCAL_DATA_DIR = path.join(__dirname, '..', '..', 'data')
+const RENDER_DATA_DIR = '/var/data'
+
+function getRenderDataDir() {
+  try {
+    return fs.existsSync(RENDER_DATA_DIR) && fs.statSync(RENDER_DATA_DIR).isDirectory()
+      ? RENDER_DATA_DIR
+      : null
+  } catch {
+    return null
+  }
+}
+
 const DATA_DIR =
   process.env.STREAK_DATA_DIR ||
+  process.env.GAME_DATA_DIR ||
+  process.env.DATA_DIR ||
   process.env.COMMENTS_DATA_DIR ||
-  path.join(__dirname, '..', '..', 'data')
+  getRenderDataDir() ||
+  LOCAL_DATA_DIR
 
 const FILE = path.join(DATA_DIR, 'discord-streak.json')
+const LEGACY_FILE = path.join(LOCAL_DATA_DIR, 'discord-streak.json')
 
 const DISCORD_ID = process.env.DISCORD_USER_ID || '271701484922601472'
 const POLL_MS = Number(process.env.STREAK_POLL_MS) || 60_000
@@ -19,11 +36,15 @@ function ensureStorage() {
   try {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true })
     if (!fs.existsSync(FILE)) {
-      fs.writeFileSync(
-        FILE,
-        JSON.stringify({ currentGame: null, games: {} }, null, 2),
-        'utf8'
-      )
+      if (path.resolve(FILE) !== path.resolve(LEGACY_FILE) && fs.existsSync(LEGACY_FILE)) {
+        fs.copyFileSync(LEGACY_FILE, FILE)
+      } else {
+        fs.writeFileSync(
+          FILE,
+          JSON.stringify({ currentGame: null, games: {} }, null, 2),
+          'utf8'
+        )
+      }
     }
   } catch (err) {
     console.error('Error creando storage de streak', err)

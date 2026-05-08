@@ -78,4 +78,20 @@ NODE_ENV=production node server/index.js
 
 Y sirve la carpeta `dist` con cualquier servidor estático (o configura un reverse proxy con Nginx hacia el Vite `preview` + API).
 
+## Render y datos persistentes
+
+Para que el leaderboard de Drive Mad y los game streaks sobrevivan redeploys en Render, crea un Persistent Disk y móntalo en:
+
+```bash
+/var/data
+```
+
+Luego agrega esta variable de entorno en Render:
+
+```bash
+DATA_DIR=/var/data
+```
+
+También puedes usar `DRIVE_MAD_DATA_DIR=/var/data` o `STREAK_DATA_DIR=/var/data` si quieres configurar esos archivos por separado. Si `/var/data` existe, el servidor lo usa automáticamente para el leaderboard y los streaks, y copia una vez los archivos anteriores desde `data/` cuando el archivo persistente todavía no existe.
+
 > Esto es un punto de partida. Puedes tunear los estilos, textos, agregar más secciones y mejorar el panel de Discord (badges, más datos del presence, etc).
