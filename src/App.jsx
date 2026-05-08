@@ -10,6 +10,7 @@ import Splash from './components/Splash'
 import Fireflies from './components/Fireflies'
 import Snowfall from './components/Snowfall'
 import CommandPalette from './components/CommandPalette'
+import ModalPortal from './components/ModalPortal'
 
 const KONAMI_VOLUME_STORAGE_KEY = 'daivr_konami_volume'
 const DEFAULT_KONAMI_VOLUME_PERCENT = 8
@@ -100,7 +101,9 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
   const [leaderboardError, setLeaderboardError] = useState('')
   const [driveMadLeaderboard, setDriveMadLeaderboard] = useState([])
   const [myDriveMadScore, setMyDriveMadScore] = useState(null)
+  const [driveMadRestore, setDriveMadRestore] = useState(null)
   const [driveMadResetting, setDriveMadResetting] = useState(false)
+  const [driveMadResetConfirmOpen, setDriveMadResetConfirmOpen] = useState(false)
   const [driveMadSaveStatus, setDriveMadSaveStatus] = useState({
     kind: 'idle',
     message: '',
@@ -240,11 +243,49 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
     }
   }, [])
 
+  useEffect(() => {
+    if (!open || internalGame !== 'drive' || !me?.id) {
+      setDriveMadRestore(null)
+      return undefined
+    }
+
+    let cancelled = false
+
+    const loadRestorePoint = async () => {
+      try {
+        const res = await fetch('/api/drive-mad/me', {
+          credentials: 'include',
+        })
+        const data = res.ok ? await res.json() : { score: null }
+        const score = data.score
+        const highestLevel = Number(score?.highestLevel) || 0
+        const baseTimeMs = Number(score?.bestTimeMs)
+
+        if (!cancelled) {
+          setDriveMadRestore(
+            highestLevel > 0
+              ? {
+                  // The leaderboard stores completed levels, so restore to the next playable level.
+                  level: highestLevel + 1,
+                  baseTimeMs: Number.isFinite(baseTimeMs) ? Math.max(0, Math.round(baseTimeMs)) : 0,
+                }
+              : null,
+          )
+        }
+      } catch (err) {
+        if (!cancelled) setDriveMadRestore(null)
+      }
+    }
+
+    loadRestorePoint()
+
+    return () => {
+      cancelled = true
+    }
+  }, [open, internalGame, me?.id])
+
   const handleResetDriveMadScore = useCallback(async () => {
     if (!me?.id || driveMadResetting) return
-
-    const confirmed = window.confirm('Reset your Drive Mad leaderboard score?')
-    if (!confirmed) return
 
     setDriveMadResetting(true)
     setDriveMadSaveStatus({
@@ -264,11 +305,13 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
       }
 
       setMyDriveMadScore(null)
+      setDriveMadRestore(null)
       setDriveMadLeaderboard(data.leaderboard || [])
       setDriveMadSaveStatus({
         kind: 'saved',
         message: 'score reset',
       })
+      setDriveMadResetConfirmOpen(false)
 
       iframeRef.current?.contentWindow?.postMessage(
         { type: 'daivr:drive-mad-reset-score' },
@@ -285,9 +328,20 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
     }
   }, [driveMadResetting, me?.id])
 
+  const openDriveMadResetConfirm = useCallback(() => {
+    if (!me?.id || driveMadResetting) return
+    setDriveMadResetConfirmOpen(true)
+  }, [driveMadResetting, me?.id])
+
+  const closeDriveMadResetConfirm = useCallback(() => {
+    if (driveMadResetting) return
+    setDriveMadResetConfirmOpen(false)
+  }, [driveMadResetting])
+
   useEffect(() => {
     if (!open || internalGame !== 'drive') {
       setLeaderboardOpen(false)
+      setDriveMadResetConfirmOpen(false)
       setDriveMadSaveStatus({
         kind: 'idle',
         message: '',
@@ -402,6 +456,10 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
 
   const queryParams = new URLSearchParams()
   if (discordId) queryParams.set('discordId', discordId)
+  if (isDriveMad && driveMadRestore?.level > 1) {
+    queryParams.set('restoreLevel', String(driveMadRestore.level))
+    queryParams.set('restoreBaseTimeMs', String(driveMadRestore.baseTimeMs || 0))
+  }
 
   const src = queryParams.toString()
     ? `${basePath}?${queryParams.toString()}`
@@ -418,8 +476,9 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
       : 'Konami unlocked. You earned a quick driving break.'
 
   return (
-    <div
-      className={`konami-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 ${
+    <>
+      <div
+        className={`konami-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 ${
         isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >
@@ -504,9 +563,9 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
                           total {formatLeaderboardTime(myDriveMadScore.bestTimeMs)}
                         </strong>
                       </div>
-                      <button
+                        <button
                         type="button"
-                        onClick={handleResetDriveMadScore}
+                        onClick={openDriveMadResetConfirm}
                         disabled={driveMadResetting}
                       >
                         reset
@@ -598,7 +657,74 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+
+      {driveMadResetConfirmOpen && (
+        <ModalPortal>
+          <div className="modal-backdrop drive-reset-backdrop" onClick={closeDriveMadResetConfirm}>
+            <div
+              className="modal-card modal-md drive-reset-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="drive-reset-title"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div>
+                  <h3 className="modal-title" id="drive-reset-title">
+                    Reset Drive Mad run?
+                  </h3>
+                  <p className="modal-text">
+                    This clears your leaderboard score and your saved game progress.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeDriveMadResetConfirm}
+                  className="modal-close"
+                  aria-label="Close reset confirmation"
+                  disabled={driveMadResetting}
+                >
+                  x
+                </button>
+              </div>
+
+              <div className="modal-panel drive-reset-warning">
+                <span className="drive-reset-icon" aria-hidden="true">
+                  !
+                </span>
+                <div>
+                  <strong>Game progress will restart at level 1.</strong>
+                  <p>
+                    Your Drive Mad save in this browser will be wiped, the game will reload,
+                    and your top 10 entry will be removed so you can start a fresh attempt.
+                  </p>
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  onClick={closeDriveMadResetConfirm}
+                  className="modal-btn-cancel"
+                  disabled={driveMadResetting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetDriveMadScore}
+                  className="modal-btn-danger"
+                  disabled={driveMadResetting}
+                >
+                  {driveMadResetting ? 'Resetting...' : 'Reset to level 1'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
+    </>
   )
 }
 function ControlIcon({ type }) {

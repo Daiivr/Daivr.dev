@@ -1900,6 +1900,58 @@ html:not(.theme-xmas) .konami-window .relative.flex-1.overflow-hidden {
   opacity: 0.58;
 }
 
+.drive-reset-modal {
+  --modal-max: 30rem;
+}
+
+.drive-reset-modal .modal-header {
+  align-items: flex-start;
+}
+
+.drive-reset-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 14px;
+  border-color: rgba(255, 84, 112, 0.28);
+  background:
+    linear-gradient(135deg, rgba(255, 84, 112, 0.10), rgba(255, 182, 39, 0.055)),
+    rgba(4, 8, 18, 0.82);
+}
+
+.drive-reset-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 84, 112, 0.36);
+  background: rgba(255, 84, 112, 0.10);
+  color: var(--arc-red, #ff5470);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 950;
+  box-shadow: 0 0 18px rgba(255, 84, 112, 0.14);
+}
+
+.drive-reset-warning strong {
+  display: block;
+  color: rgba(255, 236, 214, 0.96);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 950;
+  line-height: 1.35;
+}
+
+.drive-reset-warning p {
+  margin-top: 6px;
+  color: rgba(220, 231, 255, 0.72);
+  font-size: 0.70rem;
+  line-height: 1.55;
+}
+
 .drive-leaderboard-status {
   margin: 0;
   border-radius: 7px;

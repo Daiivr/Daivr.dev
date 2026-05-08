@@ -134,15 +134,26 @@
       (function () {
         var params = new URLSearchParams(window.location.search || "");
         var discordId = params.get("discordId") || "";
+        var storagePrefix = discordId ? "discord_" + discordId + "_" : "";
+        var restoreLevel = Math.floor(Number(params.get("restoreLevel")) || 0);
+        var restoreLevelIndex = restoreLevel > 1 ? restoreLevel - 1 : -1;
+        var restoreCompletedLevel = Math.max(0, restoreLevel - 1);
+        var restoreBaseTimeMs = Math.max(0, Math.round(Number(params.get("restoreBaseTimeMs")) || 0));
+
+        window.__daivrDriveMadStoragePrefix = storagePrefix;
+        window.getUrlLevelIndex = function () {
+          return restoreLevelIndex;
+        };
+
         var sessionId =
           Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
         var sessionStartedAt = 0;
         var activeLevelIndex = null;
         var activeLevelStartedAt = 0;
         var completedLevelDurations = {};
-        var cumulativeLevelTimeMs = 0;
+        var cumulativeLevelTimeMs = restoreBaseTimeMs;
         var lastSubmitKey = "";
-        var lastSavedLevel = 0;
+        var lastSavedLevel = restoreCompletedLevel;
 
         function clockMs() {
           if (window.performance && typeof window.performance.now === "function") {
@@ -156,6 +167,9 @@
         }
 
         function resetLeaderboardTracking() {
+          restoreLevelIndex = -1;
+          restoreCompletedLevel = 0;
+          restoreBaseTimeMs = 0;
           sessionId =
             Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
           sessionStartedAt = clockMs();
@@ -166,6 +180,61 @@
 
           if (activeLevelIndex !== null) {
             activeLevelStartedAt = clockMs();
+          }
+        }
+
+        function getSandboxDatabaseName() {
+          return (window.__daivrDriveMadStoragePrefix || "") + "/sandbox";
+        }
+
+        function reloadWithoutRestoreLevel() {
+          try {
+            var url = new URL(window.location.href);
+            url.searchParams.delete("restoreLevel");
+            url.searchParams.delete("restoreBaseTimeMs");
+            window.location.replace(url.toString());
+          } catch (err) {
+            window.location.reload();
+          }
+        }
+
+        function resetGameProgressToLevelOne() {
+          resetLeaderboardTracking();
+
+          try {
+            localStorage.clear();
+          } catch (err) {}
+
+          try {
+            if (window.IDBFS && typeof window.IDBFS.quit === "function") {
+              window.IDBFS.quit();
+            }
+          } catch (err) {}
+
+          try {
+            var indexedDBApi =
+              window.indexedDB ||
+              window.mozIndexedDB ||
+              window.webkitIndexedDB ||
+              window.msIndexedDB;
+
+            if (!indexedDBApi || typeof indexedDBApi.deleteDatabase !== "function") {
+              reloadWithoutRestoreLevel();
+              return;
+            }
+
+            var request = indexedDBApi.deleteDatabase(getSandboxDatabaseName());
+            var reload = function () {
+              reloadWithoutRestoreLevel();
+            };
+
+            request.onsuccess = reload;
+            request.onerror = reload;
+            request.onblocked = function () {
+              setTimeout(reload, 250);
+            };
+          } catch (err) {
+            window.location.reload();
           }
         }
 
@@ -345,7 +414,7 @@
           if (event.origin !== window.location.origin) return;
           var data = event.data || {};
           if (data.type === "daivr:drive-mad-reset-score") {
-            resetLeaderboardTracking();
+            resetGameProgressToLevelOne();
           }
         });
       })();
@@ -4073,6 +4142,9 @@
         IDBFS.dbs = {}
       },
       getDB: (name, callback) => {
+        if (typeof window == "object" && window.__daivrDriveMadStoragePrefix) {
+          name = window.__daivrDriveMadStoragePrefix + name
+        }
         var db = IDBFS.dbs[name];
         if (db) {
           return callback(null, db)
