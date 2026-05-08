@@ -21,7 +21,7 @@ function ensureStorage() {
     if (!fs.existsSync(FILE)) {
       fs.writeFileSync(
         FILE,
-        JSON.stringify({ game: null, streak: 0, lastDay: null }, null, 2),
+        JSON.stringify({ currentGame: null, games: {} }, null, 2),
         'utf8'
       )
     }
@@ -30,22 +30,63 @@ function ensureStorage() {
   }
 }
 
+function emptyState() {
+  return { currentGame: null, games: {} }
+}
+
+function normalizeGameRecord(record) {
+  if (!record || typeof record !== 'object') {
+    return { streak: 0, lastDay: null }
+  }
+
+  return {
+    streak: Number.isFinite(record.streak) ? record.streak : 0,
+    lastDay: typeof record.lastDay === 'string' ? record.lastDay : null,
+  }
+}
+
+function normalizeState(data) {
+  if (!data || typeof data !== 'object') return emptyState()
+
+  if (data.games && typeof data.games === 'object' && !Array.isArray(data.games)) {
+    const games = Object.entries(data.games).reduce((acc, [gameName, record]) => {
+      if (typeof gameName === 'string' && gameName.trim()) {
+        acc[gameName] = normalizeGameRecord(record)
+      }
+      return acc
+    }, {})
+
+    return {
+      currentGame:
+        typeof data.currentGame === 'string' && data.currentGame.trim()
+          ? data.currentGame
+          : null,
+      games,
+    }
+  }
+
+  // Legacy format: { game, streak, lastDay }
+  if (typeof data.game === 'string' && data.game.trim()) {
+    return {
+      currentGame: data.game,
+      games: {
+        [data.game]: normalizeGameRecord(data),
+      },
+    }
+  }
+
+  return emptyState()
+}
+
 function readState() {
   ensureStorage()
   try {
     const raw = fs.readFileSync(FILE, 'utf8')
     const data = raw ? JSON.parse(raw) : null
-    if (!data || typeof data !== 'object') {
-      return { game: null, streak: 0, lastDay: null }
-    }
-    return {
-      game: typeof data.game === 'string' ? data.game : null,
-      streak: Number.isFinite(data.streak) ? data.streak : 0,
-      lastDay: typeof data.lastDay === 'string' ? data.lastDay : null,
-    }
+    return normalizeState(data)
   } catch (e) {
     console.error('Error leyendo discord-streak.json', e)
-    return { game: null, streak: 0, lastDay: null }
+    return emptyState()
   }
 }
 
@@ -73,17 +114,31 @@ function daysBetween(a, b) {
   return Math.round((db - da) / 86_400_000)
 }
 
-// Marca un día de juego con el juego dado y devuelve el nuevo estado
-function applyGameDay(state, gameName, today) {
-  const sameGame = state.game === gameName
-  const gap = daysBetween(state.lastDay, today)
+function getGameRecord(state, gameName) {
+  return normalizeGameRecord(state.games?.[gameName])
+}
 
-  if (sameGame && gap === 0) return state // ya contado hoy
-  if (sameGame && gap === 1) {
-    return { game: gameName, streak: state.streak + 1, lastDay: today }
+// Marca un día de juego para ese juego sin tocar los streaks de otros juegos
+function applyGameDay(state, gameName, today) {
+  const current = getGameRecord(state, gameName)
+  const gap = daysBetween(current.lastDay, today)
+
+  const nextRecord =
+    gap === 0
+      ? current
+      : {
+          streak: gap === 1 ? current.streak + 1 : 1,
+          lastDay: today,
+        }
+
+  return {
+    ...state,
+    currentGame: gameName,
+    games: {
+      ...state.games,
+      [gameName]: nextRecord,
+    },
   }
-  // juego nuevo, o gap > 1, o sin lastDay
-  return { game: gameName, streak: 1, lastDay: today }
 }
 
 // El streak sigue "vivo" si jugaste hoy o ayer
@@ -109,11 +164,13 @@ async function pollLanyardOnce() {
     const today = todayKey()
     const state = readState()
     const next = applyGameDay(state, main.name, today)
+    const previous = getGameRecord(state, main.name)
+    const current = getGameRecord(next, main.name)
 
     if (
-      next.game !== state.game ||
-      next.streak !== state.streak ||
-      next.lastDay !== state.lastDay
+      next.currentGame !== state.currentGame ||
+      current.streak !== previous.streak ||
+      current.lastDay !== previous.lastDay
     ) {
       writeState(next)
     }
@@ -137,11 +194,13 @@ function startPoller() {
 router.get('/', (req, res) => {
   const state = readState()
   const today = todayKey()
-  const alive = isStreakAlive(state, today)
+  const game = state.currentGame
+  const current = game ? getGameRecord(state, game) : normalizeGameRecord()
+  const alive = isStreakAlive(current, today)
   res.json({
-    game: state.game,
-    streak: alive ? state.streak : 0,
-    lastDay: state.lastDay,
+    game,
+    streak: alive ? current.streak : 0,
+    lastDay: current.lastDay,
     alive,
   })
 })
