@@ -11,6 +11,7 @@ const { router: galleryRouter } = require('./routes/gallery')
 const { router: linksRouter } = require('./routes/links')
 const { router: visitsRouter } = require('./routes/visits')
 const { router: siteSettingsRouter } = require('./routes/siteSettings')
+const { router: driveMadLeaderboardRouter } = require('./routes/driveMadLeaderboard')
 const {
   router: discordStreakRouter,
   startPoller: startStreakPoller,
@@ -103,6 +104,7 @@ app.use('/api/links', linksRouter)
 app.use('/api/visits', visitsRouter)
 app.use('/api/site-settings', siteSettingsRouter)
 app.use('/api/discord-streak', discordStreakRouter)
+app.use('/api/drive-mad', driveMadLeaderboardRouter)
 
 
 app.get('/api/tenor-search', async (req, res) => {

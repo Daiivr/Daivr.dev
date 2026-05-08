@@ -232,19 +232,6 @@ export default function Navbar() {
           <SidebarTrafficLight />
         </div>
 
-        <div className="sidebar-system-panel" aria-hidden="true">
-          <div className="sidebar-system-top">
-            <span>stack.cache</span>
-            <span>ready</span>
-          </div>
-          <div className="sidebar-system-tags">
-            <span>React</span>
-            <span>Node</span>
-            <span>C#</span>
-            <span>SysBot</span>
-          </div>
-        </div>
-
         <div className="sidebar-credit">
           <span className="sidebar-credit-pill">
             © {new Date().getFullYear()} · Made by Dai

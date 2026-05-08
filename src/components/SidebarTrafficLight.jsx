@@ -17,18 +17,6 @@ export default function SidebarTrafficLight() {
           {/* Only the green lens blinks */}
           <span className="traffic-light traffic-green" />
         </div>
-
-        {/* reflection */}
-        <div className="traffic-art traffic-art-reflection" aria-hidden="true">
-          <img
-            src={trafficLight}
-            alt=""
-            className="traffic-img"
-            loading="lazy"
-            draggable="false"
-          />
-          <span className="traffic-light traffic-green" />
-        </div>
       </div>
     </div>
   )

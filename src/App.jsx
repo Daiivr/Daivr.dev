@@ -74,11 +74,36 @@ const canScrollPanel = (panel, deltaY) => {
   return panel.scrollTop > 2
 }
 
+const formatLeaderboardTime = (value) => {
+  const ms = Number(value)
+  if (!Number.isFinite(ms) || ms < 0) return '--'
+  const totalTenths = Math.floor(ms / 100)
+  const totalSeconds = Math.floor(totalTenths / 10)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  const tenths = totalTenths % 10
+
+  if (minutes > 0) {
+    return `${minutes}:${String(seconds).padStart(2, '0')}.${tenths}`
+  }
+
+  return `${seconds}.${tenths}s`
+}
+
 function KonamiGameOverlay({ open, activeGame, me, onClose }) {
   const [isMounted, setIsMounted] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [internalGame, setInternalGame] = useState(null)
   const [gameVolume, setGameVolume] = useState(DEFAULT_KONAMI_VOLUME_PERCENT)
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false)
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false)
+  const [leaderboardError, setLeaderboardError] = useState('')
+  const [driveMadLeaderboard, setDriveMadLeaderboard] = useState([])
+  const [myDriveMadScore, setMyDriveMadScore] = useState(null)
+  const [driveMadSaveStatus, setDriveMadSaveStatus] = useState({
+    kind: 'idle',
+    message: '',
+  })
   const iframeRef = useRef(null)
   const normalizedVolume = clampVolumePercent(gameVolume) / 100
   const targetVolumeRef = useRef(normalizedVolume)
@@ -152,6 +177,26 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
     volumeBootstrappedRef.current = true
   }, [sendVolumeMessage])
 
+  const requestDriveMadProgress = useCallback(() => {
+    if (!me?.id) {
+      setDriveMadSaveStatus({
+        kind: 'error',
+        message: 'log in with Discord to save your run',
+      })
+      return
+    }
+
+    const frame = iframeRef.current
+    if (!frame || !frame.contentWindow) return
+
+    frame.contentWindow.postMessage(
+      {
+        type: 'daivr:drive-mad-request-progress',
+      },
+      window.location.origin,
+    )
+  }, [me?.id])
+
   useEffect(() => {
     if (!open || !internalGame) {
       volumeBootstrappedRef.current = false
@@ -181,6 +226,124 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
     sendVolumeMessage(normalizedVolume, { fadeMs: 260 })
   }, [open, internalGame, normalizedVolume, sendVolumeMessage])
 
+  const loadDriveMadLeaderboard = useCallback(async (options = {}) => {
+    const silent = Boolean(options.silent)
+    if (!silent) setLeaderboardLoading(true)
+    setLeaderboardError('')
+
+    try {
+      const [leaderboardRes, myScoreRes] = await Promise.all([
+        fetch('/api/drive-mad/leaderboard?limit=10', {
+          credentials: 'include',
+        }),
+        fetch('/api/drive-mad/me', {
+          credentials: 'include',
+        }),
+      ])
+
+      if (!leaderboardRes.ok) {
+        throw new Error('leaderboard-error')
+      }
+
+      const leaderboardData = await leaderboardRes.json()
+      const myScoreData = myScoreRes.ok ? await myScoreRes.json() : { score: null }
+
+      setDriveMadLeaderboard(leaderboardData.leaderboard || [])
+      setMyDriveMadScore(myScoreData.score || null)
+    } catch (err) {
+      console.error('Error loading Drive Mad leaderboard', err)
+      setLeaderboardError('No se pudo cargar el top 10.')
+    } finally {
+      if (!silent) setLeaderboardLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!open || internalGame !== 'drive') {
+      setLeaderboardOpen(false)
+      setDriveMadSaveStatus({
+        kind: 'idle',
+        message: '',
+      })
+    }
+  }, [open, internalGame])
+
+  useEffect(() => {
+    if (!open || internalGame !== 'drive' || !leaderboardOpen) return
+    loadDriveMadLeaderboard()
+    requestDriveMadProgress()
+
+    const sync = setInterval(() => {
+      requestDriveMadProgress()
+      loadDriveMadLeaderboard({ silent: true })
+    }, 3000)
+
+    return () => clearInterval(sync)
+  }, [
+    open,
+    internalGame,
+    leaderboardOpen,
+    loadDriveMadLeaderboard,
+    requestDriveMadProgress,
+  ])
+
+  useEffect(() => {
+    if (!open || internalGame !== 'drive') return undefined
+
+    const handleScoreUpdate = (event) => {
+      if (event.origin !== window.location.origin) return
+      const data = event.data || {}
+
+      if (!me?.id && typeof data.type === 'string' && data.type.startsWith('daivr:drive-mad-score-')) {
+        setDriveMadSaveStatus({
+          kind: 'error',
+          message: 'log in with Discord to save your run',
+        })
+        return
+      }
+
+      if (data.type === 'daivr:drive-mad-score-saving') {
+        setDriveMadSaveStatus({
+          kind: 'saving',
+          message: `saving lvl ${data.level || '?'}`,
+        })
+        return
+      }
+
+      if (data.type === 'daivr:drive-mad-score-error') {
+        const message =
+          data.status === 401
+            ? 'log in with Discord to save your run'
+            : data.error === 'network-error'
+              ? 'network error while saving'
+              : 'could not save progress yet'
+
+        setDriveMadSaveStatus({
+          kind: 'error',
+          message,
+        })
+        return
+      }
+
+      if (data.type !== 'daivr:drive-mad-score-updated') return
+
+      if (data.score) {
+        setMyDriveMadScore(data.score)
+        setDriveMadSaveStatus({
+          kind: 'saved',
+          message: `saved lvl ${data.score.highestLevel}`,
+        })
+      }
+
+      if (leaderboardOpen) {
+        loadDriveMadLeaderboard({ silent: true })
+      }
+    }
+
+    window.addEventListener('message', handleScoreUpdate)
+    return () => window.removeEventListener('message', handleScoreUpdate)
+  }, [open, internalGame, leaderboardOpen, loadDriveMadLeaderboard, me?.id])
+
   const handleCloseClick = () => {
     if (onClose) onClose()
   }
@@ -191,10 +354,15 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
 
   const handleFrameLoad = useCallback(() => {
     bootstrapVolume()
-  }, [bootstrapVolume])
+    if (internalGame === 'drive') {
+      setTimeout(requestDriveMadProgress, 300)
+      setTimeout(requestDriveMadProgress, 1300)
+    }
+  }, [bootstrapVolume, internalGame, requestDriveMadProgress])
 
   if (!isMounted || !internalGame) return null
 
+  const isDriveMad = internalGame === 'drive'
   const discordId = me?.id ? String(me.id) : null
 
   const basePath =
@@ -240,6 +408,20 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
               </div>
             </div>
 
+            {isDriveMad && (
+              <button
+                type="button"
+                onClick={() => setLeaderboardOpen((prev) => !prev)}
+                className={`konami-leaderboard-toggle inline-flex h-9 items-center justify-center rounded-full border border-slate-700/70 bg-slate-900/80 px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-300 transition-colors hover:border-slate-500 hover:bg-slate-800 hover:text-slate-50 ${
+                  leaderboardOpen ? 'is-active' : ''
+                }`}
+                aria-label="Mostrar top 10 de Drive Mad"
+                aria-pressed={leaderboardOpen}
+              >
+                top 10
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handleCloseClick}
@@ -261,6 +443,93 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
                 allow="autoplay; fullscreen"
                 onLoad={handleFrameLoad}
               />
+              {isDriveMad && leaderboardOpen && (
+                <div
+                  className="drive-leaderboard-panel"
+                  role="dialog"
+                  aria-label="Drive Mad leaderboard"
+                >
+                  <div className="drive-leaderboard-header">
+                    <div>
+                      <span>leaderboard.sys</span>
+                      <strong>Drive Mad top 10</strong>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={loadDriveMadLeaderboard}
+                      disabled={leaderboardLoading}
+                    >
+                      sync
+                    </button>
+                  </div>
+
+                  {myDriveMadScore && (
+                    <div className="drive-leaderboard-self">
+                      <span>your rank</span>
+                      <strong>
+                        #{myDriveMadScore.rank} / lvl {myDriveMadScore.highestLevel} /{' '}
+                        {formatLeaderboardTime(myDriveMadScore.bestTimeMs)}
+                      </strong>
+                    </div>
+                  )}
+
+                  {!me && !driveMadSaveStatus.message && (
+                    <p className="drive-leaderboard-status is-error">
+                      log in with Discord to save your run
+                    </p>
+                  )}
+
+                  {driveMadSaveStatus.message && (
+                    <p className={`drive-leaderboard-save is-${driveMadSaveStatus.kind}`}>
+                      {driveMadSaveStatus.message}
+                    </p>
+                  )}
+
+                  {leaderboardLoading && (
+                    <p className="drive-leaderboard-status">loading scores...</p>
+                  )}
+
+                  {!leaderboardLoading && leaderboardError && (
+                    <p className="drive-leaderboard-status is-error">
+                      {leaderboardError}
+                    </p>
+                  )}
+
+                  {!leaderboardLoading && !leaderboardError && driveMadLeaderboard.length === 0 && (
+                    <p className="drive-leaderboard-status">no scores yet</p>
+                  )}
+
+                  {!leaderboardLoading && !leaderboardError && driveMadLeaderboard.length > 0 && (
+                    <ol className="drive-leaderboard-list">
+                      {driveMadLeaderboard.map((score) => (
+                        <li key={score.discordId} className="drive-leaderboard-row">
+                          <span className="drive-leaderboard-rank">
+                            {String(score.rank).padStart(2, '0')}
+                          </span>
+                          <img
+                            src={score.avatarUrl}
+                            alt=""
+                            loading="lazy"
+                            onError={(event) => {
+                              event.currentTarget.src =
+                                'https://cdn.discordapp.com/embed/avatars/0.png'
+                            }}
+                          />
+                          <span className="drive-leaderboard-player">
+                            {score.username}
+                          </span>
+                          <span className="drive-leaderboard-level">
+                            lvl {score.highestLevel}
+                          </span>
+                          <span className="drive-leaderboard-time">
+                            {formatLeaderboardTime(score.bestTimeMs)}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              )}
             </div>
             <p className="mt-2 text-center text-[0.70rem] text-slate-400">
               {subtitle}
@@ -1528,7 +1797,9 @@ export default function App() {
 
   return (
     <div className={appShellClass}>
-      <div className="app-bg" aria-hidden="true" />
+      <div className="app-bg" aria-hidden="true">
+        <span className="app-horizon-stabilizer" />
+      </div>
       <ArcadeVisualEffects visible={!showSplash} />
       <BackgroundAudio
         play={playAudio}
