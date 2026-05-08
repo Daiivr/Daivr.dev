@@ -141,7 +141,6 @@
         var activeLevelStartedAt = 0;
         var lastSubmitKey = "";
         var lastSavedLevel = 0;
-        var progressTimer = null;
 
         function clockMs() {
           if (window.performance && typeof window.performance.now === "function") {
@@ -172,94 +171,6 @@
           } catch (err) {}
         }
 
-        function readLevelIndexFromText(value) {
-          if (!value || typeof value !== "string") return null;
-          var match = value.match(/\blevel\s*[:#-]?\s*(\d{1,3})\b/i);
-          if (!match) return null;
-          return normalizeLevelIndex(Number(match[1]) - 1);
-        }
-
-        function readLevelIndexFromStorage() {
-          var bestLevelIndex = null;
-
-          try {
-            for (var i = 0; i < localStorage.length; i += 1) {
-              var key = localStorage.key(i);
-              if (!key || !/level|lvl|unlocked|current/i.test(key)) continue;
-
-              var value = "";
-              try {
-                value = String(localStorage.getItem(key) || "");
-              } catch (err) {}
-
-              var source = key + " " + value.slice(0, 240);
-              var sawContextualLevel = false;
-
-              function useCandidate(rawValue, zeroBased) {
-                var level = Number(rawValue);
-                if (!isFinite(level) || level < 0 || level > 200) return;
-
-                var levelIndex = zeroBased ? level : level - 1;
-                if (levelIndex < 0) return;
-
-                if (bestLevelIndex === null || levelIndex > bestLevelIndex) {
-                  bestLevelIndex = levelIndex;
-                }
-              }
-
-              var zeroBasedPattern =
-                /(levelIndex|level_index|currentLevelIndex|current_level_index|activeLevelIndex|active_level_index)[^0-9]{0,24}(\d{1,3})/gi;
-              var zeroMatch;
-              while ((zeroMatch = zeroBasedPattern.exec(source))) {
-                sawContextualLevel = true;
-                useCandidate(zeroMatch[2], true);
-              }
-
-              var humanPattern =
-                /(highestLevel|highest_level|currentLevel|current_level|unlockedLevel|unlocked_level|level|lvl)[^0-9]{0,24}(\d{1,3})/gi;
-              var humanMatch;
-              while ((humanMatch = humanPattern.exec(source))) {
-                sawContextualLevel = true;
-                useCandidate(humanMatch[2], false);
-              }
-
-              if (!sawContextualLevel && /^\d{1,3}$/.test(value.trim())) {
-                useCandidate(value.trim(), /index/i.test(key));
-              }
-            }
-          } catch (err) {}
-
-          return bestLevelIndex;
-        }
-
-        function detectLevelIndex() {
-          if (activeLevelIndex !== null) return activeLevelIndex;
-
-          try {
-            var domLevel = readLevelIndexFromText(document.body && document.body.innerText);
-            if (domLevel !== null) return domLevel;
-          } catch (err) {}
-
-          var storageLevel = readLevelIndexFromStorage();
-          if (storageLevel !== null) return storageLevel;
-
-          try {
-            if (typeof get_url_level_index === "function") {
-              var urlLevel = normalizeLevelIndex(get_url_level_index());
-              if (urlLevel !== null) return urlLevel;
-            }
-          } catch (err) {}
-
-          try {
-            if (typeof getUrlLevelIndex === "function") {
-              var camelUrlLevel = normalizeLevelIndex(getUrlLevelIndex());
-              if (camelUrlLevel !== null) return camelUrlLevel;
-            }
-          } catch (err) {}
-
-          return null;
-        }
-
         function submitProgress(eventName, levelIndex, extra) {
           levelIndex = normalizeLevelIndex(levelIndex);
           if (levelIndex === null) return false;
@@ -269,7 +180,7 @@
           var now = clockMs();
           var reachedAtMs = Math.max(0, Math.round(now - sessionStartedAt));
           var level = levelIndex + 1;
-          var submitKey = eventName + ":" + level + ":" + Math.floor(reachedAtMs / 2500);
+          var submitKey = eventName + ":" + level;
 
           if (submitKey === lastSubmitKey && level <= lastSavedLevel) return false;
           lastSubmitKey = submitKey;
@@ -290,6 +201,7 @@
               discordId: discordId || undefined,
               sessionId: sessionId,
               event: eventName,
+              completed: true,
               levelIndex: levelIndex,
               level: level,
               reachedAtMs: reachedAtMs,
@@ -354,69 +266,35 @@
           return true;
         }
 
-        function submitDetectedProgress(eventName, extra) {
-          var detectedLevelIndex = detectLevelIndex();
-          if (detectedLevelIndex === null) return false;
-          return submitProgress(eventName, detectedLevelIndex, extra);
-        }
-
-        function startProgressTimer() {
-          if (progressTimer) return;
-          progressTimer = setInterval(function () {
-            submitDetectedProgress("progress-heartbeat", { realtime: true });
-          }, 3000);
-        }
-
         window.__daivrDriveMad = {
           gameplayStart: function () {
             ensureSessionStarted();
-            startProgressTimer();
-            submitDetectedProgress("gameplay-start", { realtime: true });
           },
           gameplayStop: function () {
-            var levelIndex = activeLevelIndex === null ? detectLevelIndex() : activeLevelIndex;
-            if (levelIndex === null) return;
-            submitProgress("gameplay-stop", levelIndex, {
-              levelElapsedMs: activeLevelStartedAt
-                ? Math.max(0, Math.round(clockMs() - activeLevelStartedAt))
-                : null,
-            });
+            ensureSessionStarted();
           },
           levelStart: function (levelIndex) {
             var nextLevelIndex = normalizeLevelIndex(levelIndex);
             if (nextLevelIndex === null) return;
 
             ensureSessionStarted();
-            startProgressTimer();
 
             var previousDuration = null;
             if (activeLevelIndex !== null && activeLevelStartedAt) {
               previousDuration = Math.max(0, Math.round(clockMs() - activeLevelStartedAt));
             }
 
+            if (activeLevelIndex !== null && nextLevelIndex > activeLevelIndex) {
+              submitProgress("level-complete", activeLevelIndex, {
+                nextLevelIndex: nextLevelIndex,
+                levelElapsedMs: previousDuration,
+              });
+            }
+
             activeLevelIndex = nextLevelIndex;
             activeLevelStartedAt = clockMs();
-
-            submitProgress("level-start", nextLevelIndex, {
-              previousLevelDurationMs: previousDuration,
-            });
           },
         };
-
-        window.addEventListener("message", function (event) {
-          if (event.origin !== window.location.origin) return;
-          if (!event.data || event.data.type !== "daivr:drive-mad-request-progress") return;
-
-          ensureSessionStarted();
-          startProgressTimer();
-          submitDetectedProgress("parent-sync", { realtime: true });
-        });
-
-        window.setTimeout(function () {
-          ensureSessionStarted();
-          startProgressTimer();
-          submitDetectedProgress("bootstrap", { realtime: true });
-        }, 1200);
       })();
     </script>
   <script>

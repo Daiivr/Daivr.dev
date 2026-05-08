@@ -127,9 +127,24 @@ router.post('/progress', (req, res) => {
   }
 
   const body = req.body || {}
+  const eventName = String(body.event || '').slice(0, 40)
   const requestedDiscordId = body.discordId ? String(body.discordId) : null
   if (requestedDiscordId && requestedDiscordId !== String(user.id)) {
     return res.status(403).json({ error: 'Discord ID no coincide con la sesion' })
+  }
+
+  if (eventName !== 'level-complete' || body.completed !== true) {
+    const data = readData()
+    const scores = sortScores(Array.isArray(data.scores) ? data.scores : [])
+    const userId = String(user.id)
+    const index = scores.findIndex((score) => String(score.discordId) === userId)
+
+    return res.status(202).json({
+      ignored: true,
+      reason: 'completion-required',
+      score: index >= 0 ? publicScore(scores[index], index) : null,
+      ...leaderboardResponse(10),
+    })
   }
 
   const levelFromBody = clampPositiveInteger(body.level)
@@ -182,7 +197,7 @@ router.post('/progress', (req, res) => {
     highestLevel: isBetter ? highestLevel : currentLevel,
     bestTimeMs: isBetter ? bestTimeMs : current.bestTimeMs,
     bestSessionId: isBetter ? String(body.sessionId || '') : current.bestSessionId,
-    bestEvent: isBetter ? String(body.event || 'level-start').slice(0, 40) : current.bestEvent,
+    bestEvent: isBetter ? eventName : current.bestEvent,
     updatedAt: isBetter ? now : current.updatedAt || now,
     lastSeenAt: now,
     lastLevel: highestLevel,

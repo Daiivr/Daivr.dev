@@ -108,6 +108,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
   const normalizedVolume = clampVolumePercent(gameVolume) / 100
   const targetVolumeRef = useRef(normalizedVolume)
   const volumeBootstrappedRef = useRef(false)
+  const leaderboardOpenedOnceRef = useRef(false)
 
   useEffect(() => {
     if (open && activeGame) {
@@ -177,26 +178,6 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
     volumeBootstrappedRef.current = true
   }, [sendVolumeMessage])
 
-  const requestDriveMadProgress = useCallback(() => {
-    if (!me?.id) {
-      setDriveMadSaveStatus({
-        kind: 'error',
-        message: 'log in with Discord to save your run',
-      })
-      return
-    }
-
-    const frame = iframeRef.current
-    if (!frame || !frame.contentWindow) return
-
-    frame.contentWindow.postMessage(
-      {
-        type: 'daivr:drive-mad-request-progress',
-      },
-      window.location.origin,
-    )
-  }, [me?.id])
-
   useEffect(() => {
     if (!open || !internalGame) {
       volumeBootstrappedRef.current = false
@@ -265,27 +246,31 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
         kind: 'idle',
         message: '',
       })
+      leaderboardOpenedOnceRef.current = false
     }
   }, [open, internalGame])
 
   useEffect(() => {
     if (!open || internalGame !== 'drive' || !leaderboardOpen) return
-    loadDriveMadLeaderboard()
-    requestDriveMadProgress()
+    const isFirstOpen = !leaderboardOpenedOnceRef.current
+    leaderboardOpenedOnceRef.current = true
+
+    loadDriveMadLeaderboard({ silent: !isFirstOpen })
 
     const sync = setInterval(() => {
-      requestDriveMadProgress()
       loadDriveMadLeaderboard({ silent: true })
     }, 3000)
 
     return () => clearInterval(sync)
-  }, [
-    open,
-    internalGame,
-    leaderboardOpen,
-    loadDriveMadLeaderboard,
-    requestDriveMadProgress,
-  ])
+  }, [open, internalGame, leaderboardOpen, loadDriveMadLeaderboard])
+
+  useEffect(() => {
+    if (leaderboardOpen) return
+    setDriveMadSaveStatus({
+      kind: 'idle',
+      message: '',
+    })
+  }, [leaderboardOpen])
 
   useEffect(() => {
     if (!open || internalGame !== 'drive') return undefined
@@ -295,6 +280,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
       const data = event.data || {}
 
       if (!me?.id && typeof data.type === 'string' && data.type.startsWith('daivr:drive-mad-score-')) {
+        if (!leaderboardOpen) return
         setDriveMadSaveStatus({
           kind: 'error',
           message: 'log in with Discord to save your run',
@@ -303,6 +289,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
       }
 
       if (data.type === 'daivr:drive-mad-score-saving') {
+        if (!leaderboardOpen) return
         setDriveMadSaveStatus({
           kind: 'saving',
           message: `saving lvl ${data.level || '?'}`,
@@ -311,6 +298,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
       }
 
       if (data.type === 'daivr:drive-mad-score-error') {
+        if (!leaderboardOpen) return
         const message =
           data.status === 401
             ? 'log in with Discord to save your run'
@@ -329,10 +317,12 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
 
       if (data.score) {
         setMyDriveMadScore(data.score)
-        setDriveMadSaveStatus({
-          kind: 'saved',
-          message: `saved lvl ${data.score.highestLevel}`,
-        })
+        if (leaderboardOpen) {
+          setDriveMadSaveStatus({
+            kind: 'saved',
+            message: `saved completed lvl ${data.score.highestLevel}`,
+          })
+        }
       }
 
       if (leaderboardOpen) {
@@ -354,11 +344,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
 
   const handleFrameLoad = useCallback(() => {
     bootstrapVolume()
-    if (internalGame === 'drive') {
-      setTimeout(requestDriveMadProgress, 300)
-      setTimeout(requestDriveMadProgress, 1300)
-    }
-  }, [bootstrapVolume, internalGame, requestDriveMadProgress])
+  }, [bootstrapVolume])
 
   if (!isMounted || !internalGame) return null
 
