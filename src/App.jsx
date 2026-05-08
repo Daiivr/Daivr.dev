@@ -288,10 +288,10 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
     if (!me?.id || driveMadResetting) return
 
     setDriveMadResetting(true)
-    setDriveMadSaveStatus({
-      kind: 'saving',
-      message: 'resetting score',
-    })
+      setDriveMadSaveStatus({
+        kind: 'saving',
+        message: 'reiniciando puntaje',
+      })
 
     try {
       const res = await fetch('/api/drive-mad/me', {
@@ -309,7 +309,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
       setDriveMadLeaderboard(data.leaderboard || [])
       setDriveMadSaveStatus({
         kind: 'saved',
-        message: 'score reset',
+        message: 'puntaje reiniciado',
       })
       setDriveMadResetConfirmOpen(false)
 
@@ -321,7 +321,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
       console.error('Error resetting Drive Mad score', err)
       setDriveMadSaveStatus({
         kind: 'error',
-        message: 'could not reset score',
+        message: 'no se pudo reiniciar',
       })
     } finally {
       setDriveMadResetting(false)
@@ -383,7 +383,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
         if (!leaderboardOpen) return
         setDriveMadSaveStatus({
           kind: 'error',
-          message: 'log in with Discord to save your run',
+          message: 'inicia sesión con Discord para guardar',
         })
         return
       }
@@ -392,7 +392,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
         if (!leaderboardOpen) return
         setDriveMadSaveStatus({
           kind: 'saving',
-          message: `saving lvl ${data.level || '?'}`,
+          message: `guardando niv. ${data.level || '?'}`,
         })
         return
       }
@@ -401,10 +401,10 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
         if (!leaderboardOpen) return
         const message =
           data.status === 401
-            ? 'log in with Discord to save your run'
+            ? 'inicia sesión con Discord para guardar'
             : data.error === 'network-error'
-              ? 'network error while saving'
-              : 'could not save progress yet'
+              ? 'error de red al guardar'
+              : 'no se pudo guardar el progreso'
 
         setDriveMadSaveStatus({
           kind: 'error',
@@ -420,7 +420,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
         if (leaderboardOpen) {
           setDriveMadSaveStatus({
             kind: 'saved',
-            message: `saved completed lvl ${data.score.highestLevel}`,
+            message: `guardado niv. ${data.score.highestLevel}`,
           })
         }
       }
@@ -542,24 +542,24 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
                 >
                   <div className="drive-leaderboard-header">
                     <div>
-                      <span>leaderboard.sys</span>
-                      <strong>Drive Mad top 10</strong>
+                      <span>ranking.sys</span>
+                      <strong>Top 10 de Drive Mad</strong>
                     </div>
                     <button
                       type="button"
                       onClick={loadDriveMadLeaderboard}
                       disabled={leaderboardLoading}
                     >
-                      sync
+                      act.
                     </button>
                   </div>
 
                   {myDriveMadScore && (
                     <div className="drive-leaderboard-self">
                       <div className="drive-leaderboard-self-copy">
-                        <span>your rank</span>
+                        <span>tu puesto</span>
                         <strong>
-                          #{myDriveMadScore.rank} / lvl {myDriveMadScore.highestLevel} /{' '}
+                          #{myDriveMadScore.rank} / niv. {myDriveMadScore.highestLevel} /{' '}
                           total {formatLeaderboardTime(myDriveMadScore.bestTimeMs)}
                         </strong>
                       </div>
@@ -568,14 +568,14 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
                         onClick={openDriveMadResetConfirm}
                         disabled={driveMadResetting}
                       >
-                        reset
+                        reiniciar
                       </button>
                     </div>
                   )}
 
                   {!me && !driveMadSaveStatus.message && (
                     <p className="drive-leaderboard-status is-error">
-                      log in with Discord to save your run
+                      inicia sesión con Discord para guardar tu partida
                     </p>
                   )}
 
@@ -586,7 +586,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
                   )}
 
                   {leaderboardLoading && (
-                    <p className="drive-leaderboard-status">loading scores...</p>
+                    <p className="drive-leaderboard-status">cargando puntajes...</p>
                   )}
 
                   {!leaderboardLoading && leaderboardError && (
@@ -596,7 +596,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
                   )}
 
                   {!leaderboardLoading && !leaderboardError && driveMadLeaderboard.length === 0 && (
-                    <p className="drive-leaderboard-status">no scores yet</p>
+                    <p className="drive-leaderboard-status">todavía no hay puntajes</p>
                   )}
 
                   {!leaderboardLoading && !leaderboardError && driveMadLeaderboard.length > 0 && (
@@ -619,7 +619,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
                             {score.username}
                           </span>
                           <span className="drive-leaderboard-level">
-                            lvl {score.highestLevel}
+                            niv. {score.highestLevel}
                           </span>
                           <span className="drive-leaderboard-time">
                             total {formatLeaderboardTime(score.bestTimeMs)}
@@ -672,10 +672,10 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
               <div className="modal-header">
                 <div>
                   <h3 className="modal-title" id="drive-reset-title">
-                    Reset Drive Mad run?
+                    ¿Reiniciar partida de Drive Mad?
                   </h3>
                   <p className="modal-text">
-                    This clears your leaderboard score and your saved game progress.
+                    Esto borrará tu puntaje del ranking y tu progreso guardado.
                   </p>
                 </div>
                 <button
@@ -694,10 +694,11 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
                   !
                 </span>
                 <div>
-                  <strong>Game progress will restart at level 1.</strong>
+                  <strong>Tu progreso del juego volverá al nivel 1.</strong>
                   <p>
-                    Your Drive Mad save in this browser will be wiped, the game will reload,
-                    and your top 10 entry will be removed so you can start a fresh attempt.
+                    Se borrará tu partida guardada de Drive Mad en este navegador,
+                    el juego se recargará y tu entrada del top 10 será eliminada
+                    para que puedas empezar un intento nuevo.
                   </p>
                 </div>
               </div>
@@ -709,7 +710,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
                   className="modal-btn-cancel"
                   disabled={driveMadResetting}
                 >
-                  Cancel
+                  Cancelar
                 </button>
                 <button
                   type="button"
@@ -717,7 +718,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
                   className="modal-btn-danger"
                   disabled={driveMadResetting}
                 >
-                  {driveMadResetting ? 'Resetting...' : 'Reset to level 1'}
+                  {driveMadResetting ? 'Reiniciando...' : 'Reiniciar al nivel 1'}
                 </button>
               </div>
             </div>

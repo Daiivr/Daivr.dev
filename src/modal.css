@@ -1911,12 +1911,13 @@ html:not(.theme-xmas) .konami-window .relative.flex-1.overflow-hidden {
 .drive-reset-warning {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
   margin-top: 14px;
   border-color: rgba(255, 84, 112, 0.28);
   background:
     linear-gradient(135deg, rgba(255, 84, 112, 0.10), rgba(255, 182, 39, 0.055)),
     rgba(4, 8, 18, 0.82);
+  padding: 16px 18px;
 }
 
 .drive-reset-icon {
@@ -1945,11 +1946,27 @@ html:not(.theme-xmas) .konami-window .relative.flex-1.overflow-hidden {
   line-height: 1.35;
 }
 
+.drive-reset-warning > div {
+  min-width: 0;
+}
+
 .drive-reset-warning p {
   margin-top: 6px;
   color: rgba(220, 231, 255, 0.72);
   font-size: 0.70rem;
   line-height: 1.55;
+}
+
+@media (max-width: 480px) {
+  .drive-reset-warning {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .drive-reset-icon {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 .drive-leaderboard-status {
