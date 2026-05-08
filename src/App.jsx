@@ -100,6 +100,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
   const [leaderboardError, setLeaderboardError] = useState('')
   const [driveMadLeaderboard, setDriveMadLeaderboard] = useState([])
   const [myDriveMadScore, setMyDriveMadScore] = useState(null)
+  const [driveMadResetting, setDriveMadResetting] = useState(false)
   const [driveMadSaveStatus, setDriveMadSaveStatus] = useState({
     kind: 'idle',
     message: '',
@@ -238,6 +239,51 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
       if (!silent) setLeaderboardLoading(false)
     }
   }, [])
+
+  const handleResetDriveMadScore = useCallback(async () => {
+    if (!me?.id || driveMadResetting) return
+
+    const confirmed = window.confirm('Reset your Drive Mad leaderboard score?')
+    if (!confirmed) return
+
+    setDriveMadResetting(true)
+    setDriveMadSaveStatus({
+      kind: 'saving',
+      message: 'resetting score',
+    })
+
+    try {
+      const res = await fetch('/api/drive-mad/me', {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      const data = await res.json().catch(() => ({}))
+
+      if (!res.ok) {
+        throw new Error(data.error || 'reset-failed')
+      }
+
+      setMyDriveMadScore(null)
+      setDriveMadLeaderboard(data.leaderboard || [])
+      setDriveMadSaveStatus({
+        kind: 'saved',
+        message: 'score reset',
+      })
+
+      iframeRef.current?.contentWindow?.postMessage(
+        { type: 'daivr:drive-mad-reset-score' },
+        window.location.origin,
+      )
+    } catch (err) {
+      console.error('Error resetting Drive Mad score', err)
+      setDriveMadSaveStatus({
+        kind: 'error',
+        message: 'could not reset score',
+      })
+    } finally {
+      setDriveMadResetting(false)
+    }
+  }, [driveMadResetting, me?.id])
 
   useEffect(() => {
     if (!open || internalGame !== 'drive') {
@@ -451,11 +497,20 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
 
                   {myDriveMadScore && (
                     <div className="drive-leaderboard-self">
-                      <span>your rank</span>
-                      <strong>
-                        #{myDriveMadScore.rank} / lvl {myDriveMadScore.highestLevel} /{' '}
-                        {formatLeaderboardTime(myDriveMadScore.bestTimeMs)}
-                      </strong>
+                      <div className="drive-leaderboard-self-copy">
+                        <span>your rank</span>
+                        <strong>
+                          #{myDriveMadScore.rank} / lvl {myDriveMadScore.highestLevel} /{' '}
+                          total {formatLeaderboardTime(myDriveMadScore.bestTimeMs)}
+                        </strong>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleResetDriveMadScore}
+                        disabled={driveMadResetting}
+                      >
+                        reset
+                      </button>
                     </div>
                   )}
 
@@ -508,7 +563,7 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
                             lvl {score.highestLevel}
                           </span>
                           <span className="drive-leaderboard-time">
-                            {formatLeaderboardTime(score.bestTimeMs)}
+                            total {formatLeaderboardTime(score.bestTimeMs)}
                           </span>
                         </li>
                       ))}

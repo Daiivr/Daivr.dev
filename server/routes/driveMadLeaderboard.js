@@ -140,6 +140,27 @@ router.get('/me', (req, res) => {
   res.json({ score: publicScore(scores[index], index) })
 })
 
+router.delete('/me', (req, res) => {
+  const user = getUserFromRequest(req)
+  if (!user) {
+    return res.status(401).json({ error: 'Debes iniciar sesion con Discord' })
+  }
+
+  const data = readData()
+  const scores = Array.isArray(data.scores) ? data.scores : []
+  const userId = String(user.id)
+  const nextScores = scores.filter((score) => String(score.discordId) !== userId)
+
+  if (nextScores.length !== scores.length) {
+    writeData({ ...data, scores: nextScores })
+  }
+
+  res.json({
+    score: null,
+    ...leaderboardResponse(10),
+  })
+})
+
 router.post('/progress', (req, res) => {
   const user = getUserFromRequest(req)
   if (!user) {
@@ -178,11 +199,16 @@ router.post('/progress', (req, res) => {
   }
 
   const bestTimeMs = clampTimeMs(
-    body.reachedAtMs ?? body.timeMs ?? body.elapsedMs ?? body.playTimeMs,
+    body.cumulativeLevelTimeMs ??
+      body.reachedAtMs ??
+      body.timeMs ??
+      body.elapsedMs ??
+      body.playTimeMs,
   )
   if (bestTimeMs === null) {
     return res.status(400).json({ error: 'Tiempo invalido' })
   }
+  const levelElapsedMs = clampTimeMs(body.levelElapsedMs)
 
   const now = new Date().toISOString()
   const data = readData()
@@ -222,6 +248,7 @@ router.post('/progress', (req, res) => {
     lastSeenAt: now,
     lastLevel: highestLevel,
     lastTimeMs: bestTimeMs,
+    lastLevelTimeMs: levelElapsedMs,
     submissions: (Number(current.submissions) || 0) + 1,
   }
 

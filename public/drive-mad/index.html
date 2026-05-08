@@ -139,6 +139,8 @@
         var sessionStartedAt = 0;
         var activeLevelIndex = null;
         var activeLevelStartedAt = 0;
+        var completedLevelDurations = {};
+        var cumulativeLevelTimeMs = 0;
         var lastSubmitKey = "";
         var lastSavedLevel = 0;
 
@@ -151,6 +153,20 @@
 
         function ensureSessionStarted() {
           if (!sessionStartedAt) sessionStartedAt = clockMs();
+        }
+
+        function resetLeaderboardTracking() {
+          sessionId =
+            Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+          sessionStartedAt = clockMs();
+          completedLevelDurations = {};
+          cumulativeLevelTimeMs = 0;
+          lastSubmitKey = "";
+          lastSavedLevel = 0;
+
+          if (activeLevelIndex !== null) {
+            activeLevelStartedAt = clockMs();
+          }
         }
 
         function normalizeLevelIndex(value) {
@@ -171,6 +187,22 @@
           } catch (err) {}
         }
 
+        function addCompletedLevelDuration(levelIndex, durationMs) {
+          var key = String(levelIndex);
+          var nextDuration = Math.max(0, Math.round(Number(durationMs) || 0));
+          var previousDuration = completedLevelDurations[key];
+
+          if (typeof previousDuration === "number") {
+            cumulativeLevelTimeMs += nextDuration - previousDuration;
+          } else {
+            cumulativeLevelTimeMs += nextDuration;
+          }
+
+          completedLevelDurations[key] = nextDuration;
+          cumulativeLevelTimeMs = Math.max(0, Math.round(cumulativeLevelTimeMs));
+          return cumulativeLevelTimeMs;
+        }
+
         function submitProgress(eventName, levelIndex, extra) {
           levelIndex = normalizeLevelIndex(levelIndex);
           if (levelIndex === null) return false;
@@ -178,7 +210,14 @@
           ensureSessionStarted();
 
           var now = clockMs();
-          var reachedAtMs = Math.max(0, Math.round(now - sessionStartedAt));
+          var cumulativeFromLevels =
+            extra && isFinite(Number(extra.cumulativeLevelTimeMs))
+              ? Math.max(0, Math.round(Number(extra.cumulativeLevelTimeMs)))
+              : null;
+          var reachedAtMs =
+            cumulativeFromLevels !== null
+              ? cumulativeFromLevels
+              : Math.max(0, Math.round(now - sessionStartedAt));
           var level = levelIndex + 1;
           var submitKey = eventName + ":" + level;
 
@@ -285,9 +324,15 @@
             }
 
             if (activeLevelIndex !== null && nextLevelIndex > activeLevelIndex) {
+              var cumulativeLevelTime = addCompletedLevelDuration(
+                activeLevelIndex,
+                previousDuration
+              );
+
               submitProgress("level-complete", activeLevelIndex, {
                 nextLevelIndex: nextLevelIndex,
                 levelElapsedMs: previousDuration,
+                cumulativeLevelTimeMs: cumulativeLevelTime,
               });
             }
 
@@ -295,6 +340,14 @@
             activeLevelStartedAt = clockMs();
           },
         };
+
+        window.addEventListener("message", function (event) {
+          if (event.origin !== window.location.origin) return;
+          var data = event.data || {};
+          if (data.type === "daivr:drive-mad-reset-score") {
+            resetLeaderboardTracking();
+          }
+        });
       })();
     </script>
   <script>

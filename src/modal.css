@@ -1810,7 +1810,7 @@ html:not(.theme-xmas) .konami-window .relative.flex-1.overflow-hidden {
 }
 
 .drive-leaderboard-header div,
-.drive-leaderboard-self {
+.drive-leaderboard-self-copy {
   display: grid;
   min-width: 0;
   gap: 2px;
@@ -1861,6 +1861,10 @@ html:not(.theme-xmas) .konami-window .relative.flex-1.overflow-hidden {
 }
 
 .drive-leaderboard-self {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   border-radius: 7px;
   border: 1px solid rgba(255, 182, 39, 0.24);
   background: rgba(255, 182, 39, 0.07);
@@ -1869,6 +1873,31 @@ html:not(.theme-xmas) .konami-window .relative.flex-1.overflow-hidden {
 
 .drive-leaderboard-self span {
   color: var(--arc-amber, #ffb627);
+}
+
+.drive-leaderboard-self button {
+  flex: 0 0 auto;
+  min-height: 26px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 84, 112, 0.35);
+  background: rgba(255, 84, 112, 0.08);
+  color: var(--arc-red, #ff5470);
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  padding: 0 8px;
+  text-transform: uppercase;
+}
+
+.drive-leaderboard-self button:hover:not(:disabled) {
+  border-color: var(--arc-red, #ff5470);
+  background: rgba(255, 84, 112, 0.13);
+  box-shadow: 0 0 14px rgba(255, 84, 112, 0.2);
+}
+
+.drive-leaderboard-self button:disabled {
+  cursor: wait;
+  opacity: 0.58;
 }
 
 .drive-leaderboard-status {
