@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import axios from 'axios'
 import nitroRubyBadge from '../assets/discord-badge-nitro-ruby-card.png'
-import nitroRubyTooltipBadge from '../assets/discord-badge-nitro-ruby-tooltip.svg'
+import nitroRubyTooltipBadgeMarkup from '../assets/discord-badge-nitro-ruby-tooltip.svg?raw'
 import originallyKnownBadge from '../assets/discord-badge-originally-known-as.png'
 import serverBoostBadge from '../assets/discord-badge-boost.svg'
 
@@ -33,7 +33,7 @@ const BADGES = [
 const CUSTOM_BADGES = [
   {
     icon: nitroRubyBadge,
-    tooltipIcon: nitroRubyTooltipBadge,
+    tooltipMarkup: nitroRubyTooltipBadgeMarkup,
     label: "NITRO RUBY",
     sublabel: "Subscriber since 9/6/20",
     variant: "nitro-ruby",
@@ -292,6 +292,7 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
       label: badge.label,
       sublabel: badge.sublabel,
       icon: badge.tooltipIcon || badge.icon,
+      markup: badge.tooltipMarkup,
       variant: badge.variant,
       arrowOffset: anchorX - left,
       left,
@@ -545,11 +546,10 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
             role="tooltip"
           >
             {badgeTooltip.variant === 'nitro-ruby' && (
-              <img
+              <span
                 className="discord-nitro-tooltip-badge"
-                src={badgeTooltip.icon}
-                alt=""
                 aria-hidden="true"
+                dangerouslySetInnerHTML={{ __html: badgeTooltip.markup }}
               />
             )}
             <span className="discord-badge-tooltip-label">
