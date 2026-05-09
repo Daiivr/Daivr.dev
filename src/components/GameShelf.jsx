@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react'
 const GAMES = [
   {
     title: 'NieR:Automata',
-    kicker: 'favorite.01',
-    meta: 'YoRHa signal',
-    genre: 'action RPG',
+    kicker: 'favorito.01',
+    meta: 'señal YoRHa',
+    genre: 'RPG de acción',
     steamAppId: 524220,
     image: '/games/nier-automata-cover.png',
     logo: '/games/nier-automata-logo.webp',
@@ -14,9 +14,9 @@ const GAMES = [
   },
   {
     title: 'Fallout 76',
-    kicker: 'favorite.02',
-    meta: 'Appalachia signal',
-    genre: 'online RPG',
+    kicker: 'favorito.02',
+    meta: 'señal Appalachia',
+    genre: 'RPG en línea',
     steamAppId: 1151340,
     image: '/games/fallout-76-poster.png',
     logo: '/games/fallout-76-logo.png',
@@ -25,9 +25,9 @@ const GAMES = [
   },
   {
     title: 'Red Dead Redemption II',
-    kicker: 'favorite.03',
-    meta: 'Van der Linde signal',
-    genre: 'western adventure',
+    kicker: 'favorito.03',
+    meta: 'señal Van der Linde',
+    genre: 'aventura western',
     steamAppId: 1174180,
     image: '/games/rdr2-cover.png',
     logo: '/games/rdr2-logo.png',
@@ -37,19 +37,19 @@ const GAMES = [
 ]
 
 function formatPlaytime(record, status) {
-  if (status === 'loading') return 'steam syncing'
-  if (status === 'unconfigured') return 'steam not linked'
-  if (status === 'error') return 'steam offline'
+  if (status === 'loading') return 'steam sincronizando'
+  if (status === 'unconfigured') return 'steam no vinculado'
+  if (status === 'error') return 'steam sin conexión'
   if (!record?.available || !Number.isFinite(record.playtimeMinutes)) {
-    return 'hours private'
+    return 'horas privadas'
   }
 
   const minutes = record.playtimeMinutes
-  if (minutes < 60) return `${minutes}m played`
+  if (minutes < 60) return `${minutes}m jugados`
 
   const hours = minutes / 60
   const formatted = hours >= 100 ? Math.round(hours) : Math.round(hours * 10) / 10
-  return `${formatted}h played`
+  return `${formatted}h jugadas`
 }
 
 export default function GameShelf() {
@@ -88,17 +88,17 @@ export default function GameShelf() {
       <div className="section-card game-shelf-panel">
         <header className="game-shelf-header">
           <div>
-            <h2 className="section-title">Game Shelf</h2>
-            <p className="game-shelf-subtitle">favorite games - cover archive</p>
+            <h2 className="section-title">Estante de juegos</h2>
+            <p className="game-shelf-subtitle">juegos favoritos - archivo de portadas</p>
           </div>
           <div className="game-shelf-stats" aria-hidden="true">
-            <span>{String(activeGames).padStart(2, '0')} loaded</span>
-            <span>3d:on</span>
-            <span>shelf:live</span>
+            <span>{String(activeGames).padStart(2, '0')} cargados</span>
+            <span>3d:activo</span>
+            <span>estante:en vivo</span>
           </div>
         </header>
 
-        <div className="game-shelf-stage" aria-label="Favorite games shelf">
+        <div className="game-shelf-stage" aria-label="Estante de juegos favoritos">
           <div className="game-shelf-rail" aria-hidden="true" />
           <div className="game-shelf-grid">
             {GAMES.map((game) => (
@@ -114,7 +114,7 @@ export default function GameShelf() {
                     {game.image ? (
                       <img
                         src={game.image}
-                        alt={`${game.title} cover`}
+                        alt={`Portada de ${game.title}`}
                         className="game-card-cover"
                         loading="lazy"
                         decoding="async"
