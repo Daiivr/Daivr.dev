@@ -11,6 +11,19 @@ const DATA_DIR =
   process.env.COMMENTS_DATA_DIR || path.join(__dirname, '..', '..', 'data')
 
 const FILE = path.join(DATA_DIR, 'comments.json')
+const USER_STYLES_FILE = path.join(DATA_DIR, 'comment-user-styles.json')
+
+const DEFAULT_USERNAME_STYLE_ID = 'default'
+const USERNAME_STYLE_IDS = new Set([
+  DEFAULT_USERNAME_STYLE_ID,
+  'neon-cyan',
+  'synthwave',
+  'solar-flare',
+  'toxic-lime',
+  'galaxy-shift',
+  'ice-glitch',
+  'prism-run',
+])
 
 // IDs de admins leídos desde .env: ADMIN_IDS=id1,id2
 const ADMIN_IDS = (process.env.ADMIN_IDS || '')
@@ -26,9 +39,64 @@ function ensureStorage() {
     if (!fs.existsSync(FILE)) {
       fs.writeFileSync(FILE, JSON.stringify([], null, 2), 'utf8')
     }
+    if (!fs.existsSync(USER_STYLES_FILE)) {
+      fs.writeFileSync(USER_STYLES_FILE, JSON.stringify({}, null, 2), 'utf8')
+    }
   } catch (err) {
     console.error('Error creando storage de comentarios', err)
   }
+}
+
+function sanitizeUsernameStyleId(styleId) {
+  const value = String(styleId || DEFAULT_USERNAME_STYLE_ID).trim()
+  return USERNAME_STYLE_IDS.has(value) ? value : null
+}
+
+function normalizeUsernameStyleId(styleId) {
+  return sanitizeUsernameStyleId(styleId) || DEFAULT_USERNAME_STYLE_ID
+}
+
+function readUserStyles() {
+  ensureStorage()
+  try {
+    const raw = fs.readFileSync(USER_STYLES_FILE, 'utf8')
+    const data = raw ? JSON.parse(raw) : {}
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return {}
+
+    return Object.entries(data).reduce((acc, [userId, styleId]) => {
+      const normalized = sanitizeUsernameStyleId(styleId)
+      if (userId && normalized && normalized !== DEFAULT_USERNAME_STYLE_ID) {
+        acc[String(userId)] = normalized
+      }
+      return acc
+    }, {})
+  } catch (e) {
+    console.error('Error leyendo comment-user-styles.json', e)
+    return {}
+  }
+}
+
+function writeUserStyles(styles) {
+  ensureStorage()
+  try {
+    fs.writeFileSync(USER_STYLES_FILE, JSON.stringify(styles || {}, null, 2), 'utf8')
+  } catch (e) {
+    console.error('Error escribiendo comment-user-styles.json', e)
+  }
+}
+
+function getAuthorStyleId(author, styles) {
+  if (!author?.id) return DEFAULT_USERNAME_STYLE_ID
+  const userStyle = styles?.[String(author.id)]
+  return normalizeUsernameStyleId(userStyle || author.nameStyleId)
+}
+
+function sortComments(list) {
+  return [...list].sort((a, b) => {
+    // Pinneados primero, después por fecha desc
+    if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1
+    return new Date(b.createdAt) - new Date(a.createdAt)
+  })
 }
 
 function readComments() {
@@ -74,13 +142,14 @@ function writeComments(list) {
   }
 }
 
-function withAdminFlags(comment) {
+function withAdminFlags(comment, styles = readUserStyles()) {
   if (!comment) return comment
 
   const withAuthor = comment.author
     ? {
         ...comment.author,
         isAdmin: ADMIN_IDS.includes(String(comment.author.id)),
+        nameStyleId: getAuthorStyleId(comment.author, styles),
       }
     : comment.author
 
@@ -96,14 +165,15 @@ function withAdminFlags(comment) {
         author: {
           ...r.author,
           isAdmin: ADMIN_IDS.includes(String(r.author.id)),
+          nameStyleId: getAuthorStyleId(r.author, styles),
         },
       }
     }),
   }
 }
 
-async function withAvatars(comment) {
-  const hydrated = withAdminFlags(comment)
+async function withAvatars(comment, styles = readUserStyles()) {
+  const hydrated = withAdminFlags(comment, styles)
   const token = process.env.DISCORD_BOT_TOKEN
 
   // Si hay Bot Token, resolvemos el avatar actual. Si no, dejamos el guardado
@@ -133,22 +203,87 @@ async function withAvatars(comment) {
   return hydrated
 }
 
+function getUserStyleId(user, styles = readUserStyles()) {
+  if (!user?.id) return DEFAULT_USERNAME_STYLE_ID
+  return normalizeUsernameStyleId(styles[String(user.id)])
+}
+
+async function hydrateCommentsList(list, styles = readUserStyles()) {
+  const raw = sortComments(list)
+  return Promise.all(raw.map((c) => withAvatars(c, styles)))
+}
+
 
 // GET all
 router.get('/', async (req, res) => {
   try {
-    const raw = readComments().sort((a, b) => {
-      // Pinneados primero, después por fecha desc
-      if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1
-      return new Date(b.createdAt) - new Date(a.createdAt)
-    })
-
-    const comments = await Promise.all(raw.map((c) => withAvatars(c)))
+    const styles = readUserStyles()
+    const comments = await hydrateCommentsList(readComments(), styles)
     res.json({ comments })
   } catch (e) {
     console.error('Error sirviendo comentarios', e)
     res.status(500).json({ error: 'Error cargando comentarios' })
   }
+})
+
+router.get('/me/style', (req, res) => {
+  const user = getUserFromRequest(req)
+  if (!user) return res.json({ styleId: DEFAULT_USERNAME_STYLE_ID })
+
+  const styles = readUserStyles()
+  res.json({ styleId: getUserStyleId(user, styles) })
+})
+
+router.patch('/me/style', async (req, res) => {
+  const user = getUserFromRequest(req)
+  if (!user) {
+    return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
+  }
+
+  const requestedStyleId = sanitizeUsernameStyleId(req.body?.styleId)
+  if (!requestedStyleId) {
+    return res.status(400).json({ error: 'Estilo de nombre inválido' })
+  }
+
+  const userId = String(user.id)
+  const styles = readUserStyles()
+  if (requestedStyleId === DEFAULT_USERNAME_STYLE_ID) {
+    delete styles[userId]
+  } else {
+    styles[userId] = requestedStyleId
+  }
+  writeUserStyles(styles)
+
+  const comments = readComments()
+  let updatedCount = 0
+
+  const syncAuthorStyle = (author) => {
+    if (!author || String(author.id) !== userId) return
+    if (requestedStyleId === DEFAULT_USERNAME_STYLE_ID) {
+      delete author.nameStyleId
+    } else {
+      author.nameStyleId = requestedStyleId
+    }
+    updatedCount += 1
+  }
+
+  comments.forEach((comment) => {
+    syncAuthorStyle(comment.author)
+    const replies = Array.isArray(comment.replies) ? comment.replies : []
+    replies.forEach((reply) => syncAuthorStyle(reply.author))
+  })
+
+  writeComments(comments)
+
+  res.json({
+    styleId: requestedStyleId,
+    updatedCount,
+    user: {
+      ...user,
+      nameStyleId: requestedStyleId,
+    },
+    comments: await hydrateCommentsList(comments, styles),
+  })
 })
 
 
@@ -164,6 +299,8 @@ router.post('/', async (req, res) => {
   }
 
   const comments = readComments()
+  const styles = readUserStyles()
+  const nameStyleId = getUserStyleId(user, styles)
   const trimmed = text.trim().slice(0, 1000)
 
   const comment = {
@@ -174,6 +311,7 @@ router.post('/', async (req, res) => {
       id: user.id,
       username: user.username,
       avatarUrl: user.avatarUrl,
+      nameStyleId,
       // Este flag solo se usa al almacenar; en las respuestas se recalcula desde ADMIN_IDS
       isAdmin: ADMIN_IDS.includes(String(user.id)),
     },
@@ -183,7 +321,7 @@ router.post('/', async (req, res) => {
   comments.push(comment)
   writeComments(comments)
 
-  res.json({ comment: await withAvatars(comment) })
+  res.json({ comment: await withAvatars(comment, styles) })
 })
 
 // PUT edit (only author)
@@ -192,7 +330,7 @@ router.put('/:id', async (req, res) => {
   if (!user)
     return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
 
-  const id = Number(req.params.id)
+  const id = String(req.params.id)
   const { text } = req.body || {}
 
   if (!text || !text.trim()) {
@@ -200,7 +338,7 @@ router.put('/:id', async (req, res) => {
   }
 
   const comments = readComments()
-  const index = comments.findIndex((c) => c.id === id)
+  const index = comments.findIndex((c) => String(c.id) === id)
 
   if (index === -1) {
     return res.status(404).json({ error: 'Comentario no encontrado' })
@@ -227,9 +365,9 @@ router.delete('/:id', (req, res) => {
   if (!user)
     return res.status(401).json({ error: 'Debes iniciar sesión con Discord' })
 
-  const id = Number(req.params.id)
+  const id = String(req.params.id)
   const comments = readComments()
-  const index = comments.findIndex((c) => c.id === id)
+  const index = comments.findIndex((c) => String(c.id) === id)
 
   if (index === -1) {
     return res.status(404).json({ error: 'Comentario no encontrado' })
@@ -243,7 +381,7 @@ router.delete('/:id', (req, res) => {
     return res.status(403).json({ error: 'No tienes permiso para eliminar' })
   }
 
-  const remaining = comments.filter((c) => c.id !== id)
+  const remaining = comments.filter((c) => String(c.id) !== id)
   writeComments(remaining)
 
   res.json({ success: true })
@@ -267,9 +405,9 @@ router.post('/:id/replies', async (req, res) => {
     return res.status(400).json({ error: 'Respuesta vacía' })
   }
 
-  const id = Number(req.params.id)
+  const id = String(req.params.id)
   const comments = readComments()
-  const index = comments.findIndex((c) => c.id === id)
+  const index = comments.findIndex((c) => String(c.id) === id)
 
   if (index === -1) {
     return res.status(404).json({ error: 'Comentario no encontrado' })
@@ -277,6 +415,8 @@ router.post('/:id/replies', async (req, res) => {
 
   const trimmed = text.trim().slice(0, 1000)
   const baseComment = comments[index]
+  const styles = readUserStyles()
+  const nameStyleId = getUserStyleId(user, styles)
 
   const replies = Array.isArray(baseComment.replies) ? baseComment.replies : []
 
@@ -288,6 +428,7 @@ router.post('/:id/replies', async (req, res) => {
       id: user.id,
       username: user.username,
       avatarUrl: user.avatarUrl,
+      nameStyleId,
       isAdmin: true,
     },
   }
@@ -297,7 +438,7 @@ router.post('/:id/replies', async (req, res) => {
   comments[index] = baseComment
   writeComments(comments)
 
-  res.json({ comment: await withAvatars(baseComment) })
+  res.json({ comment: await withAvatars(baseComment, styles) })
 })
 
 // PUT reply (editar respuesta del admin)
@@ -318,18 +459,18 @@ router.put('/:commentId/replies/:replyId', async (req, res) => {
     return res.status(400).json({ error: 'Respuesta vacía' })
   }
 
-  const commentId = Number(req.params.commentId)
-  const replyId = Number(req.params.replyId)
+  const commentId = String(req.params.commentId)
+  const replyId = String(req.params.replyId)
 
   const comments = readComments()
-  const index = comments.findIndex((c) => c.id === commentId)
+  const index = comments.findIndex((c) => String(c.id) === commentId)
   if (index === -1) {
     return res.status(404).json({ error: 'Comentario no encontrado' })
   }
 
   const baseComment = comments[index]
   const replies = Array.isArray(baseComment.replies) ? baseComment.replies : []
-  const replyIndex = replies.findIndex((r) => r.id === replyId)
+  const replyIndex = replies.findIndex((r) => String(r.id) === replyId)
 
   if (replyIndex === -1) {
     return res.status(404).json({ error: 'Respuesta no encontrada' })
@@ -356,9 +497,9 @@ router.post('/:id/reactions', async (req, res) => {
     return res.status(400).json({ error: 'Emoji inválido' })
   }
 
-  const id = Number(req.params.id)
+  const id = String(req.params.id)
   const comments = readComments()
-  const index = comments.findIndex((c) => c.id === id)
+  const index = comments.findIndex((c) => String(c.id) === id)
   if (index === -1) {
     return res.status(404).json({ error: 'Comentario no encontrado' })
   }
@@ -402,9 +543,9 @@ router.post('/:id/pin', async (req, res) => {
     return res.status(403).json({ error: 'Solo el admin puede fijar comentarios' })
   }
 
-  const id = Number(req.params.id)
+  const id = String(req.params.id)
   const comments = readComments()
-  const index = comments.findIndex((c) => c.id === id)
+  const index = comments.findIndex((c) => String(c.id) === id)
   if (index === -1) {
     return res.status(404).json({ error: 'Comentario no encontrado' })
   }
@@ -430,18 +571,18 @@ router.delete('/:commentId/replies/:replyId', async (req, res) => {
       .json({ error: 'Solo el admin puede eliminar respuestas' })
   }
 
-  const commentId = Number(req.params.commentId)
-  const replyId = Number(req.params.replyId)
+  const commentId = String(req.params.commentId)
+  const replyId = String(req.params.replyId)
 
   const comments = readComments()
-  const index = comments.findIndex((c) => c.id === commentId)
+  const index = comments.findIndex((c) => String(c.id) === commentId)
   if (index === -1) {
     return res.status(404).json({ error: 'Comentario no encontrado' })
   }
 
   const baseComment = comments[index]
   const replies = Array.isArray(baseComment.replies) ? baseComment.replies : []
-  const filteredReplies = replies.filter((r) => r.id !== replyId)
+  const filteredReplies = replies.filter((r) => String(r.id) !== replyId)
 
   baseComment.replies = filteredReplies
   comments[index] = baseComment

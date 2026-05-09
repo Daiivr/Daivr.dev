@@ -96,6 +96,64 @@ const renderTextWithGifs = (text) => {
 }
 const formatUsername = (name) => (name ? String(name).replace(/#0$/, '') : '')
 
+const DEFAULT_USERNAME_STYLE_ID = 'default'
+const USERNAME_STYLE_PRESETS = [
+  {
+    id: DEFAULT_USERNAME_STYLE_ID,
+    label: 'Original',
+    detail: 'clean terminal white',
+    colors: ['#e6f1ff', '#9aa8c7'],
+  },
+  {
+    id: 'neon-cyan',
+    label: 'Neon Cyan',
+    detail: 'electric scanline glow',
+    colors: ['#00ffe5', '#8ffcff', '#ffffff'],
+  },
+  {
+    id: 'synthwave',
+    label: 'Synthwave',
+    detail: 'pink / violet / blue drift',
+    colors: ['#ff2bd6', '#8b5cf6', '#38bdf8'],
+  },
+  {
+    id: 'solar-flare',
+    label: 'Solar Flare',
+    detail: 'amber with hot pulse',
+    colors: ['#ffb627', '#ff5470', '#fff2a8'],
+  },
+  {
+    id: 'toxic-lime',
+    label: 'Toxic Lime',
+    detail: 'green signal shimmer',
+    colors: ['#39ff14', '#b6ff5c', '#00ffe5'],
+  },
+  {
+    id: 'galaxy-shift',
+    label: 'Galaxy Shift',
+    detail: 'aurora gradient loop',
+    colors: ['#7c3aed', '#ff2bd6', '#00ffe5'],
+  },
+  {
+    id: 'ice-glitch',
+    label: 'Ice Glitch',
+    detail: 'cool flicker edges',
+    colors: ['#a5f3fc', '#60a5fa', '#f0f9ff'],
+  },
+  {
+    id: 'prism-run',
+    label: 'Prism Run',
+    detail: 'rainbow chroma crawl',
+    colors: ['#ff5470', '#ffb627', '#00ffe5', '#8b5cf6'],
+  },
+]
+
+const USERNAME_STYLE_IDS = new Set(USERNAME_STYLE_PRESETS.map((preset) => preset.id))
+const getUsernameStyleId = (styleId) =>
+  USERNAME_STYLE_IDS.has(styleId) ? styleId : DEFAULT_USERNAME_STYLE_ID
+const getUsernameStyleClassName = (styleId, extra = '') =>
+  `username-style username-style-${getUsernameStyleId(styleId)}${extra ? ` ${extra}` : ''}`
+
 const formatDiscordTimestamp = (iso) => {
   if (!iso) return ''
   const date = new Date(iso)
@@ -157,18 +215,26 @@ export default function Comments() {
   const [gifResults, setGifResults] = useState([])
   const [gifLoading, setGifLoading] = useState(false)
   const [gifError, setGifError] = useState('')
+  const [usernameStyleOpen, setUsernameStyleOpen] = useState(false)
+  const [usernameStyleId, setUsernameStyleId] = useState(DEFAULT_USERNAME_STYLE_ID)
+  const [usernameStyleSaving, setUsernameStyleSaving] = useState('')
+  const [usernameStyleError, setUsernameStyleError] = useState('')
 
 
   const isAdmin = !!(me && me.isAdmin)
 
   const load = async () => {
     try {
-      const [cRes, meRes] = await Promise.all([
+      const [cRes, meRes, styleRes] = await Promise.all([
         axios.get('/api/comments'),
         axios.get('/api/me'),
+        axios.get('/api/comments/me/style'),
       ])
+      const user = meRes.data.user ?? null
+      const nextStyleId = getUsernameStyleId(styleRes.data?.styleId)
       setComments(cRes.data.comments ?? [])
-      setMe(meRes.data.user ?? null)
+      setUsernameStyleId(nextStyleId)
+      setMe(user ? { ...user, nameStyleId: nextStyleId } : null)
     } catch (e) {
       console.error(e)
     } finally {
@@ -192,6 +258,28 @@ export default function Comments() {
     document.addEventListener('mousedown', onDocClick)
     return () => document.removeEventListener('mousedown', onDocClick)
   }, [reactionPickerId])
+
+  useEffect(() => {
+    if (!usernameStyleOpen) return
+    const onDocClick = (event) => {
+      const target = event.target
+      if (
+        !target.closest?.('.username-style-popover') &&
+        !target.closest?.('.username-style-trigger')
+      ) {
+        setUsernameStyleOpen(false)
+      }
+    }
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setUsernameStyleOpen(false)
+    }
+    document.addEventListener('mousedown', onDocClick)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onDocClick)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [usernameStyleOpen])
 
 
   const totalPages = Math.max(1, Math.ceil((comments?.length ?? 0) / COMMENTS_PER_PAGE))
@@ -390,6 +478,42 @@ const handleGifSelect = (url) => {
 
   const logout = () => {
     window.location.href = '/auth/discord/logout'
+  }
+
+  const toggleUsernameStylePicker = () => {
+    setUsernameStyleError('')
+    setUsernameStyleOpen((open) => !open)
+  }
+
+  const saveUsernameStyle = async (styleId) => {
+    if (!me) return
+    const nextStyleId = getUsernameStyleId(styleId)
+    setUsernameStyleSaving(nextStyleId)
+    setUsernameStyleError('')
+    try {
+      const res = await axios.patch('/api/comments/me/style', {
+        styleId: nextStyleId,
+      })
+      const savedStyleId = getUsernameStyleId(res.data?.styleId)
+      setUsernameStyleId(savedStyleId)
+      setMe((prev) =>
+        prev
+          ? {
+              ...prev,
+              ...(res.data?.user || {}),
+              nameStyleId: savedStyleId,
+            }
+          : prev
+      )
+      if (Array.isArray(res.data?.comments)) {
+        setComments(res.data.comments)
+      }
+    } catch (e) {
+      console.error(e)
+      setUsernameStyleError(e.response?.data?.error ?? 'No se pudo guardar el estilo.')
+    } finally {
+      setUsernameStyleSaving('')
+    }
   }
 
   const startEdit = (comment) => {
@@ -596,15 +720,72 @@ const handleGifSelect = (url) => {
                     onError={(e) => (e.currentTarget.src = 'https://cdn.discordapp.com/embed/avatars/0.png')}
                     alt={formatUsername(me.username)}
                   />
-                  <span>
-                    {formatUsername(me.username)}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={toggleUsernameStylePicker}
+                    className="comments-user-name-btn username-style-trigger"
+                    aria-label="Cambiar color del nombre"
+                    aria-expanded={usernameStyleOpen}
+                  >
+                    <span className={getUsernameStyleClassName(me.nameStyleId || usernameStyleId)}>
+                      {formatUsername(me.username)}
+                    </span>
+                  </button>
                   {isAdmin && (
                     <span className="comments-admin-pill">
                       Admin
                     </span>
                   )}
                 </div>
+                {usernameStyleOpen && (
+                  <div className="username-style-popover" role="dialog" aria-label="Color del nombre">
+                    <div className="username-style-popover-top">
+                      <span>name.color</span>
+                      <strong>Elige tu señal</strong>
+                    </div>
+                    <div className="username-style-options">
+                      {USERNAME_STYLE_PRESETS.map((preset) => {
+                        const active =
+                          getUsernameStyleId(me.nameStyleId || usernameStyleId) === preset.id
+                        const saving = usernameStyleSaving === preset.id
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => saveUsernameStyle(preset.id)}
+                            disabled={!!usernameStyleSaving}
+                            className={`username-style-option${active ? ' is-active' : ''}`}
+                          >
+                            <span
+                              className={getUsernameStyleClassName(
+                                preset.id,
+                                'username-style-preview',
+                              )}
+                            >
+                              {formatUsername(me.username)}
+                            </span>
+                            <span className="username-style-option-copy">
+                              <strong>{preset.label}</strong>
+                              <em>{saving ? 'guardando...' : preset.detail}</em>
+                            </span>
+                            <span className="username-style-swatches" aria-hidden="true">
+                              {preset.colors.map((color) => (
+                                <span key={color} style={{ '--swatch': color }} />
+                              ))}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <div className="username-style-popover-footer">
+                      {usernameStyleError ? (
+                        <span className="is-error">{usernameStyleError}</span>
+                      ) : (
+                        <span>Se aplica a todos tus comentarios anteriores.</span>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={logout}
@@ -760,9 +941,28 @@ const handleGifSelect = (url) => {
                 <div className="comment-content">
                   <header className="comment-header">
                     <span className="comment-author-line">
-                      <span className="comment-author">
-                        {formatUsername(c.author.username)}
-                      </span>
+                      {isAuthor ? (
+                        <button
+                          type="button"
+                          onClick={toggleUsernameStylePicker}
+                          className={getUsernameStyleClassName(
+                            c.author?.nameStyleId,
+                            'comment-author comment-author-button username-style-trigger',
+                          )}
+                          aria-label="Cambiar color del nombre"
+                        >
+                          {formatUsername(c.author.username)}
+                        </button>
+                      ) : (
+                        <span
+                          className={getUsernameStyleClassName(
+                            c.author?.nameStyleId,
+                            'comment-author',
+                          )}
+                        >
+                          {formatUsername(c.author.username)}
+                        </span>
+                      )}
                       {isAuthorAdmin && (
                         <span className="comment-admin-badge">
                           Admin
@@ -965,6 +1165,7 @@ const handleGifSelect = (url) => {
                     <div className="mt-3 space-y-2 border-l border-slate-800/80 pl-3">
                       {replies.map((r) => {
                         const replyDate = r.createdAt ? new Date(r.createdAt) : null
+                        const isReplyAuthor = me && String(r.author?.id) === String(me.id)
                         const replyFullDate =
                           replyDate && !Number.isNaN(replyDate.getTime())
                             ? replyDate.toLocaleString('es-ES', {
@@ -991,9 +1192,28 @@ const handleGifSelect = (url) => {
                             <div className="flex-1">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-1">
-                                  <span className="font-medium text-slate-100">
-                                    {formatUsername(r.author?.username)}
-                                  </span>
+                                  {isReplyAuthor ? (
+                                    <button
+                                      type="button"
+                                      onClick={toggleUsernameStylePicker}
+                                      className={getUsernameStyleClassName(
+                                        r.author?.nameStyleId,
+                                        'comment-reply-author username-style-trigger',
+                                      )}
+                                      aria-label="Cambiar color del nombre"
+                                    >
+                                      {formatUsername(r.author?.username)}
+                                    </button>
+                                  ) : (
+                                    <span
+                                      className={getUsernameStyleClassName(
+                                        r.author?.nameStyleId,
+                                        'comment-reply-author',
+                                      )}
+                                    >
+                                      {formatUsername(r.author?.username)}
+                                    </span>
+                                  )}
                                   {r.author?.isAdmin && (
                                     <span className="rounded-full border border-emerald-400/70 bg-emerald-500/15 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-200 shadow-sm shadow-emerald-500/30">
                                       Admin
