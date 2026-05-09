@@ -216,12 +216,34 @@ export default function Comments() {
   const [gifLoading, setGifLoading] = useState(false)
   const [gifError, setGifError] = useState('')
   const [usernameStyleOpen, setUsernameStyleOpen] = useState(false)
+  const [usernameStyleAnchor, setUsernameStyleAnchor] = useState(null)
   const [usernameStyleId, setUsernameStyleId] = useState(DEFAULT_USERNAME_STYLE_ID)
   const [usernameStyleSaving, setUsernameStyleSaving] = useState('')
   const [usernameStyleError, setUsernameStyleError] = useState('')
+  const usernameStyleTriggerRef = useRef(null)
 
 
   const isAdmin = !!(me && me.isAdmin)
+
+  const updateUsernameStyleAnchor = (trigger) => {
+    if (!trigger?.getBoundingClientRect || typeof window === 'undefined') return
+
+    const rect = trigger.getBoundingClientRect()
+    const popoverWidth =
+      window.innerWidth <= 640
+        ? Math.min(330, window.innerWidth - 24)
+        : Math.min(372, window.innerWidth - 32)
+    const left = Math.min(
+      Math.max(12, rect.right - popoverWidth),
+      Math.max(12, window.innerWidth - popoverWidth - 12),
+    )
+
+    setUsernameStyleAnchor({
+      top: Math.round(rect.bottom + 10),
+      left: Math.round(left),
+      arrowLeft: Math.round(rect.left + rect.width / 2 - left),
+    })
+  }
 
   const load = async () => {
     try {
@@ -278,6 +300,24 @@ export default function Comments() {
     return () => {
       document.removeEventListener('mousedown', onDocClick)
       document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [usernameStyleOpen])
+
+  useEffect(() => {
+    if (!usernameStyleOpen) return
+
+    const updatePosition = () => {
+      const trigger = usernameStyleTriggerRef.current
+      updateUsernameStyleAnchor(trigger)
+    }
+
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
     }
   }, [usernameStyleOpen])
 
@@ -480,7 +520,12 @@ const handleGifSelect = (url) => {
     window.location.href = '/auth/discord/logout'
   }
 
-  const toggleUsernameStylePicker = () => {
+  const toggleUsernameStylePicker = (event) => {
+    const trigger = event?.currentTarget
+    if (trigger?.getBoundingClientRect) {
+      usernameStyleTriggerRef.current = trigger
+      updateUsernameStyleAnchor(trigger)
+    }
     setUsernameStyleError('')
     setUsernameStyleOpen((open) => !open)
   }
@@ -685,6 +730,7 @@ const handleGifSelect = (url) => {
 
   const remainingNew = MAX_COMMENT_LENGTH - newTextInput.length
   const remainingEdit = MAX_COMMENT_LENGTH - editText.length
+  const activeUsernameStyleId = getUsernameStyleId(me?.nameStyleId || usernameStyleId)
 
   return (
     <section id="comments" className="mx-auto max-w-6xl px-4 py-8">
@@ -714,78 +760,29 @@ const handleGifSelect = (url) => {
           <div className="comments-auth-zone">
             {me ? (
               <div className="comments-userbar">
-                <div className="comments-user-pill">
+                <button
+                  type="button"
+                  onClick={toggleUsernameStylePicker}
+                  className={`comments-user-pill username-style-trigger${
+                    usernameStyleOpen ? ' is-open' : ''
+                  }`}
+                  aria-label="Cambiar color del nombre"
+                  aria-expanded={usernameStyleOpen}
+                >
                   <img
                     src={me.avatarUrl}
                     onError={(e) => (e.currentTarget.src = 'https://cdn.discordapp.com/embed/avatars/0.png')}
                     alt={formatUsername(me.username)}
                   />
-                  <button
-                    type="button"
-                    onClick={toggleUsernameStylePicker}
-                    className="comments-user-name-btn username-style-trigger"
-                    aria-label="Cambiar color del nombre"
-                    aria-expanded={usernameStyleOpen}
-                  >
-                    <span className={getUsernameStyleClassName(me.nameStyleId || usernameStyleId)}>
-                      {formatUsername(me.username)}
-                    </span>
-                  </button>
+                  <span className={getUsernameStyleClassName(activeUsernameStyleId)}>
+                    {formatUsername(me.username)}
+                  </span>
                   {isAdmin && (
                     <span className="comments-admin-pill">
                       Admin
                     </span>
                   )}
-                </div>
-                {usernameStyleOpen && (
-                  <div className="username-style-popover" role="dialog" aria-label="Color del nombre">
-                    <div className="username-style-popover-top">
-                      <span>name.color</span>
-                      <strong>Elige tu señal</strong>
-                    </div>
-                    <div className="username-style-options">
-                      {USERNAME_STYLE_PRESETS.map((preset) => {
-                        const active =
-                          getUsernameStyleId(me.nameStyleId || usernameStyleId) === preset.id
-                        const saving = usernameStyleSaving === preset.id
-                        return (
-                          <button
-                            key={preset.id}
-                            type="button"
-                            onClick={() => saveUsernameStyle(preset.id)}
-                            disabled={!!usernameStyleSaving}
-                            className={`username-style-option${active ? ' is-active' : ''}`}
-                          >
-                            <span
-                              className={getUsernameStyleClassName(
-                                preset.id,
-                                'username-style-preview',
-                              )}
-                            >
-                              {formatUsername(me.username)}
-                            </span>
-                            <span className="username-style-option-copy">
-                              <strong>{preset.label}</strong>
-                              <em>{saving ? 'guardando...' : preset.detail}</em>
-                            </span>
-                            <span className="username-style-swatches" aria-hidden="true">
-                              {preset.colors.map((color) => (
-                                <span key={color} style={{ '--swatch': color }} />
-                              ))}
-                            </span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                    <div className="username-style-popover-footer">
-                      {usernameStyleError ? (
-                        <span className="is-error">{usernameStyleError}</span>
-                      ) : (
-                        <span>Se aplica a todos tus comentarios anteriores.</span>
-                      )}
-                    </div>
-                  </div>
-                )}
+                </button>
                 <button
                   type="button"
                   onClick={logout}
@@ -947,7 +944,9 @@ const handleGifSelect = (url) => {
                           onClick={toggleUsernameStylePicker}
                           className={getUsernameStyleClassName(
                             c.author?.nameStyleId,
-                            'comment-author comment-author-button username-style-trigger',
+                            `comment-author comment-author-button username-style-trigger${
+                              usernameStyleOpen ? ' is-open' : ''
+                            }`,
                           )}
                           aria-label="Cambiar color del nombre"
                         >
@@ -1198,7 +1197,9 @@ const handleGifSelect = (url) => {
                                       onClick={toggleUsernameStylePicker}
                                       className={getUsernameStyleClassName(
                                         r.author?.nameStyleId,
-                                        'comment-reply-author username-style-trigger',
+                                        `comment-reply-author username-style-trigger${
+                                          usernameStyleOpen ? ' is-open' : ''
+                                        }`,
                                       )}
                                       aria-label="Cambiar color del nombre"
                                     >
@@ -1374,6 +1375,68 @@ const handleGifSelect = (url) => {
           )}
         </div>
       </div>
+
+      {usernameStyleOpen && me && (
+        <ModalPortal>
+          <div className="username-style-popover-layer" aria-hidden="false">
+            <div
+              className="username-style-popover"
+              role="dialog"
+              aria-label="Color del nombre"
+              style={{
+                top: `${usernameStyleAnchor?.top ?? 96}px`,
+                left: `${usernameStyleAnchor?.left ?? 24}px`,
+                '--username-arrow-left': `${usernameStyleAnchor?.arrowLeft ?? 280}px`,
+              }}
+            >
+              <div className="username-style-popover-top">
+                <span>name.color</span>
+                <strong>Elige tu señal</strong>
+              </div>
+              <div className="username-style-options">
+                {USERNAME_STYLE_PRESETS.map((preset) => {
+                  const active = activeUsernameStyleId === preset.id
+                  const saving = usernameStyleSaving === preset.id
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => saveUsernameStyle(preset.id)}
+                      disabled={!!usernameStyleSaving}
+                      className={`username-style-option${active ? ' is-active' : ''}`}
+                    >
+                      <span
+                        className={getUsernameStyleClassName(
+                          preset.id,
+                          'username-style-preview',
+                        )}
+                      >
+                        {formatUsername(me.username)}
+                      </span>
+                      <span className="username-style-option-copy">
+                        <strong>{preset.label}</strong>
+                        <em>{saving ? 'guardando...' : preset.detail}</em>
+                      </span>
+                      <span className="username-style-swatches" aria-hidden="true">
+                        {preset.colors.map((color) => (
+                          <span key={color} style={{ '--swatch': color }} />
+                        ))}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="username-style-popover-footer">
+                {usernameStyleError ? (
+                  <span className="is-error">{usernameStyleError}</span>
+                ) : (
+                  <span>Se aplica a todos tus comentarios anteriores.</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
 
       
 

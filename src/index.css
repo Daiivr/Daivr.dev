@@ -8130,11 +8130,27 @@ html:not(.theme-xmas) .sidebar-credit-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
   border-radius: 7px;
   border: 1px solid rgba(0, 255, 229, 0.18);
   background: rgba(0, 255, 229, 0.045);
   color: rgba(230, 241, 255, 0.92);
   padding: 7px 9px;
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.comments-user-pill:hover,
+.comments-user-pill:focus-visible,
+.comments-user-pill.is-open {
+  border-color: rgba(0, 255, 229, 0.42);
+  background: rgba(0, 255, 229, 0.075);
+  box-shadow: 0 0 18px rgba(0, 255, 229, 0.16);
+  transform: translateY(-1px);
 }
 
 .comments-user-pill img {
@@ -8288,20 +8304,29 @@ html:not(.theme-xmas) .sidebar-credit-pill {
   }
 }
 
+.username-style-popover-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 30000;
+  isolation: isolate;
+  pointer-events: none;
+}
+
 .username-style-popover {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  z-index: 80;
+  position: fixed;
+  top: 96px;
+  left: 24px;
+  z-index: 30001;
   width: min(372px, calc(100vw - 32px));
+  pointer-events: auto;
   border-radius: 10px;
   border: 1px solid rgba(0, 255, 229, 0.28);
   background:
     linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px) 0 0 / 14px 14px,
     linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 14px 14px,
-    radial-gradient(circle at 18% 0%, rgba(0, 255, 229, 0.16), transparent 44%),
-    radial-gradient(circle at 100% 42%, rgba(255, 43, 214, 0.12), transparent 42%),
-    rgba(4, 8, 20, 0.98);
+    radial-gradient(circle at 18% 0%, rgba(0, 255, 229, 0.2), transparent 44%),
+    radial-gradient(circle at 100% 42%, rgba(255, 43, 214, 0.16), transparent 42%),
+    #040814;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.035),
     0 22px 50px rgba(0, 0, 0, 0.42),
@@ -8317,12 +8342,12 @@ html:not(.theme-xmas) .sidebar-credit-pill {
   content: '';
   position: absolute;
   top: -6px;
-  right: 132px;
+  left: clamp(16px, var(--username-arrow-left, 280px), calc(100% - 26px));
   width: 10px;
   height: 10px;
   border-left: 1px solid rgba(0, 255, 229, 0.28);
   border-top: 1px solid rgba(0, 255, 229, 0.28);
-  background: rgba(4, 8, 20, 0.98);
+  background: #040814;
   transform: rotate(45deg);
 }
 
@@ -8389,7 +8414,7 @@ html:not(.theme-xmas) .sidebar-credit-pill {
   min-height: 46px;
   border-radius: 7px;
   border: 1px solid rgba(106, 122, 153, 0.26);
-  background: rgba(2, 7, 18, 0.66);
+  background: #060b18;
   color: rgba(230, 241, 255, 0.92);
   cursor: pointer;
   padding: 8px;
@@ -8404,7 +8429,7 @@ html:not(.theme-xmas) .sidebar-credit-pill {
 .username-style-option:hover,
 .username-style-option:focus-visible {
   border-color: rgba(0, 255, 229, 0.46);
-  background: rgba(0, 255, 229, 0.07);
+  background: #071d25;
   box-shadow: 0 0 18px rgba(0, 255, 229, 0.16);
   outline: none;
   transform: translateY(-1px);
@@ -8414,7 +8439,7 @@ html:not(.theme-xmas) .sidebar-credit-pill {
   border-color: rgba(255, 43, 214, 0.54);
   background:
     linear-gradient(90deg, rgba(255, 43, 214, 0.11), rgba(0, 255, 229, 0.08)),
-    rgba(2, 7, 18, 0.76);
+    #07111f;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.035),
     0 0 18px rgba(255, 43, 214, 0.16);
@@ -8495,10 +8520,6 @@ html:not(.theme-xmas) .sidebar-credit-pill {
   .username-style-popover {
     width: min(330px, calc(100vw - 24px));
     transform-origin: center top;
-  }
-
-  .username-style-popover::before {
-    right: 90px;
   }
 
   .username-style-option {
