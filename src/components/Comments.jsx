@@ -146,6 +146,54 @@ const USERNAME_STYLE_PRESETS = [
     detail: 'rainbow chroma crawl',
     colors: ['#ff5470', '#ffb627', '#00ffe5', '#8b5cf6'],
   },
+  {
+    id: 'candy-core',
+    label: 'Candy Core',
+    detail: 'bubblegum chrome pop',
+    colors: ['#ff6ad5', '#f9a8d4', '#67e8f9', '#ffffff'],
+  },
+  {
+    id: 'void-pulse',
+    label: 'Void Pulse',
+    detail: 'blacklight violet surge',
+    colors: ['#c084fc', '#7c3aed', '#111827', '#22d3ee'],
+  },
+  {
+    id: 'emerald-matrix',
+    label: 'Emerald Matrix',
+    detail: 'terminal rain shimmer',
+    colors: ['#bbf7d0', '#22c55e', '#052e16'],
+  },
+  {
+    id: 'golden-hour',
+    label: 'Golden Hour',
+    detail: 'soft gold prestige',
+    colors: ['#fff7ad', '#facc15', '#fb7185'],
+  },
+  {
+    id: 'blood-moon',
+    label: 'Blood Moon',
+    detail: 'red chrome menace',
+    colors: ['#fecdd3', '#ef4444', '#7f1d1d'],
+  },
+  {
+    id: 'ocean-byte',
+    label: 'Ocean Byte',
+    detail: 'deep aqua waveform',
+    colors: ['#7dd3fc', '#06b6d4', '#155e75'],
+  },
+  {
+    id: 'holo-lux',
+    label: 'Holo Lux',
+    detail: 'pearl hologram sweep',
+    colors: ['#f5f3ff', '#a78bfa', '#5eead4', '#f0abfc'],
+  },
+  {
+    id: 'admin-aura',
+    label: 'Admin Aura',
+    detail: 'cyan crown overdrive',
+    colors: ['#00ffe5', '#39ff14', '#ffb627', '#ffffff'],
+  },
 ]
 
 const USERNAME_STYLE_IDS = new Set(USERNAME_STYLE_PRESETS.map((preset) => preset.id))
@@ -225,6 +273,27 @@ export default function Comments() {
 
   const isAdmin = !!(me && me.isAdmin)
 
+  const applyStyleToUserEntries = (list, styleId, userId = me?.id) => {
+    if (!userId || !Array.isArray(list)) return list
+
+    const nextStyleId = getUsernameStyleId(styleId)
+    const syncAuthor = (author) =>
+      author && String(author.id) === String(userId)
+        ? { ...author, nameStyleId: nextStyleId }
+        : author
+
+    return list.map((comment) => ({
+      ...comment,
+      author: syncAuthor(comment.author),
+      replies: Array.isArray(comment.replies)
+        ? comment.replies.map((reply) => ({
+            ...reply,
+            author: syncAuthor(reply.author),
+          }))
+        : comment.replies,
+    }))
+  }
+
   const updateUsernameStyleAnchor = (trigger) => {
     if (!trigger?.getBoundingClientRect || typeof window === 'undefined') return
 
@@ -232,7 +301,7 @@ export default function Comments() {
     const popoverWidth =
       window.innerWidth <= 640
         ? Math.min(330, window.innerWidth - 24)
-        : Math.min(372, window.innerWidth - 32)
+        : Math.min(430, window.innerWidth - 32)
     const left = Math.min(
       Math.max(12, rect.right - popoverWidth),
       Math.max(12, window.innerWidth - popoverWidth - 12),
@@ -254,7 +323,11 @@ export default function Comments() {
       ])
       const user = meRes.data.user ?? null
       const nextStyleId = getUsernameStyleId(styleRes.data?.styleId)
-      setComments(cRes.data.comments ?? [])
+      setComments(
+        user
+          ? applyStyleToUserEntries(cRes.data.comments ?? [], nextStyleId, user.id)
+          : cRes.data.comments ?? [],
+      )
       setUsernameStyleId(nextStyleId)
       setMe(user ? { ...user, nameStyleId: nextStyleId } : null)
     } catch (e) {
@@ -502,10 +575,16 @@ const handleGifSelect = (url) => {
 
     try {
       const res = await axios.post('/api/comments', { text: payloadText })
+      const activeStyleId = getUsernameStyleId(me?.nameStyleId || usernameStyleId)
+      const nextComment = applyStyleToUserEntries(
+        [res.data.comment],
+        activeStyleId,
+        me?.id,
+      )[0]
       setText('')
       setNewTextInput('')
       setNewGifUrls([])
-      setComments((prev) => [res.data.comment, ...prev])
+      setComments((prev) => [nextComment, ...applyStyleToUserEntries(prev, activeStyleId)])
     } catch (e) {
       console.error(e)
       alert(e.response?.data?.error ?? 'Error enviando comentario')
@@ -550,9 +629,13 @@ const handleGifSelect = (url) => {
             }
           : prev
       )
-      if (Array.isArray(res.data?.comments)) {
-        setComments(res.data.comments)
-      }
+      setComments((prev) =>
+        applyStyleToUserEntries(
+          Array.isArray(res.data?.comments) ? res.data.comments : prev,
+          savedStyleId,
+          me.id,
+        )
+      )
     } catch (e) {
       console.error(e)
       setUsernameStyleError(e.response?.data?.error ?? 'No se pudo guardar el estilo.')
@@ -731,6 +814,10 @@ const handleGifSelect = (url) => {
   const remainingNew = MAX_COMMENT_LENGTH - newTextInput.length
   const remainingEdit = MAX_COMMENT_LENGTH - editText.length
   const activeUsernameStyleId = getUsernameStyleId(me?.nameStyleId || usernameStyleId)
+  const getAuthorEffectiveStyleId = (author) =>
+    me && author && String(author.id) === String(me.id)
+      ? activeUsernameStyleId
+      : getUsernameStyleId(author?.nameStyleId)
 
   return (
     <section id="comments" className="mx-auto max-w-6xl px-4 py-8">
@@ -943,7 +1030,7 @@ const handleGifSelect = (url) => {
                           type="button"
                           onClick={toggleUsernameStylePicker}
                           className={getUsernameStyleClassName(
-                            c.author?.nameStyleId,
+                            getAuthorEffectiveStyleId(c.author),
                             `comment-author comment-author-button username-style-trigger${
                               usernameStyleOpen ? ' is-open' : ''
                             }`,
@@ -955,7 +1042,7 @@ const handleGifSelect = (url) => {
                       ) : (
                         <span
                           className={getUsernameStyleClassName(
-                            c.author?.nameStyleId,
+                            getAuthorEffectiveStyleId(c.author),
                             'comment-author',
                           )}
                         >
@@ -1196,7 +1283,7 @@ const handleGifSelect = (url) => {
                                       type="button"
                                       onClick={toggleUsernameStylePicker}
                                       className={getUsernameStyleClassName(
-                                        r.author?.nameStyleId,
+                                        getAuthorEffectiveStyleId(r.author),
                                         `comment-reply-author username-style-trigger${
                                           usernameStyleOpen ? ' is-open' : ''
                                         }`,
@@ -1208,7 +1295,7 @@ const handleGifSelect = (url) => {
                                   ) : (
                                     <span
                                       className={getUsernameStyleClassName(
-                                        r.author?.nameStyleId,
+                                        getAuthorEffectiveStyleId(r.author),
                                         'comment-reply-author',
                                       )}
                                     >

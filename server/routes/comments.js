@@ -23,6 +23,14 @@ const USERNAME_STYLE_IDS = new Set([
   'galaxy-shift',
   'ice-glitch',
   'prism-run',
+  'candy-core',
+  'void-pulse',
+  'emerald-matrix',
+  'golden-hour',
+  'blood-moon',
+  'ocean-byte',
+  'holo-lux',
+  'admin-aura',
 ])
 
 // IDs de admins leídos desde .env: ADMIN_IDS=id1,id2
