@@ -3,7 +3,7 @@ import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
 import Links from './components/Links'
-import Gallery from './components/Gallery'
+import GameShelf from './components/GameShelf'
 import DiscordCard from './components/DiscordCard'
 import Comments from './components/Comments'
 import Splash from './components/Splash'
@@ -18,7 +18,7 @@ const LOFI_VOLUME_STORAGE_KEY = 'daivr_lofi_volume'
 const DEFAULT_LOFI_VOLUME_PERCENT = 20
 const MATRIX_RAIN_CHARS =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*+-/<>=?[]{}'
-const SECTION_ROUTES = ['#home', '#about', '#links', '#discord', '#gallery', '#comments']
+const SECTION_ROUTES = ['#home', '#about', '#links', '#discord', '#games', '#comments']
 const LOFI_TRACKS = [
   {
     id: 'DkbPMHFumss',
@@ -1873,13 +1873,13 @@ export default function App() {
       action: () => scrollToSection('#discord'),
     },
     {
-      id: 'route-gallery',
-      label: 'Open gallery',
-      detail: 'image vault',
+      id: 'route-games',
+      label: 'Open game shelf',
+      detail: 'favorite games',
       category: 'route',
       icon: '04',
-      keywords: ['photos', 'pictures', 'media'],
-      action: () => scrollToSection('#gallery'),
+      keywords: ['games', 'shelf', 'favorites', 'nier', 'automata'],
+      action: () => scrollToSection('#games'),
     },
     {
       id: 'route-comments',
@@ -1946,7 +1946,7 @@ export default function App() {
     { href: '#about', label: 'about', node: <About /> },
     { href: '#links', label: 'links', node: <Links /> },
     { href: '#discord', label: 'discord', node: <DiscordCard /> },
-    { href: '#gallery', label: 'gallery', node: <Gallery /> },
+    { href: '#games', label: 'games', node: <GameShelf /> },
     { href: '#comments', label: 'comments', node: <Comments /> },
   ]
 
@@ -2086,7 +2086,7 @@ export default function App() {
               <About />
               <Links />
               <DiscordCard />
-              <Gallery />
+              <GameShelf />
               <Comments />
             </div>
           </>

@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import ModalPortal from './ModalPortal'
 
 const MAX_COMMENT_LENGTH = 2000
 const COMMENTS_PER_PAGE = 6
+const COMPOSER_TEXTAREA_MAX_HEIGHT = 236
 
 const REACTION_PRESETS = ['😀', '😂', '😍', '😢', '😡', '❤️', '👍', '👎', '🎉', '🔥', '💀', '✨']
 
@@ -205,6 +206,21 @@ export default function Comments() {
   }, [page, totalPages])
 
   const textareaRef = useRef(null)
+
+  const syncComposerTextareaHeight = () => {
+    const el = textareaRef.current
+    if (!el) return
+
+    el.style.height = 'auto'
+    const nextHeight = Math.min(el.scrollHeight, COMPOSER_TEXTAREA_MAX_HEIGHT)
+    el.style.height = `${nextHeight}px`
+    el.style.overflowY =
+      el.scrollHeight > COMPOSER_TEXTAREA_MAX_HEIGHT ? 'auto' : 'hidden'
+  }
+
+  useLayoutEffect(() => {
+    syncComposerTextareaHeight()
+  }, [newTextInput])
 
 
   const openGifPickerForNew = () => {
@@ -625,6 +641,7 @@ const handleGifSelect = (url) => {
                 value={newTextInput}
                 onChange={handleNewChange}
                 rows={3}
+                wrap="soft"
                 placeholder="Escribe algo bonito (o un shitpost controlado)..."
                 className="comment-textarea comments-composer-textarea"
               />

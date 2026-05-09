@@ -6413,6 +6413,510 @@ html:not(.theme-xmas) .sidebar-credit-pill {
   border-radius: 7px !important;
 }
 
+/* ---------- Game shelf ---------- */
+
+.game-shelf-panel {
+  display: grid;
+  gap: 22px;
+  overflow: visible;
+}
+
+.game-shelf-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.game-shelf-subtitle {
+  margin-top: 4px;
+  color: rgba(106, 122, 153, 0.92);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.game-shelf-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.game-shelf-stats span {
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 229, 0.2);
+  background: rgba(0, 255, 229, 0.055);
+  color: rgba(210, 255, 248, 0.82);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  padding: 6px 8px;
+  text-transform: uppercase;
+}
+
+.game-shelf-stage {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 229, 0.14);
+  background:
+    radial-gradient(620px 260px at 18% 10%, rgba(0, 255, 229, 0.12), transparent 62%),
+    radial-gradient(540px 260px at 84% 12%, rgba(255, 43, 214, 0.12), transparent 66%),
+    linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.016) 1px, transparent 1px),
+    rgba(1, 5, 14, 0.58);
+  background-size: auto, auto, 16px 16px, 16px 16px, auto;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.018),
+    inset 0 0 48px rgba(0, 255, 229, 0.035);
+  padding: 26px 18px 24px;
+}
+
+.game-shelf-rail {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 134px;
+  height: 10px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent, rgba(0, 255, 229, 0.18), rgba(255, 43, 214, 0.14), transparent),
+    rgba(0, 0, 0, 0.22);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.3),
+    0 0 18px rgba(0, 255, 229, 0.08);
+  opacity: 0.7;
+}
+
+.game-shelf-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: end;
+  perspective: 1800px;
+}
+
+.game-card {
+  --game-card-height: 330px;
+  --game-card-width: calc(var(--game-card-height) / 1.5);
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 14px;
+  outline: none;
+  overflow: visible;
+}
+
+.game-card-scene {
+  position: relative;
+  display: flex;
+  width: min(100%, var(--game-card-width));
+  height: var(--game-card-height);
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 24px;
+  overflow: visible;
+  perspective: 2500px;
+  transform-style: preserve-3d;
+}
+
+.game-card-wrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 229, 0.22);
+  background:
+    linear-gradient(180deg, rgba(20, 26, 42, 0.95), rgba(5, 8, 16, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.032),
+    0 18px 34px rgba(0, 0, 0, 0.34);
+  transform: perspective(900px) translateY(0) rotateX(0deg) translateZ(0);
+  transform-origin: center bottom;
+  transform-style: preserve-3d;
+  transition:
+    box-shadow 0.5s ease,
+    filter 0.5s ease,
+    transform 0.5s ease;
+  will-change: transform;
+}
+
+.game-card-wrapper::before,
+.game-card-wrapper::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 86px;
+  opacity: 0;
+  transition:
+    height 0.5s ease,
+    opacity 0.5s ease;
+}
+
+.game-card-wrapper::before {
+  top: 0;
+  height: 100%;
+  background-image: linear-gradient(
+    to top,
+    transparent 46%,
+    rgba(2, 4, 10, 0.58) 68%,
+    rgba(2, 4, 10, 0.96) 97%
+  );
+}
+
+.game-card-wrapper::after {
+  bottom: 0;
+  opacity: 1;
+  background-image: linear-gradient(
+    to bottom,
+    transparent 42%,
+    rgba(2, 4, 10, 0.64) 70%,
+    rgba(2, 4, 10, 0.98) 100%
+  );
+}
+
+.game-card-cover {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.game-card-character {
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  z-index: 1;
+  display: block;
+  width: 82%;
+  max-width: none;
+  max-height: 122%;
+  height: auto;
+  opacity: 0;
+  pointer-events: none;
+  filter:
+    saturate(1.18)
+    contrast(1.04);
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 54%,
+    rgba(0, 0, 0, 0.82) 68%,
+    rgba(0, 0, 0, 0.34) 86%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 54%,
+    rgba(0, 0, 0, 0.82) 68%,
+    rgba(0, 0, 0, 0.34) 86%,
+    transparent 100%
+  );
+  transform: translate3d(-50%, 8%, 0) scale(0.86);
+  transform-origin: center bottom;
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
+}
+
+.game-card-title {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  max-width: 100%;
+  justify-content: center;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  background: rgba(2, 4, 10, 0.66);
+  color: rgba(244, 250, 255, 0.96);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  line-height: 1.12;
+  padding: 8px 10px;
+  text-align: center;
+  text-shadow:
+    0 0 10px rgba(0, 255, 229, 0.34),
+    0 0 16px rgba(255, 43, 214, 0.26);
+  text-transform: uppercase;
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
+}
+
+.game-card-title span {
+  overflow-wrap: anywhere;
+}
+
+.game-card-title-logo {
+  width: calc(100% - 24px);
+  max-width: 190px;
+  opacity: 0;
+  overflow: hidden;
+  border-color: transparent;
+  background: transparent;
+  padding: 6px 8px;
+  box-shadow: none;
+  filter: none;
+}
+
+.game-card-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 3px 2px rgba(0, 0, 0, 0.92))
+    drop-shadow(0 8px 10px rgba(0, 0, 0, 0.74));
+}
+
+.game-card-meta {
+  display: grid;
+  width: min(100%, var(--game-card-width));
+  min-height: 108px;
+  gap: 3px;
+  border-radius: 9px;
+  border: 1px solid rgba(0, 255, 229, 0.14);
+  background: rgba(0, 0, 0, 0.34);
+  color: rgba(220, 231, 255, 0.76);
+  font-family: var(--font-mono);
+  padding: 10px 11px;
+}
+
+.game-card-meta span,
+.game-card-meta small {
+  color: rgba(106, 122, 153, 0.96);
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.game-card-meta strong {
+  overflow: hidden;
+  color: rgba(230, 241, 255, 0.96);
+  font-size: 0.76rem;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-card-meta em {
+  color: rgba(0, 255, 229, 0.82);
+  font-size: 0.64rem;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.game-card-meta .game-card-hours {
+  color: rgba(220, 231, 255, 0.86);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+}
+
+.game-card-placeholder {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(0, 255, 229, 0.22), transparent 30%),
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+    rgba(2, 4, 10, 0.92);
+  background-size: auto, 15px 15px, 15px 15px, auto;
+}
+
+.game-card-placeholder span {
+  width: 54px;
+  height: 76px;
+  border-radius: 10px;
+  border: 1px dashed rgba(0, 255, 229, 0.42);
+  background:
+    linear-gradient(135deg, rgba(0, 255, 229, 0.12), rgba(255, 43, 214, 0.1)),
+    rgba(0, 0, 0, 0.28);
+  box-shadow: 0 0 24px rgba(0, 255, 229, 0.12);
+}
+
+.game-card:hover .game-card-wrapper,
+.game-card:focus-visible .game-card-wrapper {
+  filter: brightness(0.72);
+  transform: perspective(900px) translateY(-5%) rotateX(25deg) translateZ(0);
+  box-shadow:
+    2px 35px 32px -8px rgba(0, 0, 0, 0.76),
+    0 0 28px rgba(0, 255, 229, 0.18);
+}
+
+.game-card:hover .game-card-wrapper::before,
+.game-card:focus-visible .game-card-wrapper::before,
+.game-card:hover .game-card-wrapper::after,
+.game-card:focus-visible .game-card-wrapper::after {
+  opacity: 1;
+}
+
+.game-card:hover .game-card-wrapper::after,
+.game-card:focus-visible .game-card-wrapper::after {
+  height: 124px;
+}
+
+.game-card:hover .game-card-title,
+.game-card:focus-visible .game-card-title {
+  transform: translate3d(0, -42px, 100px);
+}
+
+.game-card:hover .game-card-title-logo,
+.game-card:focus-visible .game-card-title-logo {
+  opacity: 1;
+}
+
+.game-card:hover .game-card-character,
+.game-card:focus-visible .game-card-character {
+  opacity: 1;
+  transform: translate3d(-50%, -8%, 100px) scale(0.98);
+}
+
+.game-card-yorha .game-card-wrapper {
+  border-color: rgba(230, 241, 255, 0.26);
+}
+
+.game-card-yorha .game-card-title-logo {
+  width: calc(100% - 10px);
+  max-width: 214px;
+  padding: 7px 8px;
+}
+
+.game-card-yorha .game-card-character {
+  width: 78%;
+  max-height: 119%;
+  transform: translate3d(-50%, 8%, 0) scale(0.835);
+}
+
+.game-card-yorha:hover .game-card-character,
+.game-card-yorha:focus-visible .game-card-character {
+  transform: translate3d(-50%, -7%, 100px) scale(0.96);
+}
+
+.game-card-vault .game-card-wrapper {
+  border-color: rgba(255, 198, 28, 0.34);
+}
+
+.game-card-vault .game-card-title-logo {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.game-card-vault .game-card-meta em {
+  color: rgba(255, 198, 28, 0.94);
+}
+
+.game-card-outlaw .game-card-wrapper {
+  border-color: rgba(255, 54, 42, 0.38);
+}
+
+.game-card-outlaw .game-card-character {
+  width: 103%;
+  max-height: 139%;
+  transform: translate3d(-50%, 8%, 0) scale(0.925);
+}
+
+.game-card-outlaw:hover .game-card-character,
+.game-card-outlaw:focus-visible .game-card-character {
+  transform: translate3d(-50%, -8%, 100px) scale(1.035);
+}
+
+.game-card-outlaw .game-card-title-logo {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.game-card-outlaw .game-card-meta em {
+  color: rgba(255, 82, 70, 0.94);
+}
+
+.game-card-magenta .game-card-meta em {
+  color: rgba(255, 190, 246, 0.92);
+}
+
+.game-card.is-pending {
+  opacity: 0.72;
+}
+
+@media (max-width: 900px) {
+  .game-shelf-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .game-shelf-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .game-shelf-stats {
+    justify-content: flex-start;
+  }
+
+  .game-shelf-stage {
+    padding: 22px 12px 20px;
+  }
+
+  .game-shelf-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .game-card {
+    --game-card-height: 300px;
+  }
+
+  .game-card-scene {
+    width: min(218px, 100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-card-wrapper,
+  .game-card-wrapper::before,
+  .game-card-wrapper::after,
+  .game-card-title,
+  .game-card-character {
+    transition: none !important;
+  }
+
+  .game-card:hover .game-card-wrapper,
+  .game-card:focus-visible .game-card-wrapper,
+  .game-card:hover .game-card-title,
+  .game-card:focus-visible .game-card-title,
+  .game-card:hover .game-card-character,
+  .game-card:focus-visible .game-card-character {
+    transform: none !important;
+  }
+
+  .game-card:hover .game-card-character,
+  .game-card:focus-visible .game-card-character {
+    opacity: 0 !important;
+  }
+}
+
 /* ---------- Gallery media panel ---------- */
 
 .gallery-panel {
@@ -7820,10 +8324,14 @@ html:not(.theme-xmas) .sidebar-credit-pill {
 }
 
 .comments-composer-textarea {
+  box-sizing: border-box;
   display: block;
   width: 100%;
   min-height: 112px;
-  resize: vertical;
+  max-height: 236px;
+  resize: none;
+  overflow-x: hidden;
+  overflow-y: hidden;
   border: 0;
   background: transparent;
   color: rgba(230, 241, 255, 0.94);
@@ -7833,7 +8341,11 @@ html:not(.theme-xmas) .sidebar-credit-pill {
   line-height: 1.55;
   outline: none;
   padding: 14px 14px 38px 34px;
+  overflow-wrap: anywhere;
+  scrollbar-gutter: stable;
   text-shadow: 0 0 8px rgba(0, 255, 229, 0.08);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .comments-composer-textarea::placeholder {
@@ -8161,6 +8673,9 @@ html:not(.theme-xmas) .sidebar-credit-pill {
   font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .comment-reactions {

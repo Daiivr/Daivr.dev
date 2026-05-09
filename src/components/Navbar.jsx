@@ -6,7 +6,7 @@ const navLinks = [
   { href: '#about', label: 'about', code: '01' },
   { href: '#links', label: 'links', code: '02' },
   { href: '#discord', label: 'discord', code: '03' },
-  { href: '#gallery', label: 'gallery', code: '04' },
+  { href: '#games', label: 'games', code: '04' },
   { href: '#comments', label: 'comments', code: '05' },
 ]
 
