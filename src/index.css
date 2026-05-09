@@ -9210,6 +9210,35 @@ html:not(.theme-xmas) .sidebar-credit-pill {
   font-weight: 900;
 }
 
+.comment-author.username-style:not(.username-style-default),
+.comment-reply-author.username-style:not(.username-style-default) {
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: saturate(1.65) brightness(1.32) drop-shadow(0 0 8px var(--username-glow));
+  font-weight: 950;
+  letter-spacing: 0.035em;
+  text-shadow:
+    0 0 12px var(--username-glow),
+    0 0 2px rgba(255, 255, 255, 0.22);
+}
+
+.comment-author.username-style:not(.username-style-default) {
+  font-size: 0.72rem;
+}
+
+.comment-reply-author.username-style:not(.username-style-default) {
+  font-size: 0.72rem;
+}
+
+.comment-author.username-style-default,
+.comment-reply-author.username-style-default {
+  color: rgba(230, 241, 255, 0.96);
+  -webkit-text-fill-color: currentColor;
+  text-shadow: none;
+}
+
 .comment-time {
   position: relative;
   display: inline-flex;
