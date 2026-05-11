@@ -18,8 +18,11 @@ const PALETTE = [
   },
 ]
 
+const SHAPES = ['triangle', 'square', 'circle', 'cross']
+
 function createFirefly(width, height, now) {
   const color = PALETTE[Math.floor(Math.random() * PALETTE.length)]
+  const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)]
   return {
     x: Math.random() * width,
     y: Math.random() * height,
@@ -30,8 +33,36 @@ function createFirefly(width, height, now) {
     createdAt: now - Math.random() * 12000,
     flickerOffset: Math.random() * Math.PI * 2,
     trailLength: 16 + Math.random() * 30,
+    rotation: Math.random() * Math.PI * 2,
+    spin: (Math.random() - 0.5) * 0.0008,
     color,
+    shape,
   }
+}
+
+function pathShape(ctx, shape, x, y, size, rotation) {
+  ctx.beginPath()
+  if (shape === 'circle') {
+    ctx.arc(x, y, size, 0, Math.PI * 2)
+    return
+  }
+  ctx.save()
+  ctx.translate(x, y)
+  ctx.rotate(rotation)
+  if (shape === 'triangle') {
+    ctx.moveTo(0, -size)
+    ctx.lineTo(size * 0.866, size * 0.5)
+    ctx.lineTo(-size * 0.866, size * 0.5)
+    ctx.closePath()
+  } else if (shape === 'square') {
+    ctx.rect(-size * 0.85, -size * 0.85, size * 1.7, size * 1.7)
+  } else if (shape === 'cross') {
+    ctx.moveTo(-size, -size)
+    ctx.lineTo(size, size)
+    ctx.moveTo(size, -size)
+    ctx.lineTo(-size, size)
+  }
+  ctx.restore()
 }
 
 export default function Fireflies() {
@@ -130,6 +161,7 @@ export default function Fireflies() {
 
       firefly.x += firefly.vx * dtFactor * 15
       firefly.y += firefly.vy * dtFactor * 15
+      firefly.rotation += firefly.spin * dtFactor * 15
 
       const margin = 42
       if (firefly.x < -margin) firefly.x = viewport.width + margin
@@ -175,16 +207,25 @@ export default function Fireflies() {
       glow.addColorStop(0, firefly.color.core)
       glow.addColorStop(0.22, firefly.color.halo)
       glow.addColorStop(1, 'rgba(0, 0, 0, 0)')
-      ctx.globalAlpha = opacity
+      ctx.globalAlpha = opacity * 0.95
       ctx.fillStyle = glow
       ctx.beginPath()
       ctx.arc(firefly.x, firefly.y, radius * 5, 0, Math.PI * 2)
       ctx.fill()
 
+      const shapeSize = Math.max(2.2, radius * 0.78)
       ctx.globalAlpha = opacity
+      ctx.strokeStyle = firefly.color.core
+      ctx.lineWidth = 1.35
+      ctx.lineJoin = 'round'
+      ctx.lineCap = 'round'
+      pathShape(ctx, firefly.shape, firefly.x, firefly.y, shapeSize, firefly.rotation)
+      ctx.stroke()
+
+      ctx.globalAlpha = opacity * 0.85
       ctx.fillStyle = firefly.color.core
       ctx.beginPath()
-      ctx.arc(firefly.x, firefly.y, Math.max(1, radius * 0.45), 0, Math.PI * 2)
+      ctx.arc(firefly.x, firefly.y, Math.max(0.7, radius * 0.22), 0, Math.PI * 2)
       ctx.fill()
     }
 

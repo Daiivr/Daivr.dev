@@ -159,34 +159,34 @@ const USERNAME_STYLE_PRESETS = [
     colors: ['#c084fc', '#7c3aed', '#111827', '#22d3ee'],
   },
   {
-    id: 'emerald-matrix',
-    label: 'Emerald Matrix',
-    detail: 'terminal rain shimmer',
-    colors: ['#bbf7d0', '#22c55e', '#052e16'],
-  },
-  {
-    id: 'golden-hour',
-    label: 'Golden Hour',
-    detail: 'soft gold prestige',
-    colors: ['#fff7ad', '#facc15', '#fb7185'],
-  },
-  {
     id: 'blood-moon',
     label: 'Blood Moon',
     detail: 'red chrome menace',
     colors: ['#fecdd3', '#ef4444', '#7f1d1d'],
   },
   {
-    id: 'ocean-byte',
-    label: 'Ocean Byte',
-    detail: 'deep aqua waveform',
-    colors: ['#7dd3fc', '#06b6d4', '#155e75'],
+    id: 'chromatic-split',
+    label: 'Chromatic Split',
+    detail: 'rgb misalignment drift',
+    colors: ['#ff2bd6', '#ffffff', '#00ffe5'],
   },
   {
-    id: 'holo-lux',
-    label: 'Holo Lux',
-    detail: 'pearl hologram sweep',
-    colors: ['#f5f3ff', '#a78bfa', '#5eead4', '#f0abfc'],
+    id: 'marquee-sweep',
+    label: 'Marquee Sweep',
+    detail: 'cinema light pass',
+    colors: ['#cbd5e1', '#ffffff', '#00ffe5', '#ff2bd6'],
+  },
+  {
+    id: 'terminal-rain',
+    label: 'Terminal Rain',
+    detail: 'matrix code descent',
+    colors: ['#022c22', '#22c55e', '#39ff14', '#bbf7d0'],
+  },
+  {
+    id: 'wireframe-pulse',
+    label: 'Wireframe Pulse',
+    detail: 'neon outline only',
+    colors: ['#00ffe5', '#ff2bd6', '#7c3aed'],
   },
   {
     id: 'admin-aura',
@@ -300,8 +300,8 @@ export default function Comments() {
     const rect = trigger.getBoundingClientRect()
     const popoverWidth =
       window.innerWidth <= 640
-        ? Math.min(330, window.innerWidth - 24)
-        : Math.min(430, window.innerWidth - 32)
+        ? Math.min(320, window.innerWidth - 24)
+        : Math.min(360, window.innerWidth - 32)
     const left = Math.min(
       Math.max(12, rect.right - popoverWidth),
       Math.max(12, window.innerWidth - popoverWidth - 12),
@@ -813,6 +813,7 @@ const handleGifSelect = (url) => {
 
   const remainingNew = MAX_COMMENT_LENGTH - newTextInput.length
   const remainingEdit = MAX_COMMENT_LENGTH - editText.length
+  const remainingReply = MAX_COMMENT_LENGTH - replyText.length
   const activeUsernameStyleId = getUsernameStyleId(me?.nameStyleId || usernameStyleId)
   const getAuthorEffectiveStyleId = (author) =>
     me && author && String(author.id) === String(me.id)
@@ -1076,32 +1077,31 @@ const handleGifSelect = (url) => {
                           <button
                             type="button"
                             onClick={() => togglePin(c.id)}
-                            className={`rounded-full px-2 py-1 text-[10px] transition ${
-                              c.pinned
-                                ? 'bg-amber-400/90 text-slate-900 hover:bg-amber-300'
-                                : 'bg-slate-800 text-slate-200 hover:bg-amber-400/80 hover:text-slate-900'
-                            }`}
-                            title={c.pinned ? 'Quitar fijado' : 'Fijar arriba'}
+                            className={`comment-action-btn is-pin${c.pinned ? ' is-active' : ''}`}
+                            aria-label={c.pinned ? 'Quitar fijado' : 'Fijar arriba'}
                           >
-                            📌
+                            <span aria-hidden="true">📌</span>
                           </button>
                         )}
                         {canEdit && (
                           <button
                             type="button"
                             onClick={() => startEdit(c)}
-                            className="rounded-full bg-slate-800 px-2 py-1 text-[10px] text-slate-200 hover:bg-sky-500/80 hover:text-slate-900 transition"
+                            className="comment-action-btn is-edit"
+                            aria-label="Editar"
                           >
-                            ✏️
+                            <span aria-hidden="true">✏️</span>
                           </button>
                         )}
                         {canDelete && (
                           <button
                             type="button"
                             onClick={() => openDeleteConfirm(c.id)}
-                            className="rounded-full bg-slate-800 px-2 py-1 text-[10px] text-slate-200 hover:bg-rose-500/80 hover:text-slate-900 transition"
+                            className="comment-action-btn is-delete"
+                            title="Borrar"
+                            aria-label="Borrar"
                           >
-                            🗑
+                            <span aria-hidden="true">🗑</span>
                           </button>
                         )}
                       {isAdmin && (
@@ -1116,7 +1116,7 @@ const handleGifSelect = (url) => {
                               setReplyText('')
                             }
                           }}
-                          className="rounded-full bg-emerald-600/80 px-3 py-0.5 text-[10px] text-slate-50 hover:bg-emerald-500 transition"
+                          className="comment-action-btn is-reply"
                         >
                           Responder
                         </button>
@@ -1204,43 +1204,61 @@ const handleGifSelect = (url) => {
                   })()}
 
                   {isEditing && (
-                    <div className="mt-2 space-y-2">
-                      <textarea
-                        value={editText}
-                        onChange={(e) =>
-                          setEditText(e.target.value.slice(0, MAX_COMMENT_LENGTH))
-                        }
-                        rows={3}
-                        className="comment-textarea w-full rounded-2xl border border-slate-800/80 bg-slate-950/60 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
-                      />
-                      <div className="flex items-center justify-between text-[10px] text-slate-500">
-                        <span>
-                          {editText.length}/{MAX_COMMENT_LENGTH} caracteres
-                        </span>
-                        {remainingEdit <= 50 && (
-                          <span
-                            className={
-                              remainingEdit < 0 ? 'text-rose-400' : 'text-amber-300'
-                            }
-                          >
-                            {remainingEdit < 0
-                              ? 'Has superado el límite.'
-                              : `Te quedan ${remainingEdit} caracteres.`}
-                          </span>
-                        )}
+                    <div className="comment-edit">
+                      <div className="comment-edit-top" aria-hidden="true">
+                        <span>edit.msg</span>
+                        <span>id // {String(c.id ?? '').slice(0, 8).padEnd(8, '-')}</span>
                       </div>
-                      <div className="flex justify-end gap-2">
+                      <div className="comments-input-frame is-edit-frame">
+                        <span className="comments-input-prompt" aria-hidden="true">
+                          &gt;
+                        </span>
+                        <textarea
+                          value={editText}
+                          onChange={(e) =>
+                            setEditText(e.target.value.slice(0, MAX_COMMENT_LENGTH))
+                          }
+                          rows={3}
+                          wrap="soft"
+                          className="comment-textarea comments-composer-textarea"
+                        />
+                        <span className="comments-input-corners" aria-hidden="true" />
+                        <div className="comments-composer-meter" aria-hidden="true">
+                          <span
+                            style={{
+                              '--chars-used': `${Math.min(
+                                100,
+                                (editText.length / MAX_COMMENT_LENGTH) * 100,
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="comments-composer-count">
+                          <span>
+                            {editText.length}/{MAX_COMMENT_LENGTH}
+                          </span>
+                          <strong>chars</strong>
+                          {remainingEdit <= 50 && (
+                            <em className={remainingEdit < 0 ? 'is-danger' : 'is-warn'}>
+                              {remainingEdit < 0
+                                ? 'limite excedido'
+                                : `${remainingEdit} restantes`}
+                            </em>
+                          )}
+                        </div>
+                      </div>
+                      <div className="comment-edit-actions">
                         <button
                           type="button"
                           onClick={cancelEdit}
-                          className="rounded-full bg-slate-800 px-3 py-1 text-[10px] text-slate-200 hover:bg-slate-700"
+                          className="comment-action-btn is-cancel"
                         >
                           Cancelar
                         </button>
                         <button
                           type="button"
                           onClick={saveEdit}
-                          className="rounded-full bg-sky-500 px-3 py-1 text-[10px] font-semibold text-slate-900 hover:bg-sky-400"
+                          className="comment-action-btn is-save"
                         >
                           Guardar
                         </button>
@@ -1303,7 +1321,7 @@ const handleGifSelect = (url) => {
                                     </span>
                                   )}
                                   {r.author?.isAdmin && (
-                                    <span className="rounded-full border border-emerald-400/70 bg-emerald-500/15 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-200 shadow-sm shadow-emerald-500/30">
+                                    <span className="comment-admin-badge">
                                       Admin
                                     </span>
                                   )}
@@ -1325,14 +1343,14 @@ const handleGifSelect = (url) => {
                                     <button
                                       type="button"
                                       onClick={() => startEditReply(r)}
-                                      className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-200 hover:bg-slate-700"
+                                      className="comment-action-btn is-edit"
                                     >
                                       Editar
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => deleteReply(c.id, r.id)}
-                                      className="rounded-full bg-rose-600/80 px-2 py-0.5 text-[10px] text-slate-50 hover:bg-rose-500"
+                                      className="comment-action-btn is-delete"
                                     >
                                       Eliminar
                                     </button>
@@ -1352,18 +1370,18 @@ const handleGifSelect = (url) => {
                                     className="comment-textarea w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-[11px] text-slate-100 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none"
                                     placeholder="Edita la respuesta…"
                                   />
-                                  <div className="flex items-center justify-end gap-2 text-[10px] text-slate-400">
+                                  <div className="comment-edit-actions">
                                     <button
                                       type="button"
                                       onClick={cancelEditReply}
-                                      className="rounded-full bg-slate-800 px-3 py-1 hover:bg-slate-700"
+                                      className="comment-action-btn is-cancel"
                                     >
                                       Cancelar
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => saveEditReply(c.id)}
-                                      className="rounded-full bg-sky-500 px-3 py-1 font-semibold text-slate-900 hover:bg-sky-400"
+                                      className="comment-action-btn is-save"
                                     >
                                       Guardar
                                     </button>
@@ -1386,46 +1404,75 @@ const handleGifSelect = (url) => {
                         e.preventDefault()
                         sendReply(c.id)
                       }}
-                      className="mt-3 space-y-1"
+                      className="comment-edit is-reply-form"
                     >
-                      <textarea
-                        value={replyText}
-                        onChange={(e) =>
-                          setReplyText(e.target.value.slice(0, MAX_COMMENT_LENGTH))
-                        }
-                        rows={2}
-                        className="comment-textarea w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-[11px] text-slate-100 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none"
-                        placeholder="Escribe una respuesta como admin…"
-                      />
-                      <div className="flex items-center justify-between text-[10px] text-slate-500">
-                        <span>
-                          {replyText.length}/{MAX_COMMENT_LENGTH} caracteres
+                      <div className="comment-edit-top" aria-hidden="true">
+                        <span>reply.msg</span>
+                        <span>to // {String(c.id ?? '').slice(0, 8).padEnd(8, '-')}</span>
+                      </div>
+                      <div className="comments-input-frame is-edit-frame">
+                        <span className="comments-input-prompt" aria-hidden="true">
+                          &gt;
                         </span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => openGifPickerForReply(c.id)}
-                            className="rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-1 text-[10px] text-slate-200 transition hover:border-emerald-400 hover:text-emerald-200"
-                          >
-                            GIF
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setReplyingToId(null)
-                              setReplyText('')
+                        <textarea
+                          value={replyText}
+                          onChange={(e) =>
+                            setReplyText(e.target.value.slice(0, MAX_COMMENT_LENGTH))
+                          }
+                          rows={2}
+                          wrap="soft"
+                          placeholder="Escribe una respuesta como admin…"
+                          className="comment-textarea comments-composer-textarea"
+                        />
+                        <span className="comments-input-corners" aria-hidden="true" />
+                        <div className="comments-composer-meter" aria-hidden="true">
+                          <span
+                            style={{
+                              '--chars-used': `${Math.min(
+                                100,
+                                (replyText.length / MAX_COMMENT_LENGTH) * 100,
+                              )}%`,
                             }}
-                            className="rounded-full bg-slate-800 px-3 py-1 text-[10px] text-slate-200 hover:bg-slate-700"
-                          >
-                            Cancelar
-                          </button>
-                          <button
-                            type="submit"
-                            className="rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-semibold text-slate-900 hover:bg-emerald-400"
-                          >
-                            Responder
-                          </button>
+                          />
                         </div>
+                        <div className="comments-composer-count">
+                          <span>
+                            {replyText.length}/{MAX_COMMENT_LENGTH}
+                          </span>
+                          <strong>chars</strong>
+                          {remainingReply <= 50 && (
+                            <em className={remainingReply < 0 ? 'is-danger' : 'is-warn'}>
+                              {remainingReply < 0
+                                ? 'limite excedido'
+                                : `${remainingReply} restantes`}
+                            </em>
+                          )}
+                        </div>
+                      </div>
+                      <div className="comment-edit-actions">
+                        <button
+                          type="button"
+                          onClick={() => openGifPickerForReply(c.id)}
+                          className="comment-action-btn is-gif"
+                        >
+                          GIF
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReplyingToId(null)
+                            setReplyText('')
+                          }}
+                          className="comment-action-btn is-cancel"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          className="comment-action-btn is-save"
+                        >
+                          Responder
+                        </button>
                       </div>
                     </form>
                   )}
@@ -1467,7 +1514,7 @@ const handleGifSelect = (url) => {
         <ModalPortal>
           <div className="username-style-popover-layer" aria-hidden="false">
             <div
-              className="username-style-popover"
+              className={`username-style-popover${isAdmin ? ' is-admin' : ''}`}
               role="dialog"
               aria-label="Color del nombre"
               style={{
@@ -1478,7 +1525,13 @@ const handleGifSelect = (url) => {
             >
               <div className="username-style-popover-top">
                 <span>name.color</span>
-                <strong>Elige tu señal</strong>
+                {isAdmin ? (
+                  <span className="username-style-popover-root" aria-hidden="true">
+                    <i /> root // granted
+                  </span>
+                ) : (
+                  <strong>Elige tu señal</strong>
+                )}
               </div>
               <div className="username-style-options">
                 {USERNAME_STYLE_PRESETS.map((preset) => {
@@ -1490,7 +1543,10 @@ const handleGifSelect = (url) => {
                       type="button"
                       onClick={() => saveUsernameStyle(preset.id)}
                       disabled={!!usernameStyleSaving}
-                      className={`username-style-option${active ? ' is-active' : ''}`}
+                      title={`${preset.label} — ${preset.detail}`}
+                      className={`username-style-option${active ? ' is-active' : ''}${
+                        saving ? ' is-saving' : ''
+                      }`}
                     >
                       <span
                         className={getUsernameStyleClassName(

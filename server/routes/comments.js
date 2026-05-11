@@ -25,11 +25,11 @@ const USERNAME_STYLE_IDS = new Set([
   'prism-run',
   'candy-core',
   'void-pulse',
-  'emerald-matrix',
-  'golden-hour',
   'blood-moon',
-  'ocean-byte',
-  'holo-lux',
+  'chromatic-split',
+  'marquee-sweep',
+  'terminal-rain',
+  'wireframe-pulse',
   'admin-aura',
 ])
 

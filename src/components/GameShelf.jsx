@@ -99,6 +99,16 @@ export default function GameShelf() {
         </header>
 
         <div className="game-shelf-stage" aria-label="Estante de juegos favoritos">
+          <div className="game-shelf-hud" aria-hidden="true">
+            <span className="game-shelf-hud-corner game-shelf-hud-tl" />
+            <span className="game-shelf-hud-corner game-shelf-hud-tr" />
+            <span className="game-shelf-hud-corner game-shelf-hud-bl" />
+            <span className="game-shelf-hud-corner game-shelf-hud-br" />
+            <span className="game-shelf-hud-tag game-shelf-hud-bay">bay // a.01-03</span>
+            <span className="game-shelf-hud-tag game-shelf-hud-sync">
+              <i /> sync // ok
+            </span>
+          </div>
           <div className="game-shelf-rail" aria-hidden="true" />
           <div className="game-shelf-grid">
             {GAMES.map((game) => (
@@ -155,7 +165,7 @@ export default function GameShelf() {
                 </div>
 
                 <div className="game-card-meta">
-                  <span>{game.kicker}</span>
+                  <span className="game-card-kicker">{game.kicker}</span>
                   <strong>{game.title}</strong>
                   <em>{game.meta}</em>
                   <small>{game.genre}</small>
@@ -165,10 +175,21 @@ export default function GameShelf() {
                       steamPlaytime.status,
                     )}
                   </small>
+                  <span className="game-card-serial" aria-hidden="true">
+                    sn//{String(game.steamAppId).padStart(7, '0')}
+                  </span>
+                  <span className="game-card-barcode" aria-hidden="true" />
                 </div>
               </article>
             ))}
           </div>
+        </div>
+        <div className="game-shelf-readout" aria-hidden="true">
+          <span>
+            <i /> rack online
+          </span>
+          <span className="game-shelf-readout-dots">··· ··· ···</span>
+          <span>{String(activeGames).padStart(2, '0')}/03 portadas</span>
         </div>
       </div>
     </section>
