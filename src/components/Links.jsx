@@ -27,6 +27,10 @@ export default function Links() {
   // drag & drop
   const [dragIndex, setDragIndex] = useState(null)
 
+  // confirmación de borrado
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+
   const isAdmin = !!(me && me.isAdmin)
 
   useEffect(() => {
@@ -188,14 +192,26 @@ export default function Links() {
     }
   }
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Eliminar este link?')) return
+  const openDeleteConfirm = (id) => {
+    setConfirmDeleteId(id)
+  }
+
+  const closeDeleteConfirm = () => {
+    setConfirmDeleteId(null)
+    setDeleting(false)
+  }
+
+  const confirmDelete = async () => {
+    if (!confirmDeleteId) return
     try {
-      await axios.delete(`/api/links/${id}`)
-      setLinks((prev) => prev.filter((l) => l.id !== id))
+      setDeleting(true)
+      await axios.delete(`/api/links/${confirmDeleteId}`)
+      setLinks((prev) => prev.filter((l) => l.id !== confirmDeleteId))
+      closeDeleteConfirm()
     } catch (err) {
       console.error(err)
       alert('Error eliminando link')
+      setDeleting(false)
     }
   }
 
@@ -362,7 +378,7 @@ export default function Links() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(link.id)}
+                    onClick={() => openDeleteConfirm(link.id)}
                     className="comment-action-btn is-delete"
                     aria-label="Eliminar link"
                     title="Eliminar"
@@ -504,6 +520,49 @@ export default function Links() {
                 Abrir
               </button>
             </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
+
+      {confirmDeleteId && (
+        <ModalPortal>
+          <div className="modal-backdrop" onClick={closeDeleteConfirm}>
+            <div className="modal-card modal-sm danger-confirm-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div>
+                  <h3 className="modal-title">¿Eliminar este link?</h3>
+                  <p className="modal-text">
+                    Esta acción no se puede deshacer. El link desaparecerá para todos.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeDeleteConfirm}
+                  className="modal-close"
+                  aria-label="Cerrar"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  onClick={closeDeleteConfirm}
+                  disabled={deleting}
+                  className="modal-btn-cancel"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  disabled={deleting}
+                  className="modal-btn-danger"
+                >
+                  {deleting ? 'Eliminando…' : 'Eliminar'}
+                </button>
+              </div>
             </div>
           </div>
         </ModalPortal>

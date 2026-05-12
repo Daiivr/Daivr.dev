@@ -1085,7 +1085,6 @@ html:not(.theme-xmas) .modal-actions {
   position: relative;
   margin-top: 18px;
   padding-top: 16px;
-  padding-bottom: 18px;
   border-top: 1px solid rgba(0, 255, 229, 0.12);
   align-items: center;
 }
@@ -1106,7 +1105,9 @@ html:not(.theme-xmas) .modal-actions::after {
   content: '● STATUS // READY';
   position: absolute;
   left: 2px;
-  bottom: 12px;
+  top: 50%;
+  margin-top: 8px;
+  transform: translateY(-50%);
   font-family: var(--font-mono);
   font-size: 0.5rem;
   font-weight: 900;
@@ -1115,6 +1116,16 @@ html:not(.theme-xmas) .modal-actions::after {
   color: rgba(0, 255, 229, 0.62);
   text-shadow: 0 0 6px rgba(0, 255, 229, 0.32);
   pointer-events: none;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  html:not(.theme-xmas) .modal-actions::after {
+    display: none;
+  }
 }
 
 html:not(.theme-xmas) .danger-confirm-modal .modal-actions::before {
@@ -1264,6 +1275,10 @@ html:not(.theme-xmas) .modal-btn-danger {
   border-color: var(--arc-cyan);
   color: var(--arc-cyan);
   box-shadow: 0 0 14px rgba(0, 255, 229, 0.20);
+}
+
+.modal-card.danger-confirm-modal {
+  --modal-max: 38rem;
 }
 
 .danger-confirm-modal {
