@@ -242,34 +242,50 @@ export default function Links() {
 
         {/* Form para agregar link – solo admin */}
         {isAdmin && (
-          <form
-            onSubmit={handleAddLink}
-            className="mt-4 grid gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/50 p-3 text-xs md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.7fr)_minmax(0,1.4fr)_auto]"
-          >
-            <input
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder="Nombre del link"
-              className="rounded-lg border border-slate-800 bg-slate-900/80 px-2 py-1 text-[11px] text-slate-100"
-            />
-            <input
-              value={href}
-              onChange={(e) => setHref(e.target.value)}
-              placeholder="https://..."
-              className="rounded-lg border border-slate-800 bg-slate-900/80 px-2 py-1 text-[11px] text-slate-100"
-            />
-            <input
-              value={iconUrl}
-              onChange={(e) => setIconUrl(e.target.value)}
-              placeholder="URL del icono (opcional)"
-              className="rounded-lg border border-slate-800 bg-slate-900/80 px-2 py-1 text-[11px] text-slate-100"
-            />
-            <button
-              type="submit"
-              className="rounded-full bg-sky-500 px-3 py-1 text-[11px] font-semibold text-slate-900"
-            >
-              Agregar
-            </button>
+          <form onSubmit={handleAddLink} className="links-composer">
+            <div className="links-composer-top" aria-hidden="true">
+              <span>add.link</span>
+              <span>admin // root</span>
+            </div>
+
+            <div className="links-composer-fields">
+              <label className="links-input-frame">
+                <span className="links-input-prompt" aria-hidden="true">&gt;</span>
+                <input
+                  value={label}
+                  onChange={(e) => setLabel(e.target.value)}
+                  placeholder="Nombre del link"
+                  className="links-composer-input"
+                />
+                <span className="links-input-corners" aria-hidden="true" />
+              </label>
+              <label className="links-input-frame">
+                <span className="links-input-prompt" aria-hidden="true">$</span>
+                <input
+                  value={href}
+                  onChange={(e) => setHref(e.target.value)}
+                  placeholder="https://..."
+                  className="links-composer-input"
+                />
+                <span className="links-input-corners" aria-hidden="true" />
+              </label>
+              <label className="links-input-frame">
+                <span className="links-input-prompt" aria-hidden="true">@</span>
+                <input
+                  value={iconUrl}
+                  onChange={(e) => setIconUrl(e.target.value)}
+                  placeholder="URL del icono (opcional)"
+                  className="links-composer-input"
+                />
+                <span className="links-input-corners" aria-hidden="true" />
+              </label>
+            </div>
+
+            <div className="links-composer-actions">
+              <button type="submit" className="links-composer-submit">
+                <span aria-hidden="true">+</span> Agregar
+              </button>
+            </div>
           </form>
         )}
 
@@ -338,16 +354,20 @@ export default function Links() {
                   <button
                     type="button"
                     onClick={() => openEditModal(link)}
-                    className="px-2 py-1 text-xs rounded-lg bg-sky-500/80 text-slate-900 shadow-sm"
+                    className="comment-action-btn is-edit"
+                    aria-label="Editar link"
+                    title="Editar"
                   >
-                    ✏️
+                    <span aria-hidden="true">✏️</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(link.id)}
-                    className="px-2 py-1 text-xs rounded-lg bg-rose-500/80 text-slate-50 shadow-sm"
+                    className="comment-action-btn is-delete"
+                    aria-label="Eliminar link"
+                    title="Eliminar"
                   >
-                    🗑
+                    <span aria-hidden="true">🗑</span>
                   </button>
                 </div>
               )}

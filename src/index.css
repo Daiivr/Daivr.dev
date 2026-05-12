@@ -4539,6 +4539,237 @@ html:not(.theme-xmas) .link-card:hover::before {
   padding: 0 12px 12px;
 }
 
+/* === Arcade-style "add.link" composer (admin only) === */
+.links-composer {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 229, 0.22);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 14px 14px,
+    radial-gradient(circle at 18% 0%, rgba(0, 255, 229, 0.12), transparent 42%),
+    radial-gradient(circle at 100% 70%, rgba(255, 43, 214, 0.09), transparent 44%),
+    rgba(2, 7, 18, 0.64);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.026),
+    inset 0 18px 42px rgba(0, 255, 229, 0.035),
+    0 18px 36px rgba(0, 0, 0, 0.22);
+  padding: 12px;
+}
+
+.links-composer::before,
+.links-composer::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.links-composer::before {
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent, rgba(0, 255, 229, 0.12), transparent) 0 0 / 42% 1px no-repeat,
+    linear-gradient(180deg, transparent, rgba(255, 43, 214, 0.1), transparent) 0 0 / 1px 58% no-repeat;
+  opacity: 0.78;
+}
+
+.links-composer::after {
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--arc-cyan), var(--arc-magenta), transparent);
+  opacity: 0.42;
+}
+
+.links-composer-top,
+.links-composer-fields,
+.links-composer-actions {
+  position: relative;
+  z-index: 1;
+}
+
+.links-composer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: rgba(106, 122, 153, 0.95);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.links-composer-top span:first-child {
+  color: var(--arc-magenta, #ff2bd6);
+  text-shadow: 0 0 9px rgba(255, 43, 214, 0.34);
+}
+
+.links-composer-top span:last-child {
+  color: rgba(0, 255, 229, 0.82);
+}
+
+.links-composer-fields {
+  display: grid;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .links-composer-fields {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.6fr) minmax(0, 1.3fr);
+  }
+}
+
+.links-input-frame {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 255, 229, 0.18);
+  background:
+    linear-gradient(180deg, rgba(0, 255, 229, 0.045), rgba(255, 43, 214, 0.018)),
+    rgba(1, 5, 14, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.5),
+    inset 0 0 22px rgba(0, 255, 229, 0.04);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.links-input-frame:focus-within {
+  border-color: rgba(0, 255, 229, 0.55);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.5),
+    inset 0 0 28px rgba(0, 255, 229, 0.07),
+    0 0 18px rgba(0, 255, 229, 0.16);
+}
+
+.links-input-prompt {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  z-index: 2;
+  color: var(--arc-cyan, #00ffe5);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-shadow: var(--arc-glow-cyan, 0 0 10px rgba(0, 255, 229, 0.5));
+  pointer-events: none;
+}
+
+.links-input-corners {
+  position: absolute;
+  inset: 5px;
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.links-input-corners::before,
+.links-input-corners::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 12px;
+  opacity: 0.75;
+}
+
+.links-input-corners::before {
+  left: 0;
+  top: 0;
+  border-top: 1px solid rgba(0, 255, 229, 0.46);
+  border-left: 1px solid rgba(0, 255, 229, 0.46);
+}
+
+.links-input-corners::after {
+  right: 0;
+  bottom: 0;
+  border-right: 1px solid rgba(255, 43, 214, 0.42);
+  border-bottom: 1px solid rgba(255, 43, 214, 0.42);
+}
+
+.links-composer-input {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(230, 241, 255, 0.94);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.4;
+  outline: none;
+  padding: 8px 12px 8px 30px;
+  text-shadow: 0 0 8px rgba(0, 255, 229, 0.08);
+}
+
+.links-composer-input::placeholder {
+  color: rgba(106, 122, 153, 0.82);
+}
+
+.links-composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.links-composer-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 229, 0.72);
+  background: linear-gradient(180deg, rgba(0, 255, 229, 0.96), rgba(0, 207, 182, 0.96));
+  color: #061018;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  padding: 0 14px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 0 18px rgba(0, 255, 229, 0.24),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.22);
+  transition:
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.links-composer-submit:hover {
+  box-shadow:
+    0 0 24px rgba(0, 255, 229, 0.38),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.22);
+  transform: translateY(-1px);
+}
+
+.links-composer-submit:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(0, 255, 229, 0.45),
+    0 0 24px rgba(0, 255, 229, 0.38),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.22);
+}
+
+.links-composer-submit > span {
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
 @media (max-width: 560px) {
   .links-panel-header {
     align-items: flex-start;
