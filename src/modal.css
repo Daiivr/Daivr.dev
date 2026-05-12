@@ -1085,6 +1085,7 @@ html:not(.theme-xmas) .modal-actions {
   position: relative;
   margin-top: 18px;
   padding-top: 16px;
+  padding-bottom: 18px;
   border-top: 1px solid rgba(0, 255, 229, 0.12);
   align-items: center;
 }

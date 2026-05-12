@@ -8695,7 +8695,7 @@ html:not(.theme-xmas) .sidebar-credit-pill::before {
 .comment-reply-author.username-style-trigger {
   appearance: none;
   border: 0;
-  background: transparent;
+  background-color: transparent;
   color: inherit;
   cursor: pointer;
   font: inherit;
