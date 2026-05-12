@@ -9943,12 +9943,40 @@ html:not(.theme-xmas) .sidebar-credit-pill::before {
   font-weight: 900;
 }
 
-.comment-author.username-style:not(.username-style-default),
-.comment-reply-author.username-style:not(.username-style-default) {
+.comment-author.username-style-neon-cyan,
+.comment-reply-author.username-style-neon-cyan,
+.comment-author.username-style-synthwave,
+.comment-reply-author.username-style-synthwave,
+.comment-author.username-style-solar-flare,
+.comment-reply-author.username-style-solar-flare,
+.comment-author.username-style-toxic-lime,
+.comment-reply-author.username-style-toxic-lime,
+.comment-author.username-style-galaxy-shift,
+.comment-reply-author.username-style-galaxy-shift,
+.comment-author.username-style-ice-glitch,
+.comment-reply-author.username-style-ice-glitch,
+.comment-author.username-style-prism-run,
+.comment-reply-author.username-style-prism-run,
+.comment-author.username-style-candy-core,
+.comment-reply-author.username-style-candy-core,
+.comment-author.username-style-void-pulse,
+.comment-reply-author.username-style-void-pulse,
+.comment-author.username-style-blood-moon,
+.comment-reply-author.username-style-blood-moon,
+.comment-author.username-style-marquee-sweep,
+.comment-reply-author.username-style-marquee-sweep,
+.comment-author.username-style-terminal-rain,
+.comment-reply-author.username-style-terminal-rain,
+.comment-author.username-style-admin-aura,
+.comment-reply-author.username-style-admin-aura {
   background-clip: text !important;
   -webkit-background-clip: text !important;
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
+}
+
+.comment-author.username-style:not(.username-style-default),
+.comment-reply-author.username-style:not(.username-style-default) {
   filter: saturate(1.65) brightness(1.32) drop-shadow(0 0 8px var(--username-glow));
   font-weight: 950;
   letter-spacing: 0.035em;
@@ -9963,6 +9991,31 @@ html:not(.theme-xmas) .sidebar-credit-pill::before {
 
 .comment-reply-author.username-style:not(.username-style-default) {
   font-size: 0.72rem;
+}
+
+.comment-author.username-style-chromatic-split,
+.comment-reply-author.username-style-chromatic-split {
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  text-shadow:
+    -1.6px 0 rgba(255, 43, 214, 0.85),
+    1.6px 0 rgba(0, 255, 229, 0.85),
+    0 0 12px rgba(0, 255, 229, 0.4);
+}
+
+.comment-author.username-style-wireframe-pulse,
+.comment-reply-author.username-style-wireframe-pulse {
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  -webkit-text-stroke-color: #00ffe5;
+  -webkit-text-stroke-width: 0.7px;
+  text-shadow:
+    0 0 6px rgba(0, 255, 229, 0.6),
+    0 0 18px rgba(0, 255, 229, 0.4);
 }
 
 .comment-author.username-style-default,

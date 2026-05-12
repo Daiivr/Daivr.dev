@@ -230,6 +230,19 @@ const formatDiscordTimestamp = (iso) => {
   return `${dateStr} ${timeStr}`
 }
 
+const getCommentCreatedTime = (comment) => {
+  const time = new Date(comment?.createdAt).getTime()
+  return Number.isNaN(time) ? 0 : time
+}
+
+const sortCommentsForDisplay = (list) =>
+  Array.isArray(list)
+    ? [...list].sort((a, b) => {
+        if (!!a?.pinned !== !!b?.pinned) return a?.pinned ? -1 : 1
+        return getCommentCreatedTime(b) - getCommentCreatedTime(a)
+      })
+    : []
+
 
 export default function Comments() {
   const [comments, setComments] = useState([])
@@ -324,9 +337,11 @@ export default function Comments() {
       const user = meRes.data.user ?? null
       const nextStyleId = getUsernameStyleId(styleRes.data?.styleId)
       setComments(
-        user
-          ? applyStyleToUserEntries(cRes.data.comments ?? [], nextStyleId, user.id)
-          : cRes.data.comments ?? [],
+        sortCommentsForDisplay(
+          user
+            ? applyStyleToUserEntries(cRes.data.comments ?? [], nextStyleId, user.id)
+            : cRes.data.comments ?? [],
+        )
       )
       setUsernameStyleId(nextStyleId)
       setMe(user ? { ...user, nameStyleId: nextStyleId } : null)
@@ -584,7 +599,12 @@ const handleGifSelect = (url) => {
       setText('')
       setNewTextInput('')
       setNewGifUrls([])
-      setComments((prev) => [nextComment, ...applyStyleToUserEntries(prev, activeStyleId)])
+      setComments((prev) =>
+        sortCommentsForDisplay([
+          nextComment,
+          ...applyStyleToUserEntries(prev, activeStyleId),
+        ])
+      )
     } catch (e) {
       console.error(e)
       alert(e.response?.data?.error ?? 'Error enviando comentario')
@@ -630,10 +650,12 @@ const handleGifSelect = (url) => {
           : prev
       )
       setComments((prev) =>
-        applyStyleToUserEntries(
-          Array.isArray(res.data?.comments) ? res.data.comments : prev,
-          savedStyleId,
-          me.id,
+        sortCommentsForDisplay(
+          applyStyleToUserEntries(
+            Array.isArray(res.data?.comments) ? res.data.comments : prev,
+            savedStyleId,
+            me.id,
+          )
         )
       )
     } catch (e) {
@@ -779,14 +801,9 @@ const handleGifSelect = (url) => {
       const res = await axios.post(`/api/comments/${commentId}/pin`)
       const updated = res.data.comment
       if (updated) {
-        setComments((prev) => {
-          const next = prev.map((c) => (c.id === updated.id ? updated : c))
-          // Reordenar: pinneados arriba, después por fecha desc
-          return [...next].sort((a, b) => {
-            if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1
-            return new Date(b.createdAt) - new Date(a.createdAt)
-          })
-        })
+        setComments((prev) =>
+          sortCommentsForDisplay(prev.map((c) => (c.id === updated.id ? updated : c)))
+        )
       }
     } catch (e) {
       console.error(e)
