@@ -8,6 +8,7 @@ import DiscordCard from './components/DiscordCard'
 import Comments from './components/Comments'
 import Splash from './components/Splash'
 import Fireflies from './components/Fireflies'
+import CodeWaves from './components/CodeWaves'
 import Snowfall from './components/Snowfall'
 import CommandPalette from './components/CommandPalette'
 import ModalPortal from './components/ModalPortal'
@@ -955,22 +956,19 @@ function MusicControlButton({
         aria-expanded={open}
       >
         <div className="arc-toggle-inner flex items-center gap-2 rounded-full bg-slate-950/90 px-3 py-2 border border-slate-700/80">
-          <span className="arc-toggle-led relative flex h-5 w-5 items-center justify-center">
-            {!effectiveMuted && !paused && (
-              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/30 animate-ping" />
-            )}
-            <span
-              className={`relative inline-flex h-3 w-3 rounded-full ${
-                effectiveMuted || paused
-                  ? 'bg-slate-400 shadow-[0_0_10px_rgba(148,163,184,0.9)]'
-                  : 'bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.95)]'
-              }`}
-            />
+          <span className="arc-toggle-led arc-toggle-vinyl" aria-hidden="true">
+            <span className="arc-toggle-vinyl-disc">
+              <span className="arc-toggle-vinyl-label" />
+              <span className="arc-toggle-vinyl-tick" />
+            </span>
           </span>
           <span className="arc-toggle-label uppercase tracking-[0.22em] text-[9px] text-slate-400">
             LOFI
           </span>
           <span className="arc-toggle-value text-[11px] font-semibold text-slate-100">
+            <span className="arc-toggle-glyph" aria-hidden="true">
+              {gameMuted ? '▾' : effectiveMuted ? '✕' : paused ? '❙❙' : '▶'}
+            </span>
             {statusLabel}
           </span>
         </div>
@@ -1977,6 +1975,7 @@ export default function App() {
         track={currentAudioTrack}
       />
       {christmasEnabled ? <Snowfall /> : <Fireflies />}
+      {!christmasEnabled && <CodeWaves />}
       <KonamiGameOverlay
         open={showGameOverlay}
         activeGame={activeGame}
@@ -2093,29 +2092,57 @@ export default function App() {
         )}
       </main>
       <footer className="app-footer">
-        <div className="footer-shell mx-auto flex max-w-6xl flex-col items-center gap-2 sm:flex-row sm:justify-between sm:gap-3">
-          <p className="text-center sm:text-left">
-            {'// built with '}
-            <span className="inline-block footer-heart">{'\u2764'}</span>
-            {", caffeine && console.log('caos') \u00B7 "}
-            {new Date().getFullYear()}
-          </p>
+        <div className="footer-shell mx-auto max-w-6xl">
+          <div className="footer-grid">
+            <p className="footer-build">
+              <span className="footer-tok-comment">{'//'}</span>{' '}
+              built with{' '}
+              <span className="inline-block footer-heart">{'\u2764'}</span>
+              {', caffeine '}
+              <span className="footer-tok-op">{'&&'}</span>{' '}
+              <span className="footer-tok-fn">console</span>
+              <span className="footer-tok-punct">.</span>
+              <span className="footer-tok-fn">log</span>
+              <span className="footer-tok-punct">(</span>
+              <span className="footer-tok-str">'caos'</span>
+              <span className="footer-tok-punct">)</span>{' '}
+              <span className="footer-tok-comment">{'\u00B7 ' + new Date().getFullYear()}</span>
+            </p>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/90 px-3 py-1 text-[11px] font-medium text-slate-200 shadow-[0_12px_40px_rgba(15,23,42,0.9)]">
-            <span className="relative flex h-5 w-5 items-center justify-center">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/30" />
-              <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.85)]" />
-            </span>
-            <span className="uppercase tracking-[0.16em] text-[9px] text-slate-400">
-              players_online
-            </span>
-            <span className="tabular-nums text-[11px] text-slate-50">
-              {visitError
-                ? '\u2014'
-                : visitCount === null
-                ? '...'
-                : visitCount.toLocaleString('en-US')}
-            </span>
+            <div className="footer-status-stack">
+              <div className="footer-pill footer-pill-status">
+                <span className="footer-pill-led footer-pill-led-cyan" aria-hidden="true">
+                  <span className="footer-pill-led-core" />
+                  <span className="footer-pill-led-ping" />
+                </span>
+                <span className="footer-pill-label">system_status</span>
+                <span className="footer-pill-value">nominal</span>
+              </div>
+              <div className="footer-pill footer-pill-players">
+                <span className="footer-pill-led footer-pill-led-green" aria-hidden="true">
+                  <span className="footer-pill-led-core" />
+                  <span className="footer-pill-led-ping" />
+                </span>
+                <span className="footer-pill-label">players_online</span>
+                <span className="footer-pill-value tabular-nums">
+                  {visitError
+                    ? '\u2014'
+                    : visitCount === null
+                    ? '...'
+                    : visitCount.toLocaleString('en-US')}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="footer-prompt" aria-hidden="true">
+            <span className="footer-prompt-user">guest</span>
+            <span className="footer-prompt-at">@</span>
+            <span className="footer-prompt-host">{me?.username || 'daivr'}</span>
+            <span className="footer-prompt-colon">:</span>
+            <span className="footer-prompt-path">~$</span>
+            <span className="footer-prompt-cmd">session.end()</span>
+            <span className="footer-prompt-caret" />
           </div>
         </div>
       </footer>
