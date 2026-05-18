@@ -58,6 +58,29 @@ function getUserBadges(user) {
 }
 // ----- END BADGES -----
 
+function getActivityAssetUrl(activity, assetKey, size = 128) {
+  if (!activity || !assetKey) return null
+
+  const key = String(assetKey)
+  if (/^https?:\/\//i.test(key)) return key
+
+  if (key.startsWith('mp:external/')) {
+    return `https://media.discordapp.net/${key.slice(3)}`
+  }
+
+  if (key.startsWith('external/')) {
+    return `https://media.discordapp.net/${key}`
+  }
+
+  if (key.startsWith('spotify:')) {
+    return `https://i.scdn.co/image/${key.slice('spotify:'.length)}`
+  }
+
+  if (!activity.application_id) return null
+
+  return `https://cdn.discordapp.com/app-assets/${activity.application_id}/${key}.png?size=${size}`
+}
+
 export default function DiscordCard() {
   const [data, setData] = useState(null)
   const [connected, setConnected] = useState(false)
@@ -160,6 +183,16 @@ export default function DiscordCard() {
     mainActivity.assets.large_image &&
     mainActivity.application_id
   )
+  const activityArtUrl = hasRichPresenceImage
+    ? getActivityAssetUrl(mainActivity, mainActivity.assets.large_image, 256)
+    : gameImageUrl
+  const activityAppIconUrl = getActivityAssetUrl(
+    mainActivity,
+    mainActivity?.assets?.small_image,
+    96,
+  )
+  const activityAppIconAlt =
+    mainActivity?.assets?.small_text || `${mainActivity?.name || 'Activity'} icon`
 
 
   const statusColor =
@@ -444,18 +477,25 @@ const rawSessionMs = data?.kv?.session_duration_ms || 0
 
           {mainActivity && (
             <div className="discord-activity-card">
-              {(hasRichPresenceImage || gameImageUrl) && (
+              {activityArtUrl && (
                 <div className="discord-activity-art">
                   <img
-                    src={
-                      hasRichPresenceImage
-                        ? `https://cdn.discordapp.com/app-assets/${mainActivity.application_id}/${mainActivity.assets.large_image}.png`
-                        : gameImageUrl
-                    }
+                    src={activityArtUrl}
                     alt={mainActivity.name}
+                    className="discord-activity-main-art"
                     loading="lazy"
                     decoding="async"
                   />
+                  {activityAppIconUrl && (
+                    <span className="discord-activity-app-icon">
+                      <img
+                        src={activityAppIconUrl}
+                        alt={activityAppIconAlt}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </span>
+                  )}
                 </div>
               )}
               <div className="discord-activity-copy">

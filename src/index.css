@@ -2839,12 +2839,41 @@ html:not(.theme-xmas) .app-horizon-stabilizer {
   box-shadow: 0 0 22px rgba(0, 255, 229, 0.12);
 }
 
-.discord-activity-art img,
+.discord-activity-main-art,
 .discord-spotify-art img {
   width: 100%;
   height: 100%;
   border-radius: 7px;
   border: 1px solid rgba(6, 9, 18, 0.94);
+  object-fit: cover;
+}
+
+.discord-activity-app-icon {
+  position: absolute;
+  right: -9px;
+  bottom: -9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 2px solid rgba(6, 9, 18, 0.96);
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.14), transparent 34%),
+    rgba(4, 8, 18, 0.98);
+  box-shadow:
+    0 0 0 1px rgba(0, 255, 229, 0.32),
+    0 0 14px rgba(0, 255, 229, 0.24),
+    0 8px 18px rgba(0, 0, 0, 0.48);
+  overflow: hidden;
+}
+
+.discord-activity-app-icon img {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: inherit;
   object-fit: cover;
 }
 
