@@ -15,6 +15,10 @@ const { router: driveMadLeaderboardRouter } = require('./routes/driveMadLeaderbo
 const { router: steamPlaytimeRouter } = require('./routes/steamPlaytime')
 const { router: tradedexRouter } = require('./routes/tradedex')
 const {
+  router: imagehostRouter,
+  handleLandingRequest: handleImagehostLanding,
+} = require('./routes/imagehost')
+const {
   router: discordStreakRouter,
   startPoller: startStreakPoller,
 } = require('./routes/discordStreak')
@@ -109,6 +113,11 @@ app.use('/api/discord-streak', discordStreakRouter)
 app.use('/api/drive-mad', driveMadLeaderboardRouter)
 app.use('/api/steam-playtime', steamPlaytimeRouter)
 app.use('/api/tradedex', tradedexRouter)
+app.use('/api/imagehost', imagehostRouter)
+
+// Public image host landing + raw routes — must be registered before the SPA fallback
+app.get('/i/:code/raw', (req, res) => handleImagehostLanding(req, res, 'raw'))
+app.get('/i/:code', (req, res) => handleImagehostLanding(req, res, 'page'))
 
 
 app.get('/api/tenor-search', async (req, res) => {

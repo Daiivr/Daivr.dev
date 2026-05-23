@@ -1,9 +1,13 @@
 {
-  "currentGame": "Fallout 76",
+  "currentGame": "Visual Studio",
   "games": {
     "Fallout 76": {
       "streak": 22,
       "lastDay": "2026-05-09"
+    },
+    "Visual Studio": {
+      "streak": 1,
+      "lastDay": "2026-05-17"
     }
   }
 }

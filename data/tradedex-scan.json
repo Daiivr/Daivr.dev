@@ -1,0 +1,32 @@
+{
+  "scans": {
+    "v1.5.2": {
+      "tag": "v1.5.2",
+      "asset": {
+        "name": "TradeDex_1.5.2.exe",
+        "size": 65763416,
+        "contentType": "application/x-msdownload",
+        "downloadUrl": "https://github.com/Daiivr/TradeDex/releases/download/v1.5.2/TradeDex_1.5.2.exe"
+      },
+      "sha256": "0f4ea0ae829450f599094ea0742a86759d4796d9bdbb44527d65d1cbb0a6c012",
+      "vt": {
+        "status": "scanned",
+        "stats": {
+          "malicious": 0,
+          "suspicious": 0,
+          "undetected": 69,
+          "harmless": 0,
+          "timeout": 0,
+          "failure": 2,
+          "total": 71,
+          "verdict": "clean"
+        },
+        "verdict": "clean",
+        "scanDate": 1779519004,
+        "permalink": "https://www.virustotal.com/gui/file/0f4ea0ae829450f599094ea0742a86759d4796d9bdbb44527d65d1cbb0a6c012",
+        "submitted": false
+      },
+      "scannedAt": 1779519926274
+    }
+  }
+}

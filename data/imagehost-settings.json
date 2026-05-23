@@ -1,0 +1,16 @@
+{
+  "secret": "azlGR9fNBF1K8c_hV-qT7eQj_heagGOc",
+  "title": "{filename} | {filesize}",
+  "description": "",
+  "embedColor": "#632f0d",
+  "siteName": "daivr.dev",
+  "siteNameUrl": "https://daivr.dev",
+  "author": "Dai",
+  "authorUrl": "",
+  "discordWebhook": "",
+  "fileNameLength": 5,
+  "embed": true,
+  "showTimestamp": true,
+  "showExtension": true,
+  "anonymous": false
+}
