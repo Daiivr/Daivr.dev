@@ -46,14 +46,33 @@ const DEFAULT_SETTINGS = {
   embedColor: '#00ffe5',
   siteName: 'daivr.dev',
   siteNameUrl: 'https://daivr.dev',
+  siteIconUrl: '',
   author: '',
   authorUrl: '',
+  footer: '',
   discordWebhook: '',
   fileNameLength: 5,
   embed: true,
   showTimestamp: false,
   showExtension: false,
   anonymous: false,
+}
+
+const eventClients = new Set()
+
+function sendEvent(res, event, payload) {
+  res.write(`event: ${event}\n`)
+  res.write(`data: ${JSON.stringify(payload || {})}\n\n`)
+}
+
+function broadcastEvent(event, payload) {
+  for (const res of eventClients) {
+    try {
+      sendEvent(res, event, payload)
+    } catch (_) {
+      eventClients.delete(res)
+    }
+  }
 }
 
 // ---- Bootstrap ----
@@ -75,6 +94,7 @@ function readSettings() {
     const raw = fs.readFileSync(SETTINGS_FILE, 'utf8')
     const data = raw ? JSON.parse(raw) : {}
     const merged = { ...DEFAULT_SETTINGS, ...data }
+    merged.fileNameLength = Math.max(3, Math.min(25, Number(merged.fileNameLength) || 5))
     // Generate a secret on first run if missing
     if (!merged.secret) {
       merged.secret = crypto.randomBytes(24).toString('base64url')
@@ -162,6 +182,12 @@ function imageRecordToPayload(record, baseUrl) {
     uploadedAt: record.uploadedAt,
     views: record.views || 0,
   }
+}
+
+function normalizeColorInt(color) {
+  const hex = String(color || '#00ffe5').replace('#', '').trim()
+  if (!/^[0-9a-fA-F]{6}$/.test(hex)) return 0x00ffe5
+  return parseInt(hex, 16)
 }
 
 function applyTemplate(template, ctx) {
@@ -308,9 +334,11 @@ router.post(
 
     const baseUrl = publicBaseUrl(req)
     const payload = imageRecordToPayload(record, baseUrl)
+    broadcastEvent('image-uploaded', { image: payload })
 
     // Fire webhook (no await — non-blocking from caller's perspective)
     if (settings.discordWebhook) {
+      const siteIconUrl = settings.siteIconUrl || `${baseUrl}/favicon.png`
       const ctx = {
         filename: record.originalName,
         filesize: formatBytes(record.size),
@@ -325,19 +353,20 @@ router.post(
             title: applyTemplate(settings.title, ctx),
             description: applyTemplate(settings.description, ctx) || undefined,
             url: payload.url,
-            color: parseInt(String(settings.embedColor || '#00ffe5').replace('#', ''), 16) || 0x00ffe5,
+            color: normalizeColorInt(settings.embedColor),
             image: { url: payload.rawUrl },
             timestamp: settings.showTimestamp ? new Date().toISOString() : undefined,
             author:
-              notAnonymous && settings.author
+              notAnonymous && settings.siteName
                 ? {
-                    name: settings.author,
-                    url: settings.authorUrl || undefined,
+                    name: settings.siteName,
+                    url: settings.siteNameUrl || undefined,
+                    icon_url: siteIconUrl,
                   }
                 : undefined,
             footer:
-              notAnonymous && settings.siteName
-                ? { text: settings.siteName }
+              notAnonymous && settings.footer
+                ? { text: applyTemplate(settings.footer, ctx) }
                 : undefined,
           },
         ],
@@ -393,8 +422,10 @@ router.post('/settings', adminOnly, (req, res) => {
     'embedColor',
     'siteName',
     'siteNameUrl',
+    'siteIconUrl',
     'author',
     'authorUrl',
+    'footer',
     'discordWebhook',
     'fileNameLength',
     'embed',
@@ -422,6 +453,31 @@ router.post('/secret/rotate', adminOnly, (req, res) => {
   current.secret = crypto.randomBytes(24).toString('base64url')
   writeSettings(current)
   res.json({ secret: current.secret })
+})
+
+router.get('/events', adminOnly, (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream; charset=utf-8')
+  res.setHeader('Cache-Control', 'no-cache, no-transform')
+  res.setHeader('Connection', 'keep-alive')
+  res.setHeader('X-Accel-Buffering', 'no')
+  res.flushHeaders?.()
+
+  eventClients.add(res)
+  sendEvent(res, 'ready', { ok: true })
+
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(': ping\n\n')
+    } catch (_) {
+      eventClients.delete(res)
+      clearInterval(heartbeat)
+    }
+  }, 25000)
+
+  req.on('close', () => {
+    eventClients.delete(res)
+    clearInterval(heartbeat)
+  })
 })
 
 router.get('/gallery', adminOnly, (req, res) => {
@@ -456,6 +512,7 @@ router.delete('/:code', (req, res) => {
 
   db.images.splice(idx, 1)
   writeImages(db)
+  broadcastEvent('image-deleted', { code })
   res.json({ ok: true })
 })
 
@@ -511,8 +568,13 @@ function renderLandingPage(record, settings, baseUrl) {
   const color = settings.embedColor || '#00ffe5'
   const rawUrl = `${baseUrl}/i/${record.code}/raw`
   const siteName = settings.siteName || 'daivr.dev'
-  const author = settings.author || ''
-  const authorUrl = settings.authorUrl || ''
+  const notAnonymous = !settings.anonymous
+  const author = notAnonymous ? settings.author || '' : ''
+  const authorUrl = notAnonymous ? settings.authorUrl || '' : ''
+  const publishedAt = settings.showTimestamp ? record.uploadedAt : ''
+  const ogType = publishedAt || author ? 'article' : 'website'
+  const imageAlt = `${record.originalName} on ${siteName}`
+  const embedEnabled = settings.embed !== false
 
   return `<!doctype html>
 <html lang="en">
@@ -521,19 +583,27 @@ function renderLandingPage(record, settings, baseUrl) {
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>${escapeHtml(title)}</title>
 <meta name="theme-color" content="${escapeHtml(color)}" />
-<meta property="og:type" content="website" />
+${embedEnabled ? `<meta property="og:type" content="${escapeHtml(ogType)}" />
 <meta property="og:title" content="${escapeHtml(title)}" />
 <meta property="og:description" content="${escapeHtml(description)}" />
 <meta property="og:image" content="${escapeHtml(rawUrl)}" />
+<meta property="og:image:secure_url" content="${escapeHtml(rawUrl)}" />
 <meta property="og:image:type" content="${escapeHtml(record.mimeType || 'image/png')}" />
+<meta property="og:image:alt" content="${escapeHtml(imageAlt)}" />
 <meta property="og:url" content="${escapeHtml(ctx.url)}" />
 <meta property="og:site_name" content="${escapeHtml(siteName)}" />
+${publishedAt ? `<meta property="article:published_time" content="${escapeHtml(publishedAt)}" />
+<meta property="article:modified_time" content="${escapeHtml(publishedAt)}" />
+<meta property="og:updated_time" content="${escapeHtml(publishedAt)}" />
+<meta name="date" content="${escapeHtml(publishedAt)}" />` : ''}
 ${author ? `<meta name="author" content="${escapeHtml(author)}" />` : ''}
+${author ? `<meta property="article:author" content="${escapeHtml(authorUrl || author)}" />` : ''}
 ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` : ''}
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="${escapeHtml(title)}" />
 <meta name="twitter:description" content="${escapeHtml(description)}" />
 <meta name="twitter:image" content="${escapeHtml(rawUrl)}" />
+<meta name="twitter:image:alt" content="${escapeHtml(imageAlt)}" />` : ''}
 <style>
   :root {
     color-scheme: dark;
@@ -645,7 +715,7 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
   <main class="frame">
     <div class="head">
       <span class="kicker">&gt; ${escapeHtml(siteName)}</span>
-      <span class="meta">${escapeHtml(ctx.filesize)} · ${escapeHtml(record.code)}</span>
+      <span class="meta">${escapeHtml(ctx.filesize)} · ${escapeHtml(record.code)}${publishedAt ? ` · ${escapeHtml(new Date(publishedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }))}` : ''}</span>
     </div>
     <div class="img-wrap">
       <img src="${escapeHtml(rawUrl)}" alt="${escapeHtml(record.originalName)}" />

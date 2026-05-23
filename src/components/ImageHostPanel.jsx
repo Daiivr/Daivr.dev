@@ -38,7 +38,15 @@ const formatDateShort = (iso) => {
 
 const SAMPLE_FILENAME = 'screenshot.png'
 const SAMPLE_FILESIZE_BYTES = 1024 * 1024 + 245 * 1024 // 1.24 MB
-const SAMPLE_CODE = 'x2sRd'
+const SAMPLE_CODE_SEED = 'x2sRd9QwZa7LmNp4KvT8YcFhJ'
+
+function normalizeCodeLength(value) {
+  return Math.max(3, Math.min(25, Number(value) || 5))
+}
+
+function getSampleCode(settings) {
+  return SAMPLE_CODE_SEED.slice(0, normalizeCodeLength(settings?.fileNameLength))
+}
 
 function applyTemplate(template, ctx) {
   if (!template) return ''
@@ -51,11 +59,12 @@ function buildSampleCtx(settings) {
   const filename = settings?.showExtension
     ? SAMPLE_FILENAME
     : SAMPLE_FILENAME.replace(/\.[^.]+$/, '')
+  const code = getSampleCode(settings)
   return {
     filename,
     filesize: formatBytes(SAMPLE_FILESIZE_BYTES),
-    code: SAMPLE_CODE,
-    url: `https://daivr.dev/i/${SAMPLE_CODE}`,
+    code,
+    url: `https://daivr.dev/i/${code}`,
   }
 }
 
@@ -80,13 +89,15 @@ function DiscordEmbedPreview({ settings, previewImage, me }) {
   const siteUrl = settings?.siteNameUrl || ''
   const author = settings?.author || ''
   const authorUrl = settings?.authorUrl || ''
+  const footer = applyTemplate(settings?.footer || '', ctx)
   const username = me?.username || 'Dai'
   const avatarUrl = me?.avatarUrl
+  const siteIconUrl = settings?.siteIconUrl || avatarUrl || '/favicon.png'
 
   const showAuthor = notAnonymous && Boolean(author)
   const showSite = notAnonymous && Boolean(siteName)
   const showTimestamp = Boolean(settings?.showTimestamp)
-  const showFooter = showSite || showTimestamp
+  const showFooter = notAnonymous && (Boolean(footer) || showTimestamp)
 
   return (
     <div className="discord-preview" aria-label="Discord embed preview">
@@ -121,6 +132,9 @@ function DiscordEmbedPreview({ settings, previewImage, me }) {
               <div className="discord-preview-embed-body">
                 {showSite && (
                   <div className="discord-preview-embed-site">
+                    {siteIconUrl && (
+                      <img src={siteIconUrl} alt="" className="discord-preview-embed-author-icon" />
+                    )}
                     {siteUrl ? (
                       <a
                         href={siteUrl}
@@ -137,9 +151,7 @@ function DiscordEmbedPreview({ settings, previewImage, me }) {
                 )}
                 {showAuthor && (
                   <div className="discord-preview-embed-author">
-                    {avatarUrl && (
-                      <img src={avatarUrl} alt="" className="discord-preview-embed-author-icon" />
-                    )}
+                    <span className="discord-preview-embed-author-label">by</span>
                     {authorUrl ? (
                       <a
                         href={authorUrl}
@@ -165,9 +177,13 @@ function DiscordEmbedPreview({ settings, previewImage, me }) {
                     <img src={previewImage} alt="" />
                   </div>
                 )}
-                {showTimestamp && (
+                {showFooter && (
                   <div className="discord-preview-embed-footer">
-                    <time>{currentTimeLabel()}</time>
+                    {footer && <span>{footer}</span>}
+                    {footer && showTimestamp && (
+                      <span className="discord-preview-embed-footer-sep">•</span>
+                    )}
+                    {showTimestamp && <time>{currentTimeLabel()}</time>}
                   </div>
                 )}
               </div>
@@ -191,6 +207,7 @@ export default function ImageHostPanel({ open, onClose, me }) {
   const [gallery, setGallery] = useState([])
   const [galleryLoading, setGalleryLoading] = useState(false)
   const [galleryError, setGalleryError] = useState('')
+  const [liveStatus, setLiveStatus] = useState('idle')
 
   const fetchSettings = useCallback(async () => {
     setLoading(true)
@@ -207,9 +224,11 @@ export default function ImageHostPanel({ open, onClose, me }) {
     }
   }, [])
 
-  const fetchGallery = useCallback(async () => {
-    setGalleryLoading(true)
-    setGalleryError('')
+  const fetchGallery = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) {
+      setGalleryLoading(true)
+      setGalleryError('')
+    }
     try {
       const res = await fetch('/api/imagehost/gallery', {
         credentials: 'include',
@@ -217,11 +236,12 @@ export default function ImageHostPanel({ open, onClose, me }) {
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error || 'gallery-failed')
       setGallery(data.images || [])
+      setGalleryError('')
     } catch (err) {
       console.error('Error loading imagehost gallery', err)
-      setGalleryError('No se pudo cargar la galería.')
+      if (!silent) setGalleryError('No se pudo cargar la galería.')
     } finally {
-      setGalleryLoading(false)
+      if (!silent) setGalleryLoading(false)
     }
   }, [])
 
@@ -231,6 +251,66 @@ export default function ImageHostPanel({ open, onClose, me }) {
     // Always load gallery so the config preview has a real sample image to show.
     fetchGallery()
   }, [open, fetchSettings, fetchGallery])
+
+  useEffect(() => {
+    if (!open) return undefined
+
+    const mergeImage = (image) => {
+      if (!image?.code) return
+      setGallery((prev) => [
+        image,
+        ...prev.filter((item) => item.code !== image.code),
+      ])
+      setGalleryError('')
+    }
+
+    const pollId = window.setInterval(() => {
+      fetchGallery({ silent: true })
+    }, 15000)
+
+    if (!('EventSource' in window)) {
+      setLiveStatus('fallback')
+      return () => {
+        window.clearInterval(pollId)
+        setLiveStatus('idle')
+      }
+    }
+
+    setLiveStatus('connecting')
+    const source = new EventSource('/api/imagehost/events', {
+      withCredentials: true,
+    })
+
+    source.onopen = () => setLiveStatus('live')
+    source.onerror = () => setLiveStatus('reconnecting')
+    source.addEventListener('ready', () => setLiveStatus('live'))
+    source.addEventListener('image-uploaded', (event) => {
+      try {
+        const data = JSON.parse(event.data || '{}')
+        mergeImage(data.image)
+        setLiveStatus('live')
+      } catch (err) {
+        console.error('Error parsing imagehost event', err)
+      }
+    })
+    source.addEventListener('image-deleted', (event) => {
+      try {
+        const data = JSON.parse(event.data || '{}')
+        if (data.code) {
+          setGallery((prev) => prev.filter((img) => img.code !== data.code))
+        }
+        setLiveStatus('live')
+      } catch (err) {
+        console.error('Error parsing imagehost delete event', err)
+      }
+    })
+
+    return () => {
+      source.close()
+      window.clearInterval(pollId)
+      setLiveStatus('idle')
+    }
+  }, [open, fetchGallery])
 
   useEffect(() => {
     if (!open) return undefined
@@ -340,18 +420,21 @@ export default function ImageHostPanel({ open, onClose, me }) {
     return 'https://opengraph.githubassets.com/1/Daiivr/TradeDex'
   }, [gallery])
 
-  const maskedSecret = useMemo(() => {
-    const s = settings?.secret || ''
-    if (!s) return ''
-    if (secretVisible) return s
-    return s.slice(0, 6) + '·'.repeat(Math.max(8, s.length - 10)) + s.slice(-4)
-  }, [settings?.secret, secretVisible])
+  const sampleCtx = useMemo(() => buildSampleCtx(settings), [settings])
+
+  const liveLabel = useMemo(() => {
+    if (liveStatus === 'live') return 'live sync'
+    if (liveStatus === 'connecting') return 'connecting'
+    if (liveStatus === 'reconnecting') return 'reconnecting'
+    if (liveStatus === 'fallback') return 'polling'
+    return 'offline'
+  }, [liveStatus])
 
   if (!open) return null
 
   return (
     <ModalPortal>
-      <div className="modal-backdrop imagehost-backdrop" onClick={onClose}>
+      <div className="modal-backdrop imagehost-backdrop">
         <div
           className="modal-card imagehost-modal"
           role="dialog"
@@ -360,7 +443,7 @@ export default function ImageHostPanel({ open, onClose, me }) {
           onClick={(event) => event.stopPropagation()}
         >
           <div className="modal-header imagehost-header">
-            <div>
+            <div className="imagehost-header-copy">
               <h3 className="modal-title" id="imagehost-title">
                 imagehost.daivr.dev
               </h3>
@@ -369,14 +452,36 @@ export default function ImageHostPanel({ open, onClose, me }) {
                 rotar el secret. Solo vos podés ver esto.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="modal-close"
-              aria-label="Cerrar"
-            >
-              x
-            </button>
+            <div className="imagehost-header-tools">
+              {settings && tab === 'config' && (
+                <div className="imagehost-save-dock">
+                  <span className={`imagehost-save-status is-${saveStatus.kind}`}>
+                    {saveStatus.message || 'ready'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={saveSettings}
+                    disabled={saving}
+                    className="imagehost-btn-save"
+                  >
+                    {saving ? 'saving' : 'save'}
+                  </button>
+                </div>
+              )}
+              <span className={`imagehost-live-chip is-${liveStatus}`}>
+                <span aria-hidden="true" />
+                {liveLabel}
+              </span>
+              <button
+                type="button"
+                onClick={onClose}
+                className="imagehost-close-btn"
+                aria-label="Cerrar modal"
+              >
+                <span>close</span>
+                <strong>x</strong>
+              </button>
+            </div>
           </div>
 
           <nav className="imagehost-tabs" role="tablist">
@@ -399,264 +504,342 @@ export default function ImageHostPanel({ open, onClose, me }) {
           )}
 
           {settings && tab === 'config' && (
-            <div className="imagehost-body">
-              <section className="imagehost-section">
-                <header className="imagehost-section-header">
-                  <span className="imagehost-section-kicker">auth.secret</span>
-                  <span className="imagehost-section-meta">
-                    rotalo si se filtra · ShareX usa este token
-                  </span>
-                </header>
-                <div className="imagehost-secret-row">
-                  <code className="imagehost-secret">{maskedSecret || '—'}</code>
-                  <div className="imagehost-secret-actions">
-                    <button
-                      type="button"
-                      onClick={() => setSecretVisible((v) => !v)}
-                      className="imagehost-mini-btn"
-                    >
-                      {secretVisible ? 'ocultar' : 'ver'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={copySecret}
-                      className="imagehost-mini-btn"
-                    >
-                      {secretCopied ? '✓ copiado' : 'copiar'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={rotateSecret}
-                      className={`imagehost-mini-btn ${rotateConfirm ? 'is-danger-confirm' : 'is-danger'}`}
-                    >
-                      {rotateConfirm ? 'confirmar?' : 'rotate'}
-                    </button>
-                  </div>
-                </div>
-              </section>
-
-              <section className="imagehost-section imagehost-section-preview">
-                <header className="imagehost-section-header">
-                  <span className="imagehost-section-kicker">preview.discord</span>
-                  <span className="imagehost-section-meta">
-                    live · cómo se ve cuando lo pegás en un canal
-                  </span>
-                </header>
-                <DiscordEmbedPreview
-                  settings={settings}
-                  previewImage={previewImage}
-                  me={me}
-                />
-              </section>
-
-              <section className="imagehost-section">
-                <header className="imagehost-section-header">
-                  <span className="imagehost-section-kicker">embed.tpl</span>
-                  <span className="imagehost-section-meta">
-                    variables: {'{filename}'} · {'{filesize}'} · {'{code}'}
-                  </span>
-                </header>
-
-                <div className="imagehost-field">
-                  <label htmlFor="ih-title">title</label>
-                  <input
-                    id="ih-title"
-                    type="text"
-                    value={settings.title || ''}
-                    onChange={(e) => updateField('title', e.target.value)}
-                    placeholder="{filename} | {filesize}"
-                    maxLength={100}
+            <div className="imagehost-body imagehost-config-body">
+              <div className="imagehost-cockpit">
+                <section className="imagehost-section imagehost-section-preview imagehost-preview-panel">
+                  <header className="imagehost-section-header">
+                    <span className="imagehost-section-kicker">preview.discord</span>
+                    <span className="imagehost-section-meta">
+                      live · cómo se ve cuando lo pegás en un canal
+                    </span>
+                  </header>
+                  <DiscordEmbedPreview
+                    settings={settings}
+                    previewImage={previewImage}
+                    me={me}
                   />
-                </div>
+                </section>
 
-                <div className="imagehost-field">
-                  <label htmlFor="ih-description">description</label>
-                  <textarea
-                    id="ih-description"
-                    value={settings.description || ''}
-                    onChange={(e) => updateField('description', e.target.value)}
-                    placeholder="opcional — sale debajo del título en el embed de Discord"
-                    rows={2}
-                    maxLength={250}
-                  />
-                </div>
-
-                <div className="imagehost-grid-2">
-                  <div className="imagehost-field">
-                    <label htmlFor="ih-color">embed color</label>
-                    <div
-                      className="imagehost-control"
-                      style={{ '--swatch-color': settings.embedColor || '#00ffe5' }}
-                    >
-                      <label
-                        className="imagehost-color-swatch"
-                        aria-label="Open color picker"
+                <aside className="imagehost-side-stack">
+                  <section className="imagehost-section imagehost-vault-panel">
+                    <header className="imagehost-section-header">
+                      <span className="imagehost-section-kicker">auth.secret</span>
+                      <span className="imagehost-section-meta">
+                        ShareX token
+                      </span>
+                    </header>
+                    <div className="imagehost-secret-row">
+                      <div
+                        className={`imagehost-secret-card ${secretVisible ? 'is-visible' : ''}`}
+                        tabIndex={0}
+                        aria-label="ShareX auth secret. Hover or focus to reveal."
                       >
-                        <input
-                          id="ih-color"
-                          type="color"
-                          value={settings.embedColor || '#00ffe5'}
-                          onChange={(e) => updateField('embedColor', e.target.value)}
-                        />
-                      </label>
-                      <input
-                        type="text"
-                        className="imagehost-color-hex"
-                        value={(settings.embedColor || '#00ffe5').toUpperCase()}
-                        onChange={(e) => {
-                          const v = e.target.value.trim()
-                          if (/^#?[0-9a-fA-F]{0,6}$/.test(v)) {
-                            updateField(
-                              'embedColor',
-                              v.startsWith('#') ? v : `#${v}`,
-                            )
-                          }
-                        }}
-                        maxLength={7}
-                        spellCheck="false"
-                      />
+                        <span className="imagehost-secret-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" width="16" height="16">
+                            <circle cx="7.5" cy="14.5" r="3.5" />
+                            <path d="M10 12l8-8M15 7l2 2M13 9l2 2" />
+                          </svg>
+                        </span>
+                        <code className="imagehost-secret-value">
+                          {settings.secret || '—'}
+                        </code>
+                        <button
+                          type="button"
+                          onClick={copySecret}
+                          className="imagehost-secret-copy"
+                          aria-label="Copiar secret"
+                          title={secretCopied ? 'copiado' : 'copiar secret'}
+                        >
+                          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                            <rect x="9" y="9" width="10" height="10" rx="2" />
+                            <path d="M5 15V7a2 2 0 0 1 2-2h8" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="imagehost-secret-actions">
+                        <button
+                          type="button"
+                          onClick={() => setSecretVisible((v) => !v)}
+                          className="imagehost-mini-btn"
+                        >
+                          {secretVisible ? 'blur' : 'pin'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={rotateSecret}
+                          className={`imagehost-mini-btn ${rotateConfirm ? 'is-danger-confirm' : 'is-danger'}`}
+                        >
+                          {rotateConfirm ? 'confirmar?' : 'rotate'}
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  </section>
 
-                  <div className="imagehost-field">
-                    <label htmlFor="ih-fnlen">file name length</label>
-                    <div
-                      className="imagehost-control"
-                      style={{
-                        '--p': `${(((Number(settings.fileNameLength) || 5) - 3) / (25 - 3)) * 100}%`,
-                      }}
-                    >
-                      <input
-                        id="ih-fnlen"
-                        type="range"
-                        min="3"
-                        max="25"
-                        value={settings.fileNameLength || 5}
-                        onChange={(e) =>
-                          updateField('fileNameLength', Number(e.target.value))
-                        }
-                        className="imagehost-slider"
-                      />
-                      <span className="imagehost-control-value">
-                        {settings.fileNameLength || 5}
-                      </span>
+                  <section className="imagehost-section imagehost-flags-panel">
+                    <header className="imagehost-section-header">
+                      <span className="imagehost-section-kicker">flags</span>
+                    </header>
+                    <div className="imagehost-toggles">
+                      {[
+                        { key: 'embed', label: 'embed', desc: 'incluir meta tags OG en la página pública' },
+                        { key: 'showTimestamp', label: 'timestamp', desc: 'mostrar timestamp en el embed de Discord' },
+                        { key: 'showExtension', label: 'extension', desc: 'mostrar extensión en el {filename}' },
+                        { key: 'anonymous', label: 'anonymous', desc: 'ocultar autor/footer en el embed' },
+                      ].map((flag) => (
+                        <label key={flag.key} className="imagehost-toggle">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(settings[flag.key])}
+                            onChange={(e) => updateField(flag.key, e.target.checked)}
+                          />
+                          <span className="imagehost-toggle-swatch" aria-hidden="true" />
+                          <span className="imagehost-toggle-text">
+                            <strong>{flag.label}</strong>
+                            <span>{flag.desc}</span>
+                          </span>
+                        </label>
+                      ))}
                     </div>
-                  </div>
-                </div>
-              </section>
-
-              <section className="imagehost-section">
-                <header className="imagehost-section-header">
-                  <span className="imagehost-section-kicker">site.meta</span>
-                  <span className="imagehost-section-meta">opcional</span>
-                </header>
-
-                <div className="imagehost-grid-2">
-                  <div className="imagehost-field">
-                    <label htmlFor="ih-site">site name</label>
-                    <input
-                      id="ih-site"
-                      type="text"
-                      value={settings.siteName || ''}
-                      onChange={(e) => updateField('siteName', e.target.value)}
-                      placeholder="daivr.dev"
-                      maxLength={50}
-                    />
-                  </div>
-                  <div className="imagehost-field">
-                    <label htmlFor="ih-site-url">site name url</label>
-                    <input
-                      id="ih-site-url"
-                      type="url"
-                      value={settings.siteNameUrl || ''}
-                      onChange={(e) => updateField('siteNameUrl', e.target.value)}
-                      placeholder="https://daivr.dev"
-                      maxLength={250}
-                    />
-                  </div>
-                  <div className="imagehost-field">
-                    <label htmlFor="ih-author">author</label>
-                    <input
-                      id="ih-author"
-                      type="text"
-                      value={settings.author || ''}
-                      onChange={(e) => updateField('author', e.target.value)}
-                      placeholder="Dai"
-                      maxLength={50}
-                    />
-                  </div>
-                  <div className="imagehost-field">
-                    <label htmlFor="ih-author-url">author url</label>
-                    <input
-                      id="ih-author-url"
-                      type="url"
-                      value={settings.authorUrl || ''}
-                      onChange={(e) => updateField('authorUrl', e.target.value)}
-                      placeholder="https://daivr.dev"
-                      maxLength={250}
-                    />
-                  </div>
-                </div>
-              </section>
-
-              <section className="imagehost-section">
-                <header className="imagehost-section-header">
-                  <span className="imagehost-section-kicker">webhook.discord</span>
-                  <span className="imagehost-section-meta">
-                    notifica cada upload — opcional
-                  </span>
-                </header>
-                <div className="imagehost-field">
-                  <input
-                    type="url"
-                    value={settings.discordWebhook || ''}
-                    onChange={(e) => updateField('discordWebhook', e.target.value)}
-                    placeholder="https://discord.com/api/webhooks/..."
-                    maxLength={250}
-                  />
-                </div>
-              </section>
-
-              <section className="imagehost-section">
-                <header className="imagehost-section-header">
-                  <span className="imagehost-section-kicker">flags</span>
-                </header>
-                <div className="imagehost-toggles">
-                  {[
-                    { key: 'embed', label: 'embed', desc: 'incluir meta tags OG en la página pública' },
-                    { key: 'showTimestamp', label: 'timestamp', desc: 'mostrar timestamp en el embed de Discord' },
-                    { key: 'showExtension', label: 'extension', desc: 'mostrar extensión en el {filename}' },
-                    { key: 'anonymous', label: 'anonymous', desc: 'ocultar autor/footer en el embed' },
-                  ].map((flag) => (
-                    <label key={flag.key} className="imagehost-toggle">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(settings[flag.key])}
-                        onChange={(e) => updateField(flag.key, e.target.checked)}
-                      />
-                      <span className="imagehost-toggle-swatch" aria-hidden="true" />
-                      <span className="imagehost-toggle-text">
-                        <strong>{flag.label}</strong>
-                        <span>{flag.desc}</span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </section>
-
-              <div className="imagehost-actions">
-                <span className={`imagehost-save-status is-${saveStatus.kind}`}>
-                  {saveStatus.message}
-                </span>
-                <button
-                  type="button"
-                  onClick={saveSettings}
-                  disabled={saving}
-                  className="imagehost-btn-save"
-                >
-                  {saving ? 'guardando...' : 'save config'}
-                </button>
+                  </section>
+                </aside>
               </div>
+
+              <div className="imagehost-settings-grid">
+                  <section className="imagehost-section imagehost-template-panel">
+                    <header className="imagehost-section-header">
+                      <span className="imagehost-section-kicker">embed.tpl</span>
+                      <span className="imagehost-section-meta">
+                        variables: {'{filename}'} · {'{filesize}'} · {'{code}'}
+                      </span>
+                    </header>
+
+                    <div className="imagehost-field">
+                      <label htmlFor="ih-title">title</label>
+                      <input
+                        id="ih-title"
+                        type="text"
+                        value={settings.title || ''}
+                        onChange={(e) => updateField('title', e.target.value)}
+                        placeholder="{filename} | {filesize}"
+                        maxLength={100}
+                      />
+                    </div>
+
+                    <div className="imagehost-field">
+                      <label htmlFor="ih-description">description</label>
+                      <textarea
+                        id="ih-description"
+                        value={settings.description || ''}
+                        onChange={(e) => updateField('description', e.target.value)}
+                        placeholder="opcional — sale debajo del título en el embed de Discord"
+                        rows={2}
+                        maxLength={250}
+                      />
+                    </div>
+
+                    <div className="imagehost-field">
+                      <label htmlFor="ih-footer">custom footer</label>
+                      <input
+                        id="ih-footer"
+                        type="text"
+                        value={settings.footer || ''}
+                        onChange={(e) => updateField('footer', e.target.value)}
+                        placeholder="optional footer text"
+                        maxLength={100}
+                      />
+                    </div>
+
+                    <div className="imagehost-tuning-grid">
+                      <div className="imagehost-field imagehost-tune-card imagehost-color-tune">
+                        <div className="imagehost-tune-label">
+                          <label htmlFor="ih-color">
+                            <span aria-hidden="true">$</span> embed color
+                          </label>
+                          <code>accent.hex</code>
+                        </div>
+                        <div
+                          className="imagehost-control imagehost-color-control imagehost-tune-surface"
+                          style={{ '--swatch-color': settings.embedColor || '#00ffe5' }}
+                        >
+                          <label
+                            className="imagehost-color-swatch"
+                            aria-label="Open color picker"
+                          >
+                            <input
+                              id="ih-color"
+                              type="color"
+                              value={settings.embedColor || '#00ffe5'}
+                              onChange={(e) => updateField('embedColor', e.target.value)}
+                            />
+                          </label>
+                          <input
+                            type="text"
+                            className="imagehost-color-hex"
+                            value={(settings.embedColor || '#00ffe5').toUpperCase()}
+                            onChange={(e) => {
+                              const v = e.target.value.trim()
+                              if (/^#?[0-9a-fA-F]{0,6}$/.test(v)) {
+                                updateField(
+                                  'embedColor',
+                                  v.startsWith('#') ? v : `#${v}`,
+                                )
+                              }
+                            }}
+                            maxLength={7}
+                            spellCheck="false"
+                          />
+                          <span className="imagehost-color-beam" aria-hidden="true" />
+                        </div>
+                      </div>
+
+                      <div className="imagehost-field imagehost-tune-card imagehost-length-tune">
+                        <div className="imagehost-tune-label">
+                          <label htmlFor="ih-fnlen">
+                            <span aria-hidden="true">$</span> file name length
+                          </label>
+                          <code>code.size</code>
+                        </div>
+                        <div
+                          className="imagehost-control imagehost-length-control imagehost-tune-surface"
+                          style={{
+                            '--p': `${((normalizeCodeLength(settings.fileNameLength) - 3) / (25 - 3)) * 100}%`,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            className="imagehost-stepper"
+                            onClick={() =>
+                              updateField(
+                                'fileNameLength',
+                                normalizeCodeLength(settings.fileNameLength - 1),
+                              )
+                            }
+                            aria-label="Decrease file name length"
+                          >
+                            -
+                          </button>
+                          <input
+                            id="ih-fnlen"
+                            type="range"
+                            min="3"
+                            max="25"
+                            value={settings.fileNameLength || 5}
+                            onChange={(e) =>
+                              updateField('fileNameLength', Number(e.target.value))
+                            }
+                            className="imagehost-slider"
+                          />
+                          <button
+                            type="button"
+                            className="imagehost-stepper"
+                            onClick={() =>
+                              updateField(
+                                'fileNameLength',
+                                normalizeCodeLength(settings.fileNameLength + 1),
+                              )
+                            }
+                            aria-label="Increase file name length"
+                          >
+                            +
+                          </button>
+                          <span className="imagehost-length-readout">
+                            <strong>{normalizeCodeLength(settings.fileNameLength)}</strong>
+                            <code>/i/{sampleCtx.code}</code>
+                          </span>
+                        </div>
+                        <div className="imagehost-length-ticks" aria-hidden="true">
+                          {[3, 8, 14, 20, 25].map((tick) => (
+                            <span key={tick}>{tick}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="imagehost-section imagehost-site-panel">
+                    <header className="imagehost-section-header">
+                      <span className="imagehost-section-kicker">site.meta</span>
+                      <span className="imagehost-section-meta">opcional</span>
+                    </header>
+
+                    <div className="imagehost-grid-2">
+                      <div className="imagehost-field">
+                        <label htmlFor="ih-site">site name</label>
+                        <input
+                          id="ih-site"
+                          type="text"
+                          value={settings.siteName || ''}
+                          onChange={(e) => updateField('siteName', e.target.value)}
+                          placeholder="daivr.dev"
+                          maxLength={50}
+                        />
+                      </div>
+                      <div className="imagehost-field">
+                        <label htmlFor="ih-site-url">site name url</label>
+                        <input
+                          id="ih-site-url"
+                          type="url"
+                          value={settings.siteNameUrl || ''}
+                          onChange={(e) => updateField('siteNameUrl', e.target.value)}
+                          placeholder="https://daivr.dev"
+                          maxLength={250}
+                        />
+                      </div>
+                      <div className="imagehost-field">
+                        <label htmlFor="ih-site-icon">site icon url</label>
+                        <input
+                          id="ih-site-icon"
+                          type="url"
+                          value={settings.siteIconUrl || ''}
+                          onChange={(e) => updateField('siteIconUrl', e.target.value)}
+                          placeholder="https://daivr.dev/favicon.png"
+                          maxLength={250}
+                        />
+                      </div>
+                      <div className="imagehost-field">
+                        <label htmlFor="ih-author">author</label>
+                        <input
+                          id="ih-author"
+                          type="text"
+                          value={settings.author || ''}
+                          onChange={(e) => updateField('author', e.target.value)}
+                          placeholder="Dai"
+                          maxLength={50}
+                        />
+                      </div>
+                      <div className="imagehost-field">
+                        <label htmlFor="ih-author-url">author url</label>
+                        <input
+                          id="ih-author-url"
+                          type="url"
+                          value={settings.authorUrl || ''}
+                          onChange={(e) => updateField('authorUrl', e.target.value)}
+                          placeholder="https://daivr.dev"
+                          maxLength={250}
+                        />
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="imagehost-section imagehost-webhook-panel">
+                    <header className="imagehost-section-header">
+                      <span className="imagehost-section-kicker">webhook.discord</span>
+                      <span className="imagehost-section-meta">
+                        notifica cada upload — opcional
+                      </span>
+                    </header>
+                    <div className="imagehost-field">
+                      <input
+                        type="url"
+                        value={settings.discordWebhook || ''}
+                        onChange={(e) => updateField('discordWebhook', e.target.value)}
+                        placeholder="https://discord.com/api/webhooks/..."
+                        maxLength={250}
+                      />
+                    </div>
+                  </section>
+              </div>
+
             </div>
           )}
 
@@ -742,7 +925,7 @@ export default function ImageHostPanel({ open, onClose, me }) {
                 <header className="imagehost-section-header">
                   <span className="imagehost-section-kicker">gallery</span>
                   <span className="imagehost-section-meta">
-                    {gallery.length} item{gallery.length === 1 ? '' : 's'}
+                    {gallery.length} item{gallery.length === 1 ? '' : 's'} · {liveLabel}
                   </span>
                 </header>
 

@@ -6364,6 +6364,264 @@ html:not(.theme-xmas) .tradedex-modal-tone-warn {
   }
 }
 
+/* ---------- TradeDex modal mobile console pass ---------- */
+
+.modal-card.tradedex-modal {
+  overflow-x: hidden;
+}
+
+.tradedex-modal .modal-header > div,
+.tradedex-body,
+.tradedex-pipeline,
+.tradedex-verdict,
+.tradedex-release-strip,
+.tradedex-modal-options,
+.tradedex-option {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .modal-backdrop.tradedex-modal-backdrop {
+    align-items: stretch;
+    padding: 8px;
+  }
+
+  html:not(.theme-xmas) .modal-card.tradedex-modal,
+  .modal-card.tradedex-modal {
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100dvh - 16px);
+    padding: 46px 14px 14px !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .tradedex-modal .modal-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 34px;
+    align-items: start;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .tradedex-modal .modal-title {
+    max-width: 100%;
+    font-size: 0.9rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .tradedex-modal .modal-text {
+    font-size: 0.72rem;
+    line-height: 1.55;
+  }
+
+  .tradedex-modal .modal-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    justify-self: end;
+  }
+
+  .tradedex-body {
+    gap: 12px;
+  }
+
+  .tradedex-pipeline {
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .tradedex-pipeline-header {
+    gap: 8px;
+    font-size: 0.52rem;
+    letter-spacing: 0.12em;
+  }
+
+  .tradedex-pipeline-header span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tradedex-stepper {
+    grid-auto-flow: row;
+    grid-auto-columns: unset;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 0;
+  }
+
+  .tradedex-step {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    align-items: center;
+    justify-items: start;
+    gap: 9px;
+    padding: 0;
+    text-align: left;
+  }
+
+  .tradedex-step:not(:last-child)::before {
+    top: 21px;
+    bottom: -9px;
+    left: 10px;
+    right: auto;
+    width: 2px;
+    height: auto;
+    background: rgba(120, 140, 170, 0.24);
+  }
+
+  .tradedex-step.is-done:not(:last-child)::before,
+  .tradedex-step.is-active:not(:last-child)::before {
+    background: linear-gradient(180deg, #39ff8a, rgba(57, 255, 138, 0.32));
+  }
+
+  .tradedex-step-dot {
+    width: 20px;
+    height: 20px;
+  }
+
+  .tradedex-step-label {
+    max-width: none;
+    font-size: 0.58rem;
+    white-space: normal;
+  }
+
+  .tradedex-step-progress {
+    justify-self: end;
+    font-size: 0.56rem;
+  }
+
+  .tradedex-verdict-hero {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .tradedex-verdict-left {
+    align-items: flex-start;
+  }
+
+  .tradedex-verdict-hero .tradedex-verdict-label {
+    font-size: 0.98rem;
+    line-height: 1.3;
+  }
+
+  .tradedex-verdict-detail {
+    font-size: 0.62rem;
+    line-height: 1.45;
+  }
+
+  .tradedex-verdict-chips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .tradedex-chip {
+    width: 100%;
+    min-width: 0;
+    padding: 8px 6px;
+  }
+
+  .tradedex-chip span {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 0.48rem;
+    letter-spacing: 0.11em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tradedex-verdict-chips .tradedex-verdict-link {
+    grid-column: 1 / -1;
+    justify-content: center;
+    margin-left: 0;
+  }
+
+  .tradedex-release-strip {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .tradedex-release-cell,
+  .tradedex-release-cell:first-child,
+  .tradedex-release-cell:last-child,
+  .tradedex-release-cell:nth-child(odd),
+  .tradedex-release-cell:nth-child(even) {
+    padding: 0;
+  }
+
+  .tradedex-release-cell + .tradedex-release-cell {
+    padding-top: 10px;
+    border-top: 1px dashed rgba(0, 255, 229, 0.14);
+  }
+
+  .tradedex-release-cell + .tradedex-release-cell::before {
+    display: none;
+  }
+
+  .tradedex-release-cell .tradedex-release-value,
+  .tradedex-release-cell .tradedex-release-hash code {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tradedex-modal-options {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .tradedex-option {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .tradedex-option-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .tradedex-option-arrow {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 26px;
+  }
+
+  .tradedex-option-kicker {
+    font-size: 0.52rem;
+    letter-spacing: 0.12em;
+  }
+
+  .tradedex-option-title {
+    font-size: 0.82rem;
+    line-height: 1.25;
+  }
+
+  .tradedex-option-desc {
+    font-size: 0.64rem;
+  }
+
+  .tradedex-modal .modal-actions {
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: 12px;
+  }
+
+  .tradedex-modal .modal-actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* ---------- ImageHost admin panel ---------- */
 
 .modal-card.imagehost-modal {
