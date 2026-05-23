@@ -13,6 +13,7 @@ const { router: visitsRouter } = require('./routes/visits')
 const { router: siteSettingsRouter } = require('./routes/siteSettings')
 const { router: driveMadLeaderboardRouter } = require('./routes/driveMadLeaderboard')
 const { router: steamPlaytimeRouter } = require('./routes/steamPlaytime')
+const { router: tradedexRouter } = require('./routes/tradedex')
 const {
   router: discordStreakRouter,
   startPoller: startStreakPoller,
@@ -107,6 +108,7 @@ app.use('/api/site-settings', siteSettingsRouter)
 app.use('/api/discord-streak', discordStreakRouter)
 app.use('/api/drive-mad', driveMadLeaderboardRouter)
 app.use('/api/steam-playtime', steamPlaytimeRouter)
+app.use('/api/tradedex', tradedexRouter)
 
 
 app.get('/api/tenor-search', async (req, res) => {
