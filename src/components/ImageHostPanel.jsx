@@ -208,6 +208,8 @@ export default function ImageHostPanel({ open, onClose, me }) {
   const [galleryLoading, setGalleryLoading] = useState(false)
   const [galleryError, setGalleryError] = useState('')
   const [liveStatus, setLiveStatus] = useState('idle')
+  const [confirmDelete, setConfirmDelete] = useState(null)
+  const [deletingCode, setDeletingCode] = useState(null)
 
   const fetchSettings = useCallback(async () => {
     setLoading(true)
@@ -391,21 +393,50 @@ export default function ImageHostPanel({ open, onClose, me }) {
     window.location.href = '/api/imagehost/sxcu'
   }, [])
 
-  const deleteImage = useCallback(async (code) => {
-    if (!code) return
-    if (!window.confirm(`Borrar imagen ${code}? esta acción no se puede deshacer.`)) return
+  const requestDelete = useCallback((img) => {
+    if (!img?.code) return
+    setConfirmDelete({
+      code: img.code,
+      name: img.originalName || `${img.code}.png`,
+    })
+  }, [])
+
+  const cancelDelete = useCallback(() => {
+    if (deletingCode) return
+    setConfirmDelete(null)
+  }, [deletingCode])
+
+  const performDelete = useCallback(async () => {
+    const target = confirmDelete
+    if (!target?.code || deletingCode) return
+    setDeletingCode(target.code)
+    setGalleryError('')
     try {
-      const res = await fetch(`/api/imagehost/${encodeURIComponent(code)}`, {
+      const res = await fetch(`/api/imagehost/${encodeURIComponent(target.code)}`, {
         method: 'DELETE',
         credentials: 'include',
       })
       if (!res.ok) throw new Error('delete-failed')
-      setGallery((prev) => prev.filter((g) => g.code !== code))
+      setGallery((prev) => prev.filter((g) => g.code !== target.code))
+      setConfirmDelete(null)
     } catch (err) {
       console.error('Error deleting image', err)
-      window.alert('No se pudo borrar la imagen.')
+      setGalleryError(`no se pudo borrar /${target.code}.`)
+      setConfirmDelete(null)
+    } finally {
+      setDeletingCode(null)
     }
-  }, [])
+  }, [confirmDelete, deletingCode])
+
+  useEffect(() => {
+    if (!confirmDelete) return undefined
+    const handleKey = (event) => {
+      if (event.key === 'Escape') cancelDelete()
+      if (event.key === 'Enter') performDelete()
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [confirmDelete, cancelDelete, performDelete])
 
   const copyToClipboard = useCallback(async (text) => {
     try {
@@ -919,6 +950,58 @@ export default function ImageHostPanel({ open, onClose, me }) {
             </div>
           )}
 
+          {confirmDelete && (
+            <div
+              className="imagehost-confirm-overlay"
+              onClick={cancelDelete}
+              role="presentation"
+            >
+              <div
+                className="imagehost-confirm-card"
+                role="alertdialog"
+                aria-modal="true"
+                aria-labelledby="imagehost-confirm-title"
+                aria-describedby="imagehost-confirm-desc"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="imagehost-confirm-head">
+                  <span className="imagehost-confirm-kicker">
+                    <span aria-hidden="true">$</span> rm --force
+                  </span>
+                  <span className="imagehost-confirm-target">
+                    /i/{confirmDelete.code}
+                  </span>
+                </div>
+                <h4 className="imagehost-confirm-title" id="imagehost-confirm-title">
+                  borrar imagen?
+                </h4>
+                <p className="imagehost-confirm-desc" id="imagehost-confirm-desc">
+                  vas a borrar <code>{confirmDelete.name}</code>. esta acción no
+                  se puede deshacer.
+                </p>
+                <div className="imagehost-confirm-actions">
+                  <button
+                    type="button"
+                    className="imagehost-mini-btn"
+                    onClick={cancelDelete}
+                    disabled={Boolean(deletingCode)}
+                  >
+                    cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="imagehost-mini-btn is-danger imagehost-confirm-go"
+                    onClick={performDelete}
+                    disabled={Boolean(deletingCode)}
+                    autoFocus
+                  >
+                    {deletingCode ? 'borrando…' : 'sí, borrar'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {tab === 'gallery' && (
             <div className="imagehost-body">
               <section className="imagehost-section">
@@ -977,9 +1060,10 @@ export default function ImageHostPanel({ open, onClose, me }) {
                           <button
                             type="button"
                             className="imagehost-mini-btn is-danger"
-                            onClick={() => deleteImage(img.code)}
+                            onClick={() => requestDelete(img)}
+                            disabled={deletingCode === img.code}
                           >
-                            delete
+                            {deletingCode === img.code ? 'borrando…' : 'delete'}
                           </button>
                         </div>
                       </li>

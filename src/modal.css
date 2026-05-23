@@ -3761,3 +3761,167 @@ html:not(.theme-xmas) .imagehost-length-ticks span::before {
   }
 }
 
+/* ---------- ImageHost styled delete confirmation ---------- */
+
+html:not(.theme-xmas) .imagehost-confirm-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(120% 80% at 50% 40%, rgba(255, 60, 110, 0.08), transparent 60%),
+    rgba(2, 5, 12, 0.78);
+  backdrop-filter: blur(6px) saturate(140%);
+  -webkit-backdrop-filter: blur(6px) saturate(140%);
+  animation: imagehost-confirm-fade 140ms ease-out;
+  border-radius: inherit;
+}
+
+@keyframes imagehost-confirm-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes imagehost-confirm-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+html:not(.theme-xmas) .imagehost-confirm-card {
+  position: relative;
+  width: min(440px, 92%);
+  padding: 20px 22px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 78, 130, 0.42);
+  background:
+    linear-gradient(140deg, rgba(255, 60, 110, 0.10), transparent 55%),
+    linear-gradient(180deg, rgba(10, 6, 14, 0.98), rgba(3, 2, 8, 0.99));
+  box-shadow:
+    0 0 0 1px rgba(255, 78, 130, 0.10),
+    0 24px 80px -28px rgba(255, 50, 110, 0.55),
+    0 38px 120px -42px rgba(0, 0, 0, 0.92);
+  color: #f5f3ff;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  animation: imagehost-confirm-pop 180ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  overflow: hidden;
+}
+
+html:not(.theme-xmas) .imagehost-confirm-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 3px,
+    rgba(255, 255, 255, 0.022) 3px 4px
+  );
+  border-radius: inherit;
+  mix-blend-mode: overlay;
+}
+
+html:not(.theme-xmas) .imagehost-confirm-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 78, 130, 0.85),
+    rgba(255, 200, 90, 0.55),
+    transparent
+  );
+  filter: blur(0.4px);
+}
+
+html:not(.theme-xmas) .imagehost-confirm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+html:not(.theme-xmas) .imagehost-confirm-kicker {
+  color: #ff5d8f;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+html:not(.theme-xmas) .imagehost-confirm-kicker span {
+  color: rgba(255, 93, 143, 0.55);
+}
+
+html:not(.theme-xmas) .imagehost-confirm-target {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 10.5px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 78, 130, 0.25);
+  background: rgba(255, 78, 130, 0.08);
+}
+
+html:not(.theme-xmas) .imagehost-confirm-title {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+html:not(.theme-xmas) .imagehost-confirm-desc {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(230, 226, 240, 0.78);
+}
+
+html:not(.theme-xmas) .imagehost-confirm-desc code {
+  color: #ffd2e0;
+  background: rgba(255, 78, 130, 0.12);
+  border: 1px solid rgba(255, 78, 130, 0.22);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+html:not(.theme-xmas) .imagehost-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+html:not(.theme-xmas) .imagehost-confirm-actions .imagehost-mini-btn {
+  min-width: 84px;
+}
+
+html:not(.theme-xmas) .imagehost-confirm-go {
+  box-shadow: 0 0 18px -4px rgba(255, 78, 130, 0.55);
+}
+
+html:not(.theme-xmas) .imagehost-confirm-go:focus-visible {
+  outline: 2px solid rgba(255, 78, 130, 0.7);
+  outline-offset: 2px;
+}
+
+html:not(.theme-xmas) .imagehost-confirm-actions .imagehost-mini-btn:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
