@@ -90,12 +90,13 @@ function DiscordEmbedPreview({ settings, previewImage, me }) {
   const author = settings?.author || ''
   const authorUrl = settings?.authorUrl || ''
   const footer = applyTemplate(settings?.footer || '', ctx)
+  const timeLabel = currentTimeLabel()
   const username = me?.username || 'Dai'
   const avatarUrl = me?.avatarUrl
   const siteIconUrl = settings?.siteIconUrl || avatarUrl || '/favicon.png'
 
-  const showAuthor = notAnonymous && Boolean(author)
   const showSite = notAnonymous && Boolean(siteName)
+  const showAuthor = notAnonymous && Boolean(author)
   const showTimestamp = Boolean(settings?.showTimestamp)
   const showFooter = notAnonymous && (Boolean(footer) || showTimestamp)
 
@@ -112,7 +113,7 @@ function DiscordEmbedPreview({ settings, previewImage, me }) {
         <div className="discord-preview-content">
           <div className="discord-preview-meta">
             <strong className="discord-preview-name">{username}</strong>
-            <time className="discord-preview-time">{currentTimeLabel()}</time>
+            <time className="discord-preview-time">{timeLabel}</time>
           </div>
           <a
             href={ctx.url}
@@ -183,7 +184,7 @@ function DiscordEmbedPreview({ settings, previewImage, me }) {
                     {footer && showTimestamp && (
                       <span className="discord-preview-embed-footer-sep">•</span>
                     )}
-                    {showTimestamp && <time>{currentTimeLabel()}</time>}
+                    {showTimestamp && <time>{timeLabel}</time>}
                   </div>
                 )}
               </div>
@@ -940,10 +941,13 @@ export default function ImageHostPanel({ open, onClose, me }) {
 
                 <div className="imagehost-sxcu-topline">
                   <div className="imagehost-sxcu-file">
-                    <span className="imagehost-sxcu-icon" aria-hidden="true">sx</span>
-                    <div>
+                    <span className="imagehost-sxcu-icon" aria-hidden="true">
+                      <img src="/imagehost/sharex-logo.png" alt="" />
+                    </span>
+                    <div className="imagehost-sxcu-file-copy">
                       <strong>{settings.siteName || 'daivr.dev'}.sxcu</strong>
-                      <span>custom uploader profile · ready to import</span>
+                      <span>ShareX custom uploader profile</span>
+                      <em>ready to import</em>
                     </div>
                   </div>
                   <span className="imagehost-sxcu-route">

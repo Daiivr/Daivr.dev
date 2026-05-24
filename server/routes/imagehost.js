@@ -346,6 +346,7 @@ router.post(
         url: payload.url,
       }
       const notAnonymous = !settings.anonymous
+      const embedAuthor = notAnonymous ? settings.author || '' : ''
       fireWebhook(settings.discordWebhook, {
         username: settings.siteName || 'daivr.dev',
         embeds: [
@@ -357,10 +358,10 @@ router.post(
             image: { url: payload.rawUrl },
             timestamp: settings.showTimestamp ? new Date().toISOString() : undefined,
             author:
-              notAnonymous && settings.siteName
+              embedAuthor
                 ? {
-                    name: settings.siteName,
-                    url: settings.siteNameUrl || undefined,
+                    name: embedAuthor,
+                    url: settings.authorUrl || undefined,
                     icon_url: siteIconUrl,
                   }
                 : undefined,
@@ -593,6 +594,7 @@ function renderLandingPage(record, settings, baseUrl) {
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>${escapeHtml(title)}</title>
 <meta name="theme-color" content="${escapeHtml(color)}" />
+${description ? `<meta name="description" content="${escapeHtml(description)}" />` : ''}
 ${embedEnabled ? `<meta property="og:type" content="${escapeHtml(ogType)}" />
 <meta property="og:title" content="${escapeHtml(title)}" />
 <meta property="og:description" content="${escapeHtml(description)}" />
@@ -1268,6 +1270,369 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
       text-align: center;
     }
   }
+
+  /* Image packet viewer v3: arcade/code composition */
+  body {
+    padding: clamp(18px, 3vw, 34px);
+    background:
+      radial-gradient(840px 520px at 0% 0%, rgba(0, 255, 229, 0.12), transparent 62%),
+      radial-gradient(760px 500px at 100% 8%, rgba(255, 43, 214, 0.11), transparent 66%),
+      linear-gradient(180deg, #040816 0%, #02040b 58%, #010208 100%);
+  }
+  body::before {
+    background:
+      repeating-linear-gradient(to bottom, transparent 0 2px, rgba(255,255,255,0.02) 2px 3px),
+      linear-gradient(rgba(0,255,229,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,229,0.03) 1px, transparent 1px);
+    background-size: auto, 28px 28px, 28px 28px;
+    opacity: 0.54;
+  }
+  .frame {
+    --cyan: #00ffe5;
+    --pink: #ff2bd6;
+    --green: #39ff8a;
+    --amber: #ffb627;
+    --line: rgba(0, 255, 229, 0.25);
+    --panel: rgba(1, 7, 18, 0.82);
+    width: min(94vw, 1160px);
+    max-width: min(94vw, 1160px);
+    border-radius: 11px;
+    border-color: rgba(0, 255, 229, 0.34);
+    background:
+      linear-gradient(90deg, rgba(0, 255, 229, 0.08), transparent 32%, transparent 68%, rgba(255, 43, 214, 0.08)),
+      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 12px 12px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px) 0 0 / 12px 12px,
+      rgba(2, 7, 18, 0.92);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 34px 105px -48px rgba(0, 255, 229, 0.5),
+      0 30px 92px -54px rgba(255, 43, 214, 0.34);
+  }
+  .frame::before {
+    height: 31px;
+    border-bottom: 1px solid rgba(0, 255, 229, 0.22);
+    background:
+      linear-gradient(90deg, #ff5f57 0 5px, transparent 5px 14px, #ffbd2e 14px 19px, transparent 19px 28px, #28c840 28px 33px, transparent 33px),
+      linear-gradient(90deg, rgba(0, 255, 229, 0.16), transparent 44%, rgba(255, 43, 214, 0.18));
+    background-position: 15px 13px, 0 0;
+    background-repeat: no-repeat;
+  }
+  .frame::after {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), var(--accent), var(--pink), transparent);
+    opacity: 0.7;
+  }
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    padding: 15px 18px 13px;
+    border-bottom: 1px dashed rgba(0, 255, 229, 0.2);
+    background:
+      linear-gradient(90deg, rgba(0, 255, 229, 0.045), transparent 44%, rgba(255, 43, 214, 0.045));
+  }
+  .head .kicker {
+    gap: 8px;
+    color: rgba(236, 245, 255, 0.9);
+    text-shadow: none;
+  }
+  .head .kicker strong {
+    color: var(--cyan);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    text-shadow: 0 0 11px rgba(0, 255, 229, 0.48);
+  }
+  .head .meta {
+    gap: 7px;
+    max-width: none;
+    overflow: visible;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .head .meta span {
+    min-height: 23px;
+    border-radius: 5px;
+    border-color: rgba(0, 255, 229, 0.22);
+    background:
+      linear-gradient(180deg, rgba(0, 255, 229, 0.06), rgba(0, 0, 0, 0.22)),
+      rgba(1, 5, 13, 0.58);
+    color: rgba(174, 190, 224, 0.86);
+  }
+  .viewer {
+    grid-template-columns: minmax(0, 1fr) minmax(286px, 318px);
+    align-items: start;
+    gap: 14px;
+    padding: 14px 16px 12px;
+  }
+  .media-shell,
+  .info-panel {
+    border-radius: 8px;
+    border-color: var(--line);
+    background:
+      radial-gradient(520px 240px at 0% 0%, rgba(0, 255, 229, 0.09), transparent 68%),
+      linear-gradient(rgba(255, 255, 255, 0.016) 1px, transparent 1px) 0 0 / 12px 12px,
+      rgba(1, 7, 18, 0.78);
+  }
+  .media-shell {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+    padding: 12px;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+      inset 0 -36px 90px rgba(0, 255, 229, 0.035);
+  }
+  .media-shell::before {
+    display: none;
+  }
+  .media-shell::after {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    pointer-events: none;
+    border-radius: 6px;
+    background:
+      linear-gradient(90deg, var(--cyan) 0 20px, transparent 20px) top left / 58px 1px no-repeat,
+      linear-gradient(var(--cyan) 0 20px, transparent 20px) top left / 1px 58px no-repeat,
+      linear-gradient(270deg, var(--pink) 0 20px, transparent 20px) bottom right / 58px 1px no-repeat,
+      linear-gradient(0deg, var(--pink) 0 20px, transparent 20px) bottom right / 1px 58px no-repeat;
+    opacity: 0.8;
+  }
+  .media-topline {
+    min-height: 24px;
+    padding: 0 2px 8px;
+    border-bottom: 1px dashed rgba(0, 255, 229, 0.16);
+    color: rgba(144, 160, 194, 0.84);
+    font-size: 0.54rem;
+  }
+  .media-topline strong {
+    color: var(--cyan);
+  }
+  .img-wrap {
+    height: min(64dvh, 620px);
+    min-height: 360px;
+    margin: 0;
+    border-radius: 7px;
+    border-color: rgba(0, 255, 229, 0.22);
+    background:
+      radial-gradient(500px 220px at 50% 0%, rgba(0, 255, 229, 0.08), transparent 72%),
+      rgba(0, 0, 0, 0.34);
+  }
+  .img-wrap img {
+    max-width: calc(100% - 28px);
+    max-height: calc(100% - 28px);
+    border-radius: 6px;
+    box-shadow: 0 18px 52px rgba(0, 0, 0, 0.32);
+  }
+  .info-panel {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    border-color: rgba(255, 43, 214, 0.28);
+    padding: 13px;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+      inset 24px 0 70px rgba(255, 43, 214, 0.035);
+  }
+  .info-panel > div:first-child {
+    min-width: 0;
+  }
+  .packet-badge {
+    min-height: 24px;
+    border-radius: 5px;
+    padding: 0 8px;
+    font-size: 0.52rem;
+  }
+  .info-eyebrow {
+    display: inline-flex;
+    margin-left: 8px;
+    color: var(--pink);
+    font-size: 0.52rem;
+    font-weight: 900;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+  }
+  .packet-command {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+    border-radius: 7px;
+    border: 1px solid rgba(0, 255, 229, 0.18);
+    background:
+      linear-gradient(90deg, rgba(0, 255, 229, 0.075), transparent 62%),
+      rgba(0, 0, 0, 0.3);
+    padding: 9px 10px;
+  }
+  .packet-command span,
+  .packet-command code {
+    overflow: hidden;
+    font-family: inherit;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .packet-command span {
+    color: rgba(160, 175, 200, 0.76);
+    font-size: 0.54rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .packet-command code {
+    color: var(--cyan);
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-shadow: 0 0 8px rgba(0, 255, 229, 0.36);
+  }
+  .info-panel h1 {
+    margin: 10px 0 6px;
+    color: rgba(240, 246, 255, 0.96);
+    font-size: clamp(1rem, 1.45vw, 1.25rem);
+    line-height: 1.22;
+  }
+  .info-panel h1 span {
+    display: inline;
+    color: var(--cyan);
+  }
+  .info-subtitle {
+    max-width: 100%;
+    margin: 0;
+    color: rgba(158, 175, 207, 0.74);
+    font-size: 0.63rem;
+    line-height: 1.45;
+  }
+  .info-grid {
+    align-content: start;
+    gap: 7px;
+    margin: 0;
+  }
+  .info-grid div {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    align-items: center;
+    min-height: 34px;
+    border-radius: 6px;
+    border-color: rgba(0, 255, 229, 0.17);
+    background:
+      linear-gradient(90deg, rgba(0, 255, 229, 0.04), transparent 70%),
+      rgba(0, 0, 0, 0.28);
+    padding: 7px 8px;
+  }
+  .info-grid dt {
+    color: rgba(255, 43, 214, 0.78);
+    font-size: 0.49rem;
+  }
+  .info-grid dd {
+    margin: 0;
+    color: rgba(229, 239, 255, 0.9);
+    font-size: 0.63rem;
+  }
+  .primary-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+  .raw-button,
+  .copy-button {
+    min-height: 42px;
+    border-radius: 7px;
+    font-size: 0.58rem;
+  }
+  .copy-button {
+    border-color: rgba(255, 43, 214, 0.34);
+    background:
+      linear-gradient(180deg, rgba(255, 43, 214, 0.12), rgba(255, 43, 214, 0.035)),
+      rgba(0, 0, 0, 0.22);
+    color: #ff76ea;
+  }
+  .foot {
+    min-height: 48px;
+    padding: 12px 18px 14px;
+    border-top: 1px dashed rgba(0, 255, 229, 0.18);
+  }
+  .title {
+    color: var(--cyan);
+    font-size: 0.62rem;
+  }
+  .title small {
+    color: rgba(160, 175, 200, 0.7);
+  }
+  .foot a {
+    min-height: 31px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+  }
+  @media (max-width: 920px) {
+    body {
+      padding: 10px;
+    }
+    .viewer {
+      grid-template-columns: 1fr;
+    }
+    .info-panel {
+      grid-template-rows: auto auto auto auto;
+    }
+    .img-wrap {
+      height: min(56dvh, 560px);
+      min-height: 260px;
+    }
+  }
+  @media (max-width: 620px) {
+    body {
+      padding: 0;
+    }
+    .frame {
+      width: 100%;
+      max-width: 100%;
+      min-height: 100dvh;
+      border-radius: 0;
+    }
+    .head {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 13px;
+    }
+    .head .meta {
+      flex-wrap: wrap;
+      max-width: 100%;
+    }
+    .viewer {
+      padding: 10px;
+    }
+    .media-shell,
+    .info-panel {
+      padding: 10px;
+    }
+    .media-topline {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .img-wrap {
+      height: min(48dvh, 430px);
+      min-height: 220px;
+    }
+    .info-eyebrow {
+      display: block;
+      margin: 7px 0 0;
+    }
+    .info-grid div {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+    .primary-actions,
+    .foot {
+      grid-template-columns: 1fr;
+    }
+    .foot {
+      align-items: stretch;
+    }
+    .foot a {
+      width: 100%;
+    }
+  }
 </style>
 </head>
 <body>
@@ -1292,10 +1657,14 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
       </div>
       <aside class="info-panel">
         <div>
-          <span class="packet-badge">live packet</span>
-          <span class="info-eyebrow">image packet</span>
+          <span class="packet-badge">asset clean</span>
+          <span class="info-eyebrow">packet.inspect</span>
           <h1>${escapeHtml(record.originalName)} <span>/ ${escapeHtml(record.code)}</span></h1>
           <p class="info-subtitle">${escapeHtml(title)}</p>
+        </div>
+        <div class="packet-command">
+          <span>$ imagehost open --code</span>
+          <code>/i/${escapeHtml(record.code)}</code>
         </div>
         <dl class="info-grid">
           <div>
@@ -1312,7 +1681,7 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
           </div>
           <div>
             <dt>route</dt>
-            <dd>/i/${escapeHtml(record.code)}/raw</dd>
+            <dd>GET /i/${escapeHtml(record.code)}/raw</dd>
           </div>
           <div>
             <dt>views</dt>
@@ -1320,8 +1689,8 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
           </div>
         </dl>
         <div class="primary-actions">
-          <a class="raw-button" href="${escapeHtml(rawUrl)}" target="_blank" rel="noreferrer">open raw</a>
-          <button class="copy-button" type="button" data-copy="${escapeHtml(ctx.url)}">copy link</button>
+          <a class="raw-button" href="${escapeHtml(rawUrl)}" target="_blank" rel="noreferrer">raw</a>
+          <button class="copy-button" type="button" data-copy="${escapeHtml(ctx.url)}">copy</button>
         </div>
       </aside>
     </section>

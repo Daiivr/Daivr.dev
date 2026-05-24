@@ -985,7 +985,7 @@ function ImageHostToggleButton({ visible, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="arc-toggle arc-toggle-imagehost fixed bottom-[8.5rem] right-5 z-40 rounded-full p-[2px] bg-gradient-to-r from-sky-500/70 via-cyan-400/60 to-fuchsia-500/70 shadow-[0_14px_44px_rgba(15,23,42,0.9)] transition-transform duration-200 hover:translate-y-0.5 active:scale-[0.97]"
+      className="arc-toggle arc-toggle-imagehost fixed bottom-[4.75rem] right-5 z-40 rounded-full p-[2px] bg-gradient-to-r from-sky-500/70 via-cyan-400/60 to-fuchsia-500/70 shadow-[0_14px_44px_rgba(15,23,42,0.9)] transition-transform duration-200 hover:translate-y-0.5 active:scale-[0.97]"
       aria-label="Open imagehost panel"
       title="ImageHost panel (admin)"
     >

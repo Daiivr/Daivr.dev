@@ -5402,8 +5402,9 @@ html .imagehost-gallery-panel {
 }
 
 html .imagehost-gallery {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 292px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 320px));
   align-items: start;
+  justify-content: start;
   gap: 16px;
   padding-bottom: 10px;
 }
@@ -5426,10 +5427,10 @@ html .imagehost-gallery-item {
 }
 
 html .imagehost-gallery-thumb {
-  min-height: 218px;
+  min-height: 0;
   border-radius: 9px;
   border-color: rgba(0, 255, 229, 0.24);
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 3;
   box-shadow: inset 0 -32px 80px rgba(0, 0, 0, 0.22);
 }
 
@@ -5495,12 +5496,12 @@ html .imagehost-gallery-actions .imagehost-mini-btn:focus-visible {
   }
 
   html .imagehost-gallery {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
     gap: 13px;
   }
 
   html .imagehost-gallery-thumb {
-    min-height: 184px;
+    aspect-ratio: 4 / 3;
   }
 }
 
@@ -5511,6 +5512,186 @@ html .imagehost-gallery-actions .imagehost-mini-btn:focus-visible {
 
   html .imagehost-gallery-actions .imagehost-mini-btn {
     min-height: 36px;
+  }
+}
+
+/* ---------- ImageHost ShareX file badge polish ---------- */
+
+html .imagehost-sxcu-file {
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 14px;
+  min-height: 74px;
+  padding: 10px;
+}
+
+html .imagehost-sxcu-icon {
+  position: relative;
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: end center;
+  align-self: center;
+  overflow: hidden;
+  border-radius: 9px;
+  border: 1px solid rgba(0, 255, 229, 0.42);
+  background:
+    linear-gradient(135deg, rgba(236, 245, 255, 0.16) 0 12px, transparent 12px),
+    radial-gradient(70px 40px at 50% 0%, rgba(0, 255, 229, 0.22), transparent 70%),
+    linear-gradient(180deg, rgba(0, 255, 229, 0.15), rgba(0, 0, 0, 0.18)),
+    rgba(1, 16, 25, 0.86);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 -18px 34px rgba(0, 255, 229, 0.06),
+    0 0 22px rgba(0, 255, 229, 0.14);
+}
+
+html .imagehost-sxcu-icon::before {
+  content: 'CFG';
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  color: rgba(160, 255, 245, 0.66);
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+html .imagehost-sxcu-icon::after {
+  content: '';
+  position: absolute;
+  inset: 22px 9px auto;
+  height: 1px;
+  background:
+    linear-gradient(90deg, rgba(0, 255, 229, 0.62), transparent),
+    linear-gradient(90deg, transparent, rgba(255, 43, 214, 0.38));
+  box-shadow:
+    0 8px 0 rgba(0, 255, 229, 0.22),
+    0 16px 0 rgba(0, 255, 229, 0.12);
+}
+
+html .imagehost-sxcu-icon span {
+  position: relative;
+  z-index: 1;
+  width: calc(100% - 12px);
+  margin-bottom: 7px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.34);
+  color: var(--arc-cyan);
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 5px 4px;
+  text-align: center;
+  text-shadow: 0 0 8px rgba(0, 255, 229, 0.48);
+  text-transform: lowercase;
+}
+
+html .imagehost-sxcu-file-copy {
+  display: grid;
+  min-width: 0;
+  align-content: center;
+  gap: 4px;
+}
+
+html .imagehost-sxcu-file-copy strong,
+html .imagehost-sxcu-file-copy span,
+html .imagehost-sxcu-file-copy em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html .imagehost-sxcu-file-copy strong {
+  color: rgba(238, 247, 255, 0.96);
+  font-size: 0.95rem;
+}
+
+html .imagehost-sxcu-file-copy span {
+  color: rgba(180, 196, 226, 0.76);
+  font-size: 0.65rem;
+  font-style: normal;
+}
+
+html .imagehost-sxcu-file-copy em {
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  border: 1px solid rgba(57, 255, 138, 0.24);
+  background: rgba(57, 255, 138, 0.07);
+  color: rgba(181, 255, 204, 0.82);
+  font-family: var(--font-mono);
+  font-size: 0.49rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  padding: 4px 7px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 520px) {
+  html .imagehost-sxcu-file {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  html .imagehost-sxcu-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  html .imagehost-sxcu-icon::after {
+    inset-inline: 8px;
+    top: 19px;
+  }
+
+  html .imagehost-sxcu-icon span {
+    font-size: 0.49rem;
+  }
+}
+
+/* Use the real ShareX mark in the setup card. */
+html .imagehost-sxcu-file {
+  grid-template-columns: 70px minmax(0, 1fr);
+}
+
+html .imagehost-sxcu-icon {
+  place-items: center;
+  padding: 8px;
+  border-color: rgba(0, 255, 229, 0.34);
+  background:
+    radial-gradient(circle at 45% 38%, rgba(255, 255, 255, 0.16), transparent 38%),
+    radial-gradient(86px 64px at 50% 0%, rgba(0, 255, 229, 0.18), transparent 72%),
+    linear-gradient(180deg, rgba(0, 255, 229, 0.08), rgba(255, 43, 214, 0.05)),
+    rgba(1, 10, 22, 0.82);
+}
+
+html .imagehost-sxcu-icon::before,
+html .imagehost-sxcu-icon::after {
+  content: none;
+}
+
+html .imagehost-sxcu-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 8px rgba(0, 255, 229, 0.22))
+    drop-shadow(0 10px 16px rgba(0, 0, 0, 0.32));
+}
+
+@media (max-width: 520px) {
+  html .imagehost-sxcu-file {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  html .imagehost-sxcu-icon {
+    padding: 7px;
   }
 }
 
