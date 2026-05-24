@@ -566,12 +566,22 @@ function renderLandingPage(record, settings, baseUrl) {
   const title = applyTemplate(settings.title || '{filename} | {filesize}', ctx)
   const description = applyTemplate(settings.description || '', ctx)
   const color = settings.embedColor || '#00ffe5'
+  const accent = /^#[0-9a-fA-F]{6}$/.test(String(color).trim())
+    ? String(color).trim()
+    : '#00ffe5'
   const rawUrl = `${baseUrl}/i/${record.code}/raw`
   const siteName = settings.siteName || 'daivr.dev'
   const notAnonymous = !settings.anonymous
   const author = notAnonymous ? settings.author || '' : ''
   const authorUrl = notAnonymous ? settings.authorUrl || '' : ''
   const publishedAt = settings.showTimestamp ? record.uploadedAt : ''
+  const publishedLabel = publishedAt
+    ? new Date(publishedAt).toLocaleString('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })
+    : ''
+  const viewCount = Number(record.views || 0)
   const ogType = publishedAt || author ? 'article' : 'website'
   const imageAlt = `${record.originalName} on ${siteName}`
   const embedEnabled = settings.embed !== false
@@ -963,22 +973,329 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
       min-height: 220px;
     }
   }
+  /* Image packet viewer v2 */
+  body {
+    justify-content: center;
+    padding: clamp(14px, 4vw, 42px);
+    background:
+      radial-gradient(900px 520px at 0% 0%, rgba(0, 255, 229, 0.13), transparent 62%),
+      radial-gradient(820px 560px at 100% 12%, rgba(255, 43, 214, 0.12), transparent 66%),
+      linear-gradient(180deg, #030712, #01030a 72%, #02040a);
+  }
+  .frame {
+    --cyan: #00ffe5;
+    --pink: #ff2bd6;
+    --green: #39ff8a;
+    --line: rgba(0, 255, 229, 0.24);
+    --panel: rgba(1, 7, 18, 0.76);
+    width: min(94vw, 1160px);
+    max-width: min(94vw, 1160px);
+    border-radius: 16px;
+    isolation: isolate;
+  }
+  .frame::before {
+    height: 36px;
+    background:
+      linear-gradient(90deg, #ff5f57 0 5px, transparent 5px 14px, #ffbd2e 14px 19px, transparent 19px 28px, #28c840 28px 33px, transparent 33px),
+      linear-gradient(90deg, rgba(0, 255, 229, 0.23), transparent 46%, color-mix(in srgb, var(--accent) 28%, #ff2bd6) 100%);
+    background-position: 16px 15px, 0 0;
+    background-repeat: no-repeat;
+  }
+  .head {
+    align-items: center;
+    padding: 18px 20px 14px;
+  }
+  .head .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: rgba(236, 245, 255, 0.9);
+  }
+  .head .kicker::before {
+    content: '>';
+    color: var(--pink);
+  }
+  .head .kicker strong {
+    color: var(--cyan);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    text-shadow: 0 0 13px rgba(0, 255, 229, 0.45);
+  }
+  .head .meta {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    color: rgba(165, 181, 214, 0.82);
+  }
+  .head .meta span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 255, 229, 0.16);
+    background: rgba(0, 0, 0, 0.22);
+    padding: 0 8px;
+  }
+  .viewer {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    gap: 16px;
+    padding: 16px;
+  }
+  .media-shell,
+  .info-panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background:
+      radial-gradient(620px 260px at 0% 0%, rgba(0, 255, 229, 0.09), transparent 68%),
+      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 12px 12px,
+      var(--panel);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.024);
+  }
+  .media-shell {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .media-shell::before {
+    content: '';
+    position: absolute;
+    inset: -22%;
+    z-index: -1;
+    background-image: var(--packet-image);
+    background-position: center;
+    background-size: cover;
+    filter: blur(34px) saturate(1.05);
+    opacity: 0.18;
+    transform: scale(1.08);
+  }
+  .media-topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: rgba(160, 175, 200, 0.74);
+    font-size: 0.56rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .media-topline strong {
+    color: var(--cyan);
+    text-shadow: 0 0 9px rgba(0, 255, 229, 0.36);
+  }
+  .media-topline span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .img-wrap {
+    height: min(68dvh, 650px);
+    margin: 0;
+    border-radius: 10px;
+    background:
+      radial-gradient(640px 260px at 50% 0%, rgba(0, 255, 229, 0.08), transparent 72%),
+      rgba(0, 0, 0, 0.28);
+  }
+  .img-wrap img {
+    max-height: calc(100% - 24px);
+    border-radius: 8px;
+    object-fit: contain;
+  }
+  .info-panel {
+    align-content: stretch;
+    gap: 16px;
+    border-radius: 12px;
+    border-color: rgba(255, 43, 214, 0.3);
+    padding: 18px;
+  }
+  .packet-badge {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(57, 255, 138, 0.32);
+    background: rgba(57, 255, 138, 0.08);
+    color: var(--green);
+    font-size: 0.55rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    padding: 6px 9px;
+    text-transform: uppercase;
+  }
+  .packet-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+  }
+  .info-panel h1 {
+    margin: 14px 0 8px;
+    color: rgba(236, 245, 255, 0.96);
+    font-size: clamp(1rem, 1.6vw, 1.34rem);
+    line-height: 1.24;
+  }
+  .info-panel h1 span {
+    color: var(--cyan);
+  }
+  .info-subtitle {
+    margin: 0;
+    color: rgba(160, 175, 200, 0.78);
+    font-size: 0.68rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+  .info-grid {
+    gap: 9px;
+  }
+  .info-grid div {
+    border-color: rgba(0, 255, 229, 0.2);
+    background:
+      linear-gradient(90deg, rgba(0, 255, 229, 0.05), transparent 60%),
+      rgba(0, 0, 0, 0.28);
+    padding: 10px;
+  }
+  .info-grid dd {
+    font-size: 0.7rem;
+  }
+  .primary-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .raw-button,
+  .copy-button {
+    min-height: 44px;
+    border-radius: 9px;
+  }
+  .copy-button {
+    border: 1px solid rgba(255, 43, 214, 0.34);
+    background:
+      linear-gradient(180deg, rgba(255, 43, 214, 0.12), rgba(255, 43, 214, 0.035)),
+      rgba(0, 0, 0, 0.22);
+    color: #ff76ea;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.64rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-shadow: 0 0 8px rgba(255, 43, 214, 0.32);
+    text-transform: uppercase;
+  }
+  .raw-button:hover,
+  .copy-button:hover {
+    transform: translateY(-1px);
+  }
+  .foot {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 20px 18px;
+  }
+  .title {
+    display: inline-flex;
+    min-width: 0;
+    gap: 8px;
+    color: rgba(0, 255, 229, 0.9);
+  }
+  .title small {
+    color: rgba(160, 175, 200, 0.72);
+    font-size: inherit;
+  }
+  @media (max-width: 940px) {
+    body {
+      padding: 12px;
+    }
+    .viewer {
+      grid-template-columns: 1fr;
+    }
+    .info-panel {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .img-wrap {
+      height: min(56dvh, 560px);
+    }
+  }
+  @media (max-width: 620px) {
+    body {
+      padding: 0;
+    }
+    .frame {
+      width: 100%;
+      max-width: 100%;
+      min-height: 100dvh;
+      border-radius: 0;
+    }
+    .head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .head .meta {
+      flex-wrap: wrap;
+      max-width: 100%;
+      text-align: left;
+    }
+    .viewer {
+      padding: 10px;
+    }
+    .media-shell,
+    .info-panel {
+      padding: 11px;
+      border-radius: 10px;
+    }
+    .media-topline {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .img-wrap {
+      height: min(50dvh, 460px);
+      min-height: 240px;
+    }
+    .primary-actions,
+    .foot {
+      grid-template-columns: 1fr;
+    }
+    .foot a {
+      text-align: center;
+    }
+  }
 </style>
 </head>
 <body>
-  <main class="frame">
+  <main class="frame" style="--accent: ${escapeHtml(accent)}; --packet-image: url('${escapeHtml(rawUrl)}');">
     <div class="head">
-      <span class="kicker">&gt; ${escapeHtml(siteName)}</span>
-      <span class="meta">${escapeHtml(ctx.filesize)} · ${escapeHtml(record.code)}${publishedAt ? ` · ${escapeHtml(new Date(publishedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }))}` : ''}</span>
+      <span class="kicker"><strong>${escapeHtml(siteName)}</strong></span>
+      <span class="meta">
+        <span>${escapeHtml(ctx.filesize)}</span>
+        <span>${escapeHtml(record.code)}</span>
+        ${publishedLabel ? `<span>${escapeHtml(publishedLabel)}</span>` : ''}
+      </span>
     </div>
     <section class="viewer">
-      <div class="img-wrap">
-        <img src="${escapeHtml(rawUrl)}" alt="${escapeHtml(record.originalName)}" />
+      <div class="media-shell">
+        <div class="media-topline">
+          <strong>/i/${escapeHtml(record.code)}</strong>
+          <span>${escapeHtml(record.mimeType || 'image')} · ${escapeHtml(record.originalName)}</span>
+        </div>
+        <div class="img-wrap">
+          <img src="${escapeHtml(rawUrl)}" alt="${escapeHtml(record.originalName)}" />
+        </div>
       </div>
       <aside class="info-panel">
         <div>
+          <span class="packet-badge">live packet</span>
           <span class="info-eyebrow">image packet</span>
-          <h1>${escapeHtml(title)} <span>/ ${escapeHtml(record.code)}</span></h1>
+          <h1>${escapeHtml(record.originalName)} <span>/ ${escapeHtml(record.code)}</span></h1>
+          <p class="info-subtitle">${escapeHtml(title)}</p>
         </div>
         <dl class="info-grid">
           <div>
@@ -997,15 +1314,35 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
             <dt>route</dt>
             <dd>/i/${escapeHtml(record.code)}/raw</dd>
           </div>
+          <div>
+            <dt>views</dt>
+            <dd>${escapeHtml(String(viewCount))}</dd>
+          </div>
         </dl>
-        <a class="raw-button" href="${escapeHtml(rawUrl)}" target="_blank" rel="noreferrer">open raw</a>
+        <div class="primary-actions">
+          <a class="raw-button" href="${escapeHtml(rawUrl)}" target="_blank" rel="noreferrer">open raw</a>
+          <button class="copy-button" type="button" data-copy="${escapeHtml(ctx.url)}">copy link</button>
+        </div>
       </aside>
     </section>
     <div class="foot">
-      <span class="title">${escapeHtml(title)}</span>
+      <span class="title">${escapeHtml(record.originalName)} <small>| ${escapeHtml(ctx.filesize)}</small></span>
       <a href="${escapeHtml(rawUrl)}" target="_blank" rel="noreferrer">open raw ↗</a>
     </div>
   </main>
+  <script>
+    document.querySelector('[data-copy]')?.addEventListener('click', async (event) => {
+      const button = event.currentTarget
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy)
+        button.textContent = 'copied'
+        setTimeout(() => { button.textContent = 'copy link' }, 1300)
+      } catch (_) {
+        button.textContent = 'copy failed'
+        setTimeout(() => { button.textContent = 'copy link' }, 1300)
+      }
+    })
+  </script>
 </body>
 </html>`
 }

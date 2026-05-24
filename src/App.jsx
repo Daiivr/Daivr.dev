@@ -9,7 +9,6 @@ import Comments from './components/Comments'
 import Splash from './components/Splash'
 import Fireflies from './components/Fireflies'
 import CodeWaves from './components/CodeWaves'
-import Snowfall from './components/Snowfall'
 import CommandPalette from './components/CommandPalette'
 import ModalPortal from './components/ModalPortal'
 import ImageHostPanel from './components/ImageHostPanel'
@@ -979,42 +978,6 @@ function MusicControlButton({
 }
 
 
-function ChristmasToggleButton({ visible, enabled, saving, onToggle }) {
-  if (!visible) return null
-
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      disabled={saving}
-      className={`arc-toggle arc-toggle-xmas ${enabled ? 'arc-toggle-on' : 'arc-toggle-off'} fixed bottom-[4.75rem] right-5 z-40 rounded-full p-[2px] bg-gradient-to-r from-rose-500/70 via-red-500/60 to-emerald-500/70 shadow-[0_14px_44px_rgba(15,23,42,0.9)] transition-transform duration-200 hover:translate-y-0.5 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed`}
-      aria-label={enabled ? 'Disable Christmas theme' : 'Enable Christmas theme'}
-      title={enabled ? 'Christmas theme: ON' : 'Christmas theme: OFF'}
-    >
-      <div className="arc-toggle-inner flex items-center gap-2 rounded-full bg-slate-950/90 px-3 py-2 border border-slate-700/80">
-        <span className="arc-toggle-led relative flex h-5 w-5 items-center justify-center">
-          {enabled && (
-            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/25 animate-ping" />
-          )}
-          <span
-            className={`relative inline-flex h-3 w-3 rounded-full ${
-              enabled
-                ? 'bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.95)]'
-                : 'bg-slate-400 shadow-[0_0_10px_rgba(148,163,184,0.9)]'
-            }`}
-          />
-        </span>
-        <span className="arc-toggle-label uppercase tracking-[0.22em] text-[9px] text-slate-400">
-          XMAS
-        </span>
-        <span className="arc-toggle-value text-[11px] font-semibold text-slate-100">
-          {saving ? '...' : enabled ? 'ON' : 'OFF'}
-        </span>
-      </div>
-    </button>
-  )
-}
-
 function ImageHostToggleButton({ visible, onClick }) {
   if (!visible) return null
 
@@ -1329,8 +1292,6 @@ export default function App() {
   const [visitCount, setVisitCount] = useState(null)
   const [visitError, setVisitError] = useState(false)
   const [me, setMe] = useState(null)
-  const [christmasEnabled, setChristmasEnabled] = useState(false)
-  const [christmasSaving, setChristmasSaving] = useState(false)
   const [imageHostOpen, setImageHostOpen] = useState(false)
   const [showGameOverlay, setShowGameOverlay] = useState(false)
   const [activeGame, setActiveGame] = useState(null)
@@ -1428,27 +1389,6 @@ export default function App() {
     loadMe()
   }, [])
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const res = await fetch('/api/site-settings')
-        if (!res.ok) return
-        const data = await res.json()
-        setChristmasEnabled(!!data.christmasEnabled)
-      } catch (err) {
-        console.error('Error cargando /api/site-settings', err)
-      }
-    }
-
-    loadSettings()
-  }, [])
-
-  useEffect(() => {
-    const root = document.documentElement
-    root.classList.toggle('theme-xmas', !!christmasEnabled)
-    return () => root.classList.remove('theme-xmas')
-  }, [christmasEnabled])
-
-  useEffect(() => {
     return () => {
       window.clearTimeout(secretPulseTimeoutRef.current)
       window.clearTimeout(secretEndTimeoutRef.current)
@@ -1508,29 +1448,6 @@ export default function App() {
     setTimeout(() => {
       setPlayAudio(true)
     }, 450)
-  }
-
-  const toggleChristmasTheme = async () => {
-    if (!me || !me.isAdmin || christmasSaving) return
-    const next = !christmasEnabled
-    setChristmasEnabled(next) // optimistic
-    setChristmasSaving(true)
-    try {
-      const res = await fetch('/api/site-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ christmasEnabled: next }),
-      })
-      if (!res.ok) throw new Error('save-failed')
-      const data = await res.json()
-      setChristmasEnabled(!!data.christmasEnabled)
-    } catch (err) {
-      console.error('Error guardando christmasEnabled', err)
-      setChristmasEnabled((prev) => !prev) // revert
-    } finally {
-      setChristmasSaving(false)
-    }
   }
 
   const currentAudioTrack =
@@ -1967,19 +1884,6 @@ export default function App() {
       keywords: ['music', 'lofi', 'mute', 'volume'],
       action: toggleLofiMute,
     },
-    ...(me && me.isAdmin
-      ? [
-          {
-            id: 'theme-xmas',
-            label: christmasEnabled ? 'Disable Xmas mode' : 'Enable Xmas mode',
-            detail: christmasSaving ? 'saving settings' : 'admin theme switch',
-            category: 'admin',
-            icon: 'XM',
-            keywords: ['christmas', 'xmas', 'snow', 'theme'],
-            action: toggleChristmasTheme,
-          },
-        ]
-      : []),
   ]
 
   const deckSections = [
@@ -2017,8 +1921,8 @@ export default function App() {
         volume={showGameOverlay ? 0 : audioVolume}
         track={currentAudioTrack}
       />
-      {christmasEnabled ? <Snowfall /> : <Fireflies />}
-      {!christmasEnabled && <CodeWaves />}
+      <Fireflies />
+      <CodeWaves />
       <KonamiGameOverlay
         open={showGameOverlay}
         activeGame={activeGame}
@@ -2041,12 +1945,6 @@ export default function App() {
         onVolumeChange={handleLofiVolumeChange}
         onNext={setNextAudioTrack}
         onPrevious={setPreviousAudioTrack}
-      />
-      <ChristmasToggleButton
-        visible={!showSplash && !!(me && me.isAdmin)}
-        enabled={christmasEnabled}
-        saving={christmasSaving}
-        onToggle={toggleChristmasTheme}
       />
       <ImageHostToggleButton
         visible={!showSplash && !!(me && me.isAdmin)}

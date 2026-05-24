@@ -660,8 +660,8 @@
 
 /* ---------- Backdrop: darker, scanlines, terminal grid ---------- */
 
-html:not(.theme-xmas) .modal-backdrop,
-html:not(.theme-xmas) .konami-overlay {
+html .modal-backdrop,
+html .konami-overlay {
   background:
     radial-gradient(circle at top left, rgba(0, 255, 229, 0.08), transparent 58%),
     radial-gradient(circle at bottom right, rgba(255, 43, 214, 0.08), transparent 58%),
@@ -670,8 +670,8 @@ html:not(.theme-xmas) .konami-overlay {
   -webkit-backdrop-filter: blur(10px) saturate(1.05) !important;
 }
 
-html:not(.theme-xmas) .modal-backdrop::before,
-html:not(.theme-xmas) .konami-overlay::before {
+html .modal-backdrop::before,
+html .konami-overlay::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -691,15 +691,15 @@ html:not(.theme-xmas) .konami-overlay::before {
   z-index: 0;
 }
 
-html:not(.theme-xmas) .modal-backdrop > *,
-html:not(.theme-xmas) .konami-overlay > * {
+html .modal-backdrop > *,
+html .konami-overlay > * {
   position: relative;
   z-index: 1;
 }
 
 /* ---------- Modal card -> code-editor window ---------- */
 
-html:not(.theme-xmas) .modal-card {
+html .modal-card {
   border-radius: 10px !important;
   border: 1px solid rgba(0, 255, 229, 0.14) !important;
   background:
@@ -717,7 +717,7 @@ html:not(.theme-xmas) .modal-card {
 }
 
 /* Replace the rainbow border ring with a window chrome bar + traffic-lights */
-html:not(.theme-xmas) .modal-card::before {
+html .modal-card::before {
   content: '';
   position: absolute !important;
   inset: 0 0 auto 0 !important;
@@ -746,7 +746,7 @@ html:not(.theme-xmas) .modal-card::before {
 }
 
 /* Subtle moving sweep for sheen */
-html:not(.theme-xmas) .modal-card::after {
+html .modal-card::after {
   background:
     linear-gradient(
       115deg,
@@ -766,25 +766,25 @@ html:not(.theme-xmas) .modal-card::after {
 }
 
 /* Header: title + close */
-html:not(.theme-xmas) .modal-title {
+html .modal-title {
   font-family: var(--font-mono);
   color: var(--arc-cyan);
   text-shadow: 0 0 8px rgba(0, 255, 229, 0.4);
   letter-spacing: 0.04em;
 }
-html:not(.theme-xmas) .modal-title::before {
+html .modal-title::before {
   content: '> ';
   color: var(--arc-magenta);
   text-shadow: 0 0 6px rgba(255, 43, 214, 0.4);
 }
 
-html:not(.theme-xmas) .modal-text {
+html .modal-text {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: rgba(220, 231, 255, 0.72);
 }
 
-html:not(.theme-xmas) .modal-close {
+html .modal-close {
   border-radius: 4px !important;
   border: 1px solid rgba(0, 255, 229, 0.35) !important;
   background: rgba(0, 255, 229, 0.05) !important;
@@ -793,14 +793,14 @@ html:not(.theme-xmas) .modal-close {
   text-shadow: 0 0 6px rgba(0, 255, 229, 0.35);
   box-shadow: inset 0 0 8px rgba(0, 255, 229, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.4);
 }
-html:not(.theme-xmas) .modal-close:hover {
+html .modal-close:hover {
   background: rgba(0, 255, 229, 0.1) !important;
   border-color: var(--arc-cyan) !important;
   box-shadow: 0 0 14px rgba(0, 255, 229, 0.4) !important;
 }
 
 /* Inner panel + inputs */
-html:not(.theme-xmas) .modal-panel {
+html .modal-panel {
   position: relative;
   border-radius: 6px !important;
   border: 1px solid rgba(0, 255, 229, 0.18) !important;
@@ -811,10 +811,10 @@ html:not(.theme-xmas) .modal-panel {
   font-family: var(--font-mono);
 }
 
-html:not(.theme-xmas) .modal-input,
-html:not(.theme-xmas) .modal-card input[type="text"],
-html:not(.theme-xmas) .modal-card input[type="url"],
-html:not(.theme-xmas) .modal-card textarea {
+html .modal-input,
+html .modal-card input[type="text"],
+html .modal-card input[type="url"],
+html .modal-card textarea {
   border-radius: 4px !important;
   border: 1px solid rgba(0, 255, 229, 0.22) !important;
   background: rgba(0, 0, 0, 0.45) !important;
@@ -822,15 +822,15 @@ html:not(.theme-xmas) .modal-card textarea {
   color: var(--arc-fg) !important;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4) !important;
 }
-html:not(.theme-xmas) .modal-input::placeholder,
-html:not(.theme-xmas) .modal-card input::placeholder,
-html:not(.theme-xmas) .modal-card textarea::placeholder {
+html .modal-input::placeholder,
+html .modal-card input::placeholder,
+html .modal-card textarea::placeholder {
   color: rgba(106, 122, 153, 0.7);
   font-family: var(--font-mono);
 }
-html:not(.theme-xmas) .modal-input:focus,
-html:not(.theme-xmas) .modal-card input:focus,
-html:not(.theme-xmas) .modal-card textarea:focus {
+html .modal-input:focus,
+html .modal-card input:focus,
+html .modal-card textarea:focus {
   border-color: var(--arc-cyan) !important;
   box-shadow:
     0 0 0 1px var(--arc-cyan),
@@ -838,7 +838,7 @@ html:not(.theme-xmas) .modal-card textarea:focus {
 }
 
 /* Modal buttons */
-html:not(.theme-xmas) .modal-btn-cancel {
+html .modal-btn-cancel {
   border-radius: 5px !important;
   border: 1px solid rgba(106, 122, 153, 0.4) !important;
   background:
@@ -855,7 +855,7 @@ html:not(.theme-xmas) .modal-btn-cancel {
     0 0 0 1px rgba(0, 0, 0, 0.4);
   transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease, color 150ms ease, transform 150ms ease;
 }
-html:not(.theme-xmas) .modal-btn-cancel:hover:not(:disabled) {
+html .modal-btn-cancel:hover:not(:disabled) {
   background:
     linear-gradient(180deg, rgba(220, 231, 255, 0.07), rgba(0, 0, 0, 0.18)),
     rgba(2, 6, 14, 0.7) !important;
@@ -867,7 +867,7 @@ html:not(.theme-xmas) .modal-btn-cancel:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
-html:not(.theme-xmas) .modal-btn-save {
+html .modal-btn-save {
   border-radius: 5px !important;
   border: 1px solid rgba(0, 255, 229, 0.6) !important;
   background:
@@ -885,7 +885,7 @@ html:not(.theme-xmas) .modal-btn-save {
     0 0 12px rgba(0, 255, 229, 0.28) !important;
   transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 }
-html:not(.theme-xmas) .modal-btn-save:hover:not(:disabled) {
+html .modal-btn-save:hover:not(:disabled) {
   border-color: rgba(0, 255, 229, 0.9) !important;
   background:
     linear-gradient(180deg, rgba(0, 255, 229, 0.26), rgba(0, 255, 229, 0.1)),
@@ -896,7 +896,7 @@ html:not(.theme-xmas) .modal-btn-save:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
-html:not(.theme-xmas) .modal-btn-danger {
+html .modal-btn-danger {
   border-radius: 5px !important;
   border: 1px solid rgba(255, 84, 112, 0.6) !important;
   background:
@@ -914,7 +914,7 @@ html:not(.theme-xmas) .modal-btn-danger {
     0 0 12px rgba(255, 84, 112, 0.3) !important;
   transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 }
-html:not(.theme-xmas) .modal-btn-danger:hover:not(:disabled) {
+html .modal-btn-danger:hover:not(:disabled) {
   border-color: rgba(255, 84, 112, 0.9) !important;
   background:
     linear-gradient(180deg, rgba(255, 84, 112, 0.26), rgba(255, 84, 112, 0.08)),
@@ -926,14 +926,14 @@ html:not(.theme-xmas) .modal-btn-danger:hover:not(:disabled) {
 }
 
 /* Inner scrollbar inside modal */
-html:not(.theme-xmas) .modal-card::-webkit-scrollbar-thumb {
+html .modal-card::-webkit-scrollbar-thumb {
   background-color: rgba(0, 255, 229, 0.45) !important;
   border-radius: 2px;
 }
 
 /* ---------- V5 modal polish: closer to the upgraded cards ---------- */
 
-html:not(.theme-xmas) .modal-backdrop {
+html .modal-backdrop {
   align-items: center;
   overflow-y: auto;
   background:
@@ -945,11 +945,11 @@ html:not(.theme-xmas) .modal-backdrop {
   -webkit-backdrop-filter: blur(15px) saturate(1.12) contrast(1.03) !important;
 }
 
-html:not(.theme-xmas) .modal-backdrop::before {
+html .modal-backdrop::before {
   opacity: 0.42;
 }
 
-html:not(.theme-xmas) .modal-backdrop::after {
+html .modal-backdrop::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -961,7 +961,7 @@ html:not(.theme-xmas) .modal-backdrop::after {
   opacity: 0.82;
 }
 
-html:not(.theme-xmas) .modal-card {
+html .modal-card {
   border-radius: 12px !important;
   border-color: rgba(0, 255, 229, 0.24) !important;
   background:
@@ -981,7 +981,7 @@ html:not(.theme-xmas) .modal-card {
   animation: modalTerminalPop 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-html:not(.theme-xmas) .modal-card::before {
+html .modal-card::before {
   height: 32px !important;
   border-radius: 12px 12px 0 0 !important;
   background:
@@ -1015,7 +1015,7 @@ html:not(.theme-xmas) .modal-card::before {
   }
 }
 
-html:not(.theme-xmas) .modal-card::after {
+html .modal-card::after {
   background:
     linear-gradient(135deg, rgba(0, 255, 229, 0.22), transparent 18%) top left / 78px 78px no-repeat,
     linear-gradient(315deg, rgba(255, 43, 214, 0.18), transparent 18%) bottom right / 78px 78px no-repeat,
@@ -1025,7 +1025,7 @@ html:not(.theme-xmas) .modal-card::after {
   opacity: 0.72 !important;
 }
 
-html:not(.theme-xmas) .modal-header {
+html .modal-header {
   align-items: center;
   gap: 18px;
   margin: 0 0 18px;
@@ -1033,7 +1033,7 @@ html:not(.theme-xmas) .modal-header {
   border-bottom: 1px solid rgba(0, 255, 229, 0.12);
 }
 
-html:not(.theme-xmas) .modal-title {
+html .modal-title {
   margin-bottom: 4px;
   color: var(--arc-cyan);
   font-size: 0.95rem;
@@ -1041,13 +1041,13 @@ html:not(.theme-xmas) .modal-title {
   letter-spacing: 0.03em;
 }
 
-html:not(.theme-xmas) .modal-text {
+html .modal-text {
   max-width: 56ch;
   color: rgba(220, 231, 255, 0.74);
   line-height: 1.55;
 }
 
-html:not(.theme-xmas) .modal-close {
+html .modal-close {
   width: 34px;
   height: 34px;
   border-radius: 7px !important;
@@ -1059,7 +1059,7 @@ html:not(.theme-xmas) .modal-close {
     0 10px 28px rgba(0, 0, 0, 0.35) !important;
 }
 
-html:not(.theme-xmas) .modal-panel {
+html .modal-panel {
   border-color: rgba(0, 255, 229, 0.22) !important;
   background:
     radial-gradient(320px 180px at 18% 0%, rgba(0, 255, 229, 0.075), transparent 66%),
@@ -1072,16 +1072,16 @@ html:not(.theme-xmas) .modal-panel {
     0 18px 42px rgba(0, 0, 0, 0.32);
 }
 
-html:not(.theme-xmas) .modal-input,
-html:not(.theme-xmas) .modal-card input[type="text"],
-html:not(.theme-xmas) .modal-card input[type="url"],
-html:not(.theme-xmas) .modal-card textarea {
+html .modal-input,
+html .modal-card input[type="text"],
+html .modal-card input[type="url"],
+html .modal-card textarea {
   min-height: 40px;
   border-radius: 7px !important;
   padding: 0.68rem 0.82rem;
 }
 
-html:not(.theme-xmas) .modal-actions {
+html .modal-actions {
   position: relative;
   margin-top: 18px;
   padding-top: 16px;
@@ -1089,7 +1089,7 @@ html:not(.theme-xmas) .modal-actions {
   align-items: center;
 }
 
-html:not(.theme-xmas) .modal-actions::before {
+html .modal-actions::before {
   content: '';
   position: absolute;
   left: 0;
@@ -1101,7 +1101,7 @@ html:not(.theme-xmas) .modal-actions::before {
   box-shadow: 0 0 6px rgba(0, 255, 229, 0.45);
 }
 
-html:not(.theme-xmas) .modal-actions::after {
+html .modal-actions::after {
   content: '● STATUS // READY';
   position: absolute;
   left: 2px;
@@ -1123,25 +1123,25 @@ html:not(.theme-xmas) .modal-actions::after {
 }
 
 @media (max-width: 420px) {
-  html:not(.theme-xmas) .modal-actions::after {
+  html .modal-actions::after {
     display: none;
   }
 }
 
-html:not(.theme-xmas) .danger-confirm-modal .modal-actions::before {
+html .danger-confirm-modal .modal-actions::before {
   background: linear-gradient(90deg, var(--arc-red), rgba(255, 84, 112, 0.4), transparent);
   box-shadow: 0 0 6px rgba(255, 84, 112, 0.55);
 }
 
-html:not(.theme-xmas) .danger-confirm-modal .modal-actions::after {
+html .danger-confirm-modal .modal-actions::after {
   content: '● STATUS // CONFIRM';
   color: rgba(255, 84, 112, 0.8);
   text-shadow: 0 0 6px rgba(255, 84, 112, 0.4);
 }
 
-html:not(.theme-xmas) .modal-btn-cancel,
-html:not(.theme-xmas) .modal-btn-save,
-html:not(.theme-xmas) .modal-btn-danger {
+html .modal-btn-cancel,
+html .modal-btn-save,
+html .modal-btn-danger {
   min-height: 36px;
   border-radius: 7px !important;
   padding: 0.58rem 1.05rem;
@@ -1309,30 +1309,30 @@ html:not(.theme-xmas) .modal-btn-danger {
 }
 
 @media (max-width: 560px) {
-  html:not(.theme-xmas) .modal-backdrop {
+  html .modal-backdrop {
     align-items: flex-start;
     padding: 16px;
   }
 
-  html:not(.theme-xmas) .modal-card {
+  html .modal-card {
     padding: 46px 16px 16px !important;
   }
 
-  html:not(.theme-xmas) .modal-header,
+  html .modal-header,
   .link-confirm-identity {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  html:not(.theme-xmas) .modal-actions {
+  html .modal-actions {
     justify-content: stretch;
   }
 
-  html:not(.theme-xmas) .modal-actions::after {
+  html .modal-actions::after {
     display: none;
   }
 
-  html:not(.theme-xmas) .modal-actions > button {
+  html .modal-actions > button {
     flex: 1 1 0;
   }
 
@@ -1343,15 +1343,15 @@ html:not(.theme-xmas) .modal-btn-danger {
 
 /* ---------- SPLASH SCREEN ---------- */
 
-html:not(.theme-xmas) .modal-card.splash-card {
+html .modal-card.splash-card {
   padding-top: 38px !important;
 }
-html:not(.theme-xmas) .modal-card.splash-card::before {
+html .modal-card.splash-card::before {
   /* keep window chrome */
   animation: none !important;
 }
 
-html:not(.theme-xmas) .splash-shell {
+html .splash-shell {
   border-radius: 6px;
   border: 1px solid rgba(0, 255, 229, 0.18);
   background:
@@ -1360,7 +1360,7 @@ html:not(.theme-xmas) .splash-shell {
     rgba(2, 4, 10, 0.7);
 }
 
-html:not(.theme-xmas) .splash-aurora {
+html .splash-aurora {
   background:
     radial-gradient(circle at 20% 25%, rgba(0, 255, 229, 0.3), transparent 52%),
     radial-gradient(circle at 78% 22%, rgba(255, 43, 214, 0.28), transparent 55%),
@@ -1369,7 +1369,7 @@ html:not(.theme-xmas) .splash-aurora {
   opacity: 0.7;
 }
 
-html:not(.theme-xmas) .splash-grid-mask {
+html .splash-grid-mask {
   background-image:
     linear-gradient(rgba(0, 255, 229, 0.12) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 255, 229, 0.12) 1px, transparent 1px);
@@ -1377,12 +1377,12 @@ html:not(.theme-xmas) .splash-grid-mask {
   opacity: 0.18;
 }
 
-html:not(.theme-xmas) .splash-topbar {
+html .splash-topbar {
   font-family: var(--font-mono);
   color: var(--arc-muted);
 }
 
-html:not(.theme-xmas) .splash-brand {
+html .splash-brand {
   font-family: var(--font-pixel);
   font-size: 0.62rem;
   color: var(--arc-cyan);
@@ -1390,7 +1390,7 @@ html:not(.theme-xmas) .splash-brand {
   letter-spacing: 0.08em;
 }
 
-html:not(.theme-xmas) .splash-live-pill {
+html .splash-live-pill {
   font-family: var(--font-mono);
   border: 1px solid rgba(0, 255, 229, 0.35) !important;
   background: rgba(0, 255, 229, 0.05) !important;
@@ -1400,24 +1400,24 @@ html:not(.theme-xmas) .splash-live-pill {
 }
 
 /* Boot orb */
-html:not(.theme-xmas) .splash-loader-orb {
+html .splash-loader-orb {
   height: 5.6rem;
   width: 5.6rem;
 }
 
-html:not(.theme-xmas) .splash-loader-core {
+html .splash-loader-core {
   height: 3.2rem;
   width: 3.2rem;
 }
 
-html:not(.theme-xmas) .splash-loader-ring {
+html .splash-loader-ring {
   border: 2px solid rgba(0, 255, 229, 0.28);
   border-top-color: var(--arc-magenta);
   border-right-color: var(--arc-cyan);
   filter: drop-shadow(0 0 6px rgba(0, 255, 229, 0.5));
 }
 
-html:not(.theme-xmas) .splash-loader-core {
+html .splash-loader-core {
   border-radius: 9999px;
   background:
     linear-gradient(180deg, #0a1426, #050811);
@@ -1432,45 +1432,45 @@ html:not(.theme-xmas) .splash-loader-core {
   overflow: hidden;
 }
 
-html:not(.theme-xmas) .splash-loader-core img {
+html .splash-loader-core img {
   border-radius: 9999px !important;
   image-rendering: pixelated;
 }
 
 /* Bars: switch to hard pixel boxes with cyan/magenta */
-html:not(.theme-xmas) .splash-eq-bar {
+html .splash-eq-bar {
   background: linear-gradient(to top, var(--arc-magenta), var(--arc-cyan)) !important;
   border-radius: 1px !important;
   box-shadow: 0 0 8px rgba(0, 255, 229, 0.4);
 }
 
-html:not(.theme-xmas) .splash-loader-title {
+html .splash-loader-title {
   font-family: var(--font-mono);
   color: var(--arc-cyan);
   text-shadow: 0 0 8px rgba(0, 255, 229, 0.4);
   letter-spacing: 0.16em;
 }
 
-html:not(.theme-xmas) .splash-loader-copy {
+html .splash-loader-copy {
   font-family: var(--font-mono);
   color: var(--arc-muted);
 }
 
-html:not(.theme-xmas) .splash-kicker {
+html .splash-kicker {
   font-family: var(--font-mono);
   color: var(--arc-magenta);
   text-shadow: 0 0 6px rgba(255, 43, 214, 0.4);
   letter-spacing: 0.22em;
 }
 
-html:not(.theme-xmas) .splash-title {
+html .splash-title {
   font-family: var(--font-pixel);
   font-size: clamp(1.2rem, 3vw, 1.9rem);
   letter-spacing: 0.02em;
   line-height: 1.3;
 }
 
-html:not(.theme-xmas) .splash-title > span {
+html .splash-title > span {
   background: linear-gradient(90deg, var(--arc-cyan), var(--arc-magenta), var(--arc-amber)) !important;
   -webkit-background-clip: text !important;
           background-clip: text !important;
@@ -1478,13 +1478,13 @@ html:not(.theme-xmas) .splash-title > span {
   filter: drop-shadow(0 0 14px rgba(0, 255, 229, 0.35)) drop-shadow(0 0 18px rgba(255, 43, 214, 0.18));
 }
 
-html:not(.theme-xmas) .splash-copy {
+html .splash-copy {
   font-family: var(--font-mono);
   color: rgba(220, 231, 255, 0.88);
   font-size: 0.82rem;
 }
 
-html:not(.theme-xmas) .splash-tag {
+html .splash-tag {
   font-family: var(--font-mono);
   border-radius: 4px;
   border: 1px solid rgba(0, 255, 229, 0.32) !important;
@@ -1496,31 +1496,31 @@ html:not(.theme-xmas) .splash-tag {
   font-size: 0.6rem;
   padding: 0.28rem 0.6rem;
 }
-html:not(.theme-xmas) .splash-tag::before { content: '['; color: var(--arc-magenta); margin-right: 3px; }
-html:not(.theme-xmas) .splash-tag::after { content: ']'; color: var(--arc-magenta); margin-left: 3px; }
+html .splash-tag::before { content: '['; color: var(--arc-magenta); margin-right: 3px; }
+html .splash-tag::after { content: ']'; color: var(--arc-magenta); margin-left: 3px; }
 
-html:not(.theme-xmas) .splash-hint {
+html .splash-hint {
   font-family: var(--font-mono);
   color: var(--arc-muted);
   font-size: 0.7rem;
 }
 
-html:not(.theme-xmas) .splash-enter-btn {
+html .splash-enter-btn {
   border-radius: 6px !important;
   font-family: var(--font-mono);
   letter-spacing: 0.1em;
 }
 
 /* V5 splash polish */
-html:not(.theme-xmas) .splash-card {
+html .splash-card {
   --modal-max: 48rem;
 }
 
-html:not(.theme-xmas) .splash-card.modal-card {
+html .splash-card.modal-card {
   padding: 38px 24px 24px !important;
 }
 
-html:not(.theme-xmas) .splash-shell {
+html .splash-shell {
   min-height: min(460px, calc(100dvh - 8rem));
   border-radius: 8px;
   border-color: rgba(0, 255, 229, 0.24);
@@ -1535,7 +1535,7 @@ html:not(.theme-xmas) .splash-shell {
     inset 0 0 42px rgba(0, 255, 229, 0.035);
 }
 
-html:not(.theme-xmas) .splash-shell::after {
+html .splash-shell::after {
   content: '';
   position: absolute;
   inset: 14px;
@@ -1550,7 +1550,7 @@ html:not(.theme-xmas) .splash-shell::after {
   z-index: 1;
 }
 
-html:not(.theme-xmas) .splash-topbar {
+html .splash-topbar {
   min-height: 34px;
   margin-bottom: 10px;
   border-radius: 6px;
@@ -1559,13 +1559,13 @@ html:not(.theme-xmas) .splash-topbar {
   padding: 8px 10px;
 }
 
-html:not(.theme-xmas) .splash-brand {
+html .splash-brand {
   display: inline-flex;
   align-items: center;
   gap: 9px;
 }
 
-html:not(.theme-xmas) .splash-brand::before {
+html .splash-brand::before {
   content: '';
   display: inline-block;
   width: 7px;
@@ -1575,7 +1575,7 @@ html:not(.theme-xmas) .splash-brand::before {
   box-shadow: var(--arc-glow-cyan);
 }
 
-html:not(.theme-xmas) .splash-display {
+html .splash-display {
   position: relative;
   overflow: hidden;
   min-height: 340px;
@@ -1591,7 +1591,7 @@ html:not(.theme-xmas) .splash-display {
     inset 0 0 34px rgba(0, 255, 229, 0.025);
 }
 
-html:not(.theme-xmas) .splash-display::before {
+html .splash-display::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1625,13 +1625,13 @@ html:not(.theme-xmas) .splash-display::before {
   border-bottom: 1px solid rgba(255, 43, 214, 0.30);
 }
 
-html:not(.theme-xmas) .splash-stage {
+html .splash-stage {
   position: relative;
   z-index: 1;
   height: 340px;
 }
 
-html:not(.theme-xmas) .splash-phase-welcome {
+html .splash-phase-welcome {
   justify-content: center;
   gap: 12px;
   padding: 26px 42px 22px;
@@ -1643,7 +1643,7 @@ html:not(.theme-xmas) .splash-phase-welcome {
   gap: 8px;
 }
 
-html:not(.theme-xmas) .splash-kicker {
+html .splash-kicker {
   display: inline-flex;
   align-items: center;
   margin: 0;
@@ -1654,13 +1654,13 @@ html:not(.theme-xmas) .splash-kicker {
   font-size: 0.62rem;
 }
 
-html:not(.theme-xmas) .splash-title {
+html .splash-title {
   position: relative;
   margin: 0;
   font-size: clamp(1.55rem, 4vw, 2.35rem);
 }
 
-html:not(.theme-xmas) .splash-title::after {
+html .splash-title::after {
   content: '';
   position: absolute;
   left: 50%;
@@ -1672,23 +1672,23 @@ html:not(.theme-xmas) .splash-title::after {
   opacity: 0.75;
 }
 
-html:not(.theme-xmas) .splash-copy {
+html .splash-copy {
   max-width: 39ch;
   margin: 8px 0 0;
   color: rgba(220, 231, 255, 0.86);
 }
 
-html:not(.theme-xmas) .splash-tags {
+html .splash-tags {
   margin-top: 4px;
   max-width: 520px;
 }
 
-html:not(.theme-xmas) .splash-actions {
+html .splash-actions {
   margin-top: 4px;
   gap: 9px;
 }
 
-html:not(.theme-xmas) .splash-enter-btn {
+html .splash-enter-btn {
   min-width: 126px;
   min-height: 42px;
   border-radius: 6px !important;
@@ -1702,7 +1702,7 @@ html:not(.theme-xmas) .splash-enter-btn {
     inset 0 -2px 0 rgba(0, 0, 0, 0.25) !important;
 }
 
-html:not(.theme-xmas) .splash-enter-btn:hover:not(:disabled) {
+html .splash-enter-btn:hover:not(:disabled) {
   border-color: rgba(0, 255, 229, 0.9) !important;
   background: linear-gradient(180deg, rgba(0, 255, 229, 1), rgba(0, 219, 192, 1)) !important;
   color: #061018 !important;
@@ -1734,15 +1734,15 @@ html:not(.theme-xmas) .splash-enter-btn:hover:not(:disabled) {
   text-transform: uppercase;
 }
 
-html:not(.theme-xmas) .splash-loader-bars {
+html .splash-loader-bars {
   display: none;
 }
 
-html:not(.theme-xmas) .splash-phase-loading {
+html .splash-phase-loading {
   gap: 14px;
 }
 
-html:not(.theme-xmas) .splash-loader-title {
+html .splash-loader-title {
   border-radius: 5px;
   border: 1px solid rgba(0, 255, 229, 0.18);
   background: rgba(0, 255, 229, 0.045);
@@ -1750,26 +1750,26 @@ html:not(.theme-xmas) .splash-loader-title {
 }
 
 @media (max-width: 720px) {
-  html:not(.theme-xmas) .splash-card.modal-card {
+  html .splash-card.modal-card {
     padding: 38px 14px 14px !important;
   }
 
-  html:not(.theme-xmas) .splash-shell {
+  html .splash-shell {
     min-height: auto;
     padding: 10px;
   }
 
-  html:not(.theme-xmas) .splash-display,
-  html:not(.theme-xmas) .splash-stage {
+  html .splash-display,
+  html .splash-stage {
     min-height: 420px;
     height: 420px;
   }
 
-  html:not(.theme-xmas) .splash-phase-welcome {
+  html .splash-phase-welcome {
     padding: 26px 18px 20px;
   }
 
-  html:not(.theme-xmas) .splash-copy {
+  html .splash-copy {
     max-width: 31ch;
   }
 
@@ -1780,14 +1780,14 @@ html:not(.theme-xmas) .splash-loader-title {
 
 /* ---------- KONAMI GAME OVERLAY ---------- */
 
-html:not(.theme-xmas) .konami-overlay {
+html .konami-overlay {
   background:
     radial-gradient(circle at top left, rgba(0, 255, 229, 0.08), transparent 58%),
     radial-gradient(circle at bottom right, rgba(255, 43, 214, 0.08), transparent 58%),
     rgba(2, 4, 10, 0.92) !important;
 }
 
-html:not(.theme-xmas) .konami-window {
+html .konami-window {
   border-radius: 12px !important;
   border: 1px solid rgba(0, 255, 229, 0.35) !important;
   background:
@@ -1802,13 +1802,13 @@ html:not(.theme-xmas) .konami-window {
 }
 
 @media (min-width: 640px) {
-  html:not(.theme-xmas) .konami-window {
+  html .konami-window {
     border-radius: 14px !important;
   }
 }
 
 /* Window chrome bar with traffic-light dots */
-html:not(.theme-xmas) .konami-window::before {
+html .konami-window::before {
   content: '';
   position: absolute;
   top: 0;
@@ -1830,13 +1830,13 @@ html:not(.theme-xmas) .konami-window::before {
   z-index: 5;
 }
 @media (min-width: 640px) {
-  html:not(.theme-xmas) .konami-window::before {
+  html .konami-window::before {
     border-radius: 14px 14px 0 0;
   }
 }
 
 /* Title pill inside the konami window */
-html:not(.theme-xmas) .konami-window header > div .inline-flex {
+html .konami-window header > div .inline-flex {
   border-radius: 4px !important;
   border: 1px solid rgba(0, 255, 229, 0.4) !important;
   background: rgba(0, 0, 0, 0.55) !important;
@@ -1845,12 +1845,12 @@ html:not(.theme-xmas) .konami-window header > div .inline-flex {
   letter-spacing: 0.06em;
   text-shadow: 0 0 6px rgba(0, 255, 229, 0.35);
 }
-html:not(.theme-xmas) .konami-window header > div .inline-flex span:not(.inline-flex) {
+html .konami-window header > div .inline-flex span:not(.inline-flex) {
   color: inherit;
 }
 
 /* Close button */
-html:not(.theme-xmas) .konami-window header > button {
+html .konami-window header > button {
   border-radius: 4px !important;
   border: 1px solid rgba(0, 255, 229, 0.4) !important;
   background: rgba(0, 0, 0, 0.55) !important;
@@ -1860,14 +1860,14 @@ html:not(.theme-xmas) .konami-window header > button {
   font-size: 0.95rem !important;
   font-weight: 700;
 }
-html:not(.theme-xmas) .konami-window header > button:hover {
+html .konami-window header > button:hover {
   background: rgba(0, 255, 229, 0.12) !important;
   border-color: var(--arc-cyan) !important;
   box-shadow: 0 0 12px rgba(0, 255, 229, 0.4);
   color: #c8fff7 !important;
 }
 
-html:not(.theme-xmas) .konami-window .konami-leaderboard-toggle {
+html .konami-window .konami-leaderboard-toggle {
   width: auto !important;
   min-width: 72px;
   padding-inline: 12px !important;
@@ -1876,7 +1876,7 @@ html:not(.theme-xmas) .konami-window .konami-leaderboard-toggle {
   letter-spacing: 0.14em;
 }
 
-html:not(.theme-xmas) .konami-window .konami-leaderboard-toggle.is-active {
+html .konami-window .konami-leaderboard-toggle.is-active {
   border-color: rgba(255, 43, 214, 0.64) !important;
   background: rgba(255, 43, 214, 0.12) !important;
   color: rgba(255, 213, 250, 0.96) !important;
@@ -1884,10 +1884,10 @@ html:not(.theme-xmas) .konami-window .konami-leaderboard-toggle.is-active {
 }
 
 /* Iframe frame */
-html:not(.theme-xmas) .konami-window iframe {
+html .konami-window iframe {
   border-radius: 6px;
 }
-html:not(.theme-xmas) .konami-window .relative.flex-1.overflow-hidden {
+html .konami-window .relative.flex-1.overflow-hidden {
   border-radius: 6px !important;
   border: 1px solid rgba(0, 255, 229, 0.25) !important;
   background: rgba(0, 0, 0, 0.6) !important;
@@ -2233,43 +2233,43 @@ html:not(.theme-xmas) .konami-window .relative.flex-1.overflow-hidden {
 }
 
 /* Subtitle line under iframe */
-html:not(.theme-xmas) .konami-window p.text-center {
+html .konami-window p.text-center {
   font-family: var(--font-mono);
   color: var(--arc-muted) !important;
   letter-spacing: 0.06em;
 }
-html:not(.theme-xmas) .konami-window p.text-center::before {
+html .konami-window p.text-center::before {
   content: '// ';
   color: rgba(106, 122, 153, 0.7);
 }
 
 /* Volume slider pill */
-html:not(.theme-xmas) .konami-window label.inline-flex {
+html .konami-window label.inline-flex {
   border-radius: 4px !important;
   border: 1px solid rgba(0, 255, 229, 0.3) !important;
   background: rgba(0, 0, 0, 0.55) !important;
   color: var(--arc-cyan) !important;
   font-family: var(--font-mono);
 }
-html:not(.theme-xmas) .konami-window label.inline-flex span {
+html .konami-window label.inline-flex span {
   color: var(--arc-cyan) !important;
 }
-html:not(.theme-xmas) .konami-window label.inline-flex span.uppercase {
+html .konami-window label.inline-flex span.uppercase {
   color: var(--arc-magenta) !important;
   text-shadow: 0 0 6px rgba(255, 43, 214, 0.4);
 }
-html:not(.theme-xmas) .konami-window input[type="range"] {
+html .konami-window input[type="range"] {
   accent-color: var(--arc-cyan);
 }
 
 /* Pulse status dot inside konami header pill -> arcade green */
-html:not(.theme-xmas) .konami-window header .bg-emerald-400 {
+html .konami-window header .bg-emerald-400 {
   background: var(--arc-green) !important;
   box-shadow: 0 0 10px rgba(57, 255, 20, 0.85) !important;
 }
 
 /* Konami inner aurora gradient blob -> tone down to neon cyan/magenta */
-html:not(.theme-xmas) .konami-window > .absolute.inset-0.pointer-events-none {
+html .konami-window > .absolute.inset-0.pointer-events-none {
   background:
     radial-gradient(circle at top left, rgba(0, 255, 229, 0.18), transparent 60%),
     radial-gradient(circle at bottom right, rgba(255, 43, 214, 0.18), transparent 60%) !important;
@@ -2279,18 +2279,18 @@ html:not(.theme-xmas) .konami-window > .absolute.inset-0.pointer-events-none {
 /* ---------- Mobile optimization pass: preserve layout, reduce work ---------- */
 
 @media (max-width: 768px) {
-  html:not(.theme-xmas) .modal-backdrop {
+  html .modal-backdrop {
     backdrop-filter: blur(10px) saturate(1.02) !important;
     -webkit-backdrop-filter: blur(10px) saturate(1.02) !important;
   }
 
-  html:not(.theme-xmas) .modal-card::after,
-  html:not(.theme-xmas) .splash-aurora {
+  html .modal-card::after,
+  html .splash-aurora {
     animation: none !important;
   }
 
-  html:not(.theme-xmas) .modal-card,
-  html:not(.theme-xmas) .splash-card.modal-card {
+  html .modal-card,
+  html .splash-card.modal-card {
     max-height: calc(100dvh - 24px);
   }
 
@@ -2301,7 +2301,7 @@ html:not(.theme-xmas) .konami-window > .absolute.inset-0.pointer-events-none {
 
 /* ---------- ImageHost admin console polish ---------- */
 
-html:not(.theme-xmas) .modal-card.imagehost-modal {
+html .modal-card.imagehost-modal {
   --modal-max: 72rem;
   width: min(96vw, 72rem);
   max-width: min(96vw, 72rem) !important;
@@ -2324,7 +2324,7 @@ html:not(.theme-xmas) .modal-card.imagehost-modal {
     0 54px 150px -42px rgba(0, 0, 0, 0.98) !important;
 }
 
-html:not(.theme-xmas) .imagehost-modal .modal-header {
+html .imagehost-modal .modal-header {
   align-items: flex-start;
   margin-bottom: 14px;
   padding-bottom: 13px;
@@ -2463,7 +2463,7 @@ html:not(.theme-xmas) .imagehost-modal .modal-header {
   transform: translateY(-1px);
 }
 
-html:not(.theme-xmas) .imagehost-tabs {
+html .imagehost-tabs {
   gap: 7px;
   margin-bottom: 14px;
   padding: 5px;
@@ -2477,7 +2477,7 @@ html:not(.theme-xmas) .imagehost-tabs {
     inset 0 0 24px rgba(0, 255, 229, 0.035);
 }
 
-html:not(.theme-xmas) .imagehost-tab {
+html .imagehost-tab {
   display: inline-flex;
   min-height: 38px;
   align-items: center;
@@ -2485,7 +2485,7 @@ html:not(.theme-xmas) .imagehost-tab {
   border-radius: 7px;
 }
 
-html:not(.theme-xmas) .imagehost-tab.is-active {
+html .imagehost-tab.is-active {
   background:
     linear-gradient(180deg, rgba(0, 255, 229, 0.18), rgba(0, 255, 229, 0.055)),
     rgba(0, 0, 0, 0.42);
@@ -2495,7 +2495,7 @@ html:not(.theme-xmas) .imagehost-tab.is-active {
     0 0 18px rgba(0, 255, 229, 0.24);
 }
 
-html:not(.theme-xmas) .imagehost-body {
+html .imagehost-body {
   max-height: calc(94dvh - 184px);
   overflow-y: auto;
   overflow-x: hidden;
@@ -2509,20 +2509,20 @@ html:not(.theme-xmas) .imagehost-body {
   gap: 14px;
 }
 
-html:not(.theme-xmas) .imagehost-body::-webkit-scrollbar {
+html .imagehost-body::-webkit-scrollbar {
   width: 6px;
 }
 
-html:not(.theme-xmas) .imagehost-body::-webkit-scrollbar-track {
+html .imagehost-body::-webkit-scrollbar-track {
   background: transparent;
 }
 
-html:not(.theme-xmas) .imagehost-body::-webkit-scrollbar-thumb {
+html .imagehost-body::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: rgba(0, 255, 229, 0.36);
 }
 
-html:not(.theme-xmas) .imagehost-section {
+html .imagehost-section {
   position: relative;
   overflow: hidden;
   border-color: rgba(0, 255, 229, 0.24);
@@ -2537,7 +2537,7 @@ html:not(.theme-xmas) .imagehost-section {
     inset 0 0 34px rgba(0, 255, 229, 0.03);
 }
 
-html:not(.theme-xmas) .imagehost-section::before {
+html .imagehost-section::before {
   content: '';
   position: absolute;
   left: 0;
@@ -2602,7 +2602,7 @@ html:not(.theme-xmas) .imagehost-section::before {
     rgba(1, 6, 16, 0.70);
 }
 
-html:not(.theme-xmas) .imagehost-section-preview {
+html .imagehost-section-preview {
   padding: 16px;
   border-color: rgba(88, 101, 242, 0.34);
   background:
@@ -2611,7 +2611,7 @@ html:not(.theme-xmas) .imagehost-section-preview {
     rgba(1, 6, 16, 0.64);
 }
 
-html:not(.theme-xmas) .discord-preview {
+html .discord-preview {
   border-color: rgba(88, 101, 242, 0.42);
   background:
     linear-gradient(180deg, rgba(49, 51, 56, 0.98), rgba(43, 45, 49, 0.98));
@@ -2621,13 +2621,13 @@ html:not(.theme-xmas) .discord-preview {
     0 18px 42px rgba(0, 0, 0, 0.45);
 }
 
-html:not(.theme-xmas) .discord-preview::before {
+html .discord-preview::before {
   border-color: rgba(88, 101, 242, 0.54);
   color: #c8d0ff;
   text-shadow: 0 0 8px rgba(88, 101, 242, 0.55);
 }
 
-html:not(.theme-xmas) .discord-preview-embed {
+html .discord-preview-embed {
   max-width: min(560px, 100%);
   background: #2b2d31;
   box-shadow:
@@ -2635,7 +2635,7 @@ html:not(.theme-xmas) .discord-preview-embed {
     0 10px 26px rgba(0, 0, 0, 0.26);
 }
 
-html:not(.theme-xmas) .discord-preview-embed-site {
+html .discord-preview-embed-site {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -2645,7 +2645,7 @@ html:not(.theme-xmas) .discord-preview-embed-site {
   font-weight: 700;
 }
 
-html:not(.theme-xmas) .discord-preview-embed-author {
+html .discord-preview-embed-author {
   gap: 6px;
   color: rgba(219, 222, 225, 0.84);
   font-size: 0.78rem;
@@ -2658,21 +2658,21 @@ html:not(.theme-xmas) .discord-preview-embed-author {
   font-weight: 600;
 }
 
-html:not(.theme-xmas) .discord-preview-embed-image {
+html .discord-preview-embed-image {
   display: inline-block;
   width: fit-content;
   max-width: 100%;
   background: transparent;
 }
 
-html:not(.theme-xmas) .discord-preview-embed-image img {
+html .discord-preview-embed-image img {
   width: auto;
   max-width: min(100%, 530px);
   height: auto;
   background: transparent;
 }
 
-html:not(.theme-xmas) .imagehost-secret-row {
+html .imagehost-secret-row {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
@@ -2832,28 +2832,28 @@ html:not(.theme-xmas) .imagehost-secret-row {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-mini-btn,
-html:not(.theme-xmas) .imagehost-btn-save,
-html:not(.theme-xmas) .imagehost-btn-link {
+html .imagehost-mini-btn,
+html .imagehost-btn-save,
+html .imagehost-btn-link {
   border-radius: 7px;
 }
 
-html:not(.theme-xmas) .imagehost-section-preview .discord-preview-embed-image img {
+html .imagehost-section-preview .discord-preview-embed-image img {
   max-height: 220px;
 }
 
-html:not(.theme-xmas) .imagehost-gallery {
+html .imagehost-gallery {
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
 }
 
-html:not(.theme-xmas) .imagehost-gallery-item {
+html .imagehost-gallery-item {
   border-color: rgba(0, 255, 229, 0.22);
   background:
     linear-gradient(135deg, rgba(0, 255, 229, 0.065), transparent 34%),
     rgba(1, 6, 16, 0.68);
 }
 
-html:not(.theme-xmas) .imagehost-gallery-thumb::after {
+html .imagehost-gallery-thumb::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -2865,7 +2865,7 @@ html:not(.theme-xmas) .imagehost-gallery-thumb::after {
 }
 
 @media (max-width: 860px) {
-  html:not(.theme-xmas) .modal-card.imagehost-modal {
+  html .modal-card.imagehost-modal {
     width: min(96vw, 48rem);
     padding-inline: 16px !important;
   }
@@ -2897,19 +2897,19 @@ html:not(.theme-xmas) .imagehost-gallery-thumb::after {
 }
 
 @media (max-width: 640px) {
-  html:not(.theme-xmas) .modal-card.imagehost-modal {
+  html .modal-card.imagehost-modal {
     width: calc(100vw - 20px);
     max-height: calc(100dvh - 20px);
     padding: 46px 12px 14px !important;
   }
 
-  html:not(.theme-xmas) .imagehost-body {
+  html .imagehost-body {
     max-height: calc(100dvh - 168px);
     padding-right: 0;
     padding-bottom: 34px;
   }
 
-  html:not(.theme-xmas) .imagehost-header {
+  html .imagehost-header {
     align-items: stretch;
     flex-direction: column;
   }
@@ -2926,26 +2926,26 @@ html:not(.theme-xmas) .imagehost-gallery-thumb::after {
     justify-content: space-between;
   }
 
-  html:not(.theme-xmas) .imagehost-tabs {
+  html .imagehost-tabs {
     overflow-x: auto;
     scrollbar-width: none;
   }
 
-  html:not(.theme-xmas) .imagehost-tabs::-webkit-scrollbar {
+  html .imagehost-tabs::-webkit-scrollbar {
     display: none;
   }
 
-  html:not(.theme-xmas) .imagehost-tab {
+  html .imagehost-tab {
     flex: 0 0 auto;
     min-width: 11.5rem;
   }
 
-  html:not(.theme-xmas) .imagehost-secret-row,
-  html:not(.theme-xmas) .imagehost-secret-actions {
+  html .imagehost-secret-row,
+  html .imagehost-secret-actions {
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .imagehost-secret-actions {
+  html .imagehost-secret-actions {
     display: grid;
     gap: 7px;
   }
@@ -2954,26 +2954,26 @@ html:not(.theme-xmas) .imagehost-gallery-thumb::after {
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .discord-preview {
+  html .discord-preview {
     padding: 14px 12px;
   }
 
-  html:not(.theme-xmas) .discord-preview-msg {
+  html .discord-preview-msg {
     grid-template-columns: 34px minmax(0, 1fr);
     gap: 10px;
   }
 
-  html:not(.theme-xmas) .discord-preview-avatar {
+  html .discord-preview-avatar {
     width: 34px;
     height: 34px;
   }
 
-  html:not(.theme-xmas) .imagehost-actions {
+  html .imagehost-actions {
     align-items: stretch;
     flex-direction: column;
   }
 
-  html:not(.theme-xmas) .imagehost-btn-save {
+  html .imagehost-btn-save {
     width: 100%;
     justify-content: center;
   }
@@ -2981,7 +2981,7 @@ html:not(.theme-xmas) .imagehost-gallery-thumb::after {
 
 /* ---------- ImageHost final cockpit layout ---------- */
 
-html:not(.theme-xmas) .modal-card.imagehost-modal {
+html .modal-card.imagehost-modal {
   --modal-max: 72rem;
   display: flex;
   width: min(94vw, 72rem);
@@ -3000,7 +3000,7 @@ html:not(.theme-xmas) .modal-card.imagehost-modal {
     linear-gradient(180deg, rgba(7, 12, 25, 0.99), rgba(2, 5, 12, 0.995)) !important;
 }
 
-html:not(.theme-xmas) .imagehost-modal .modal-header {
+html .imagehost-modal .modal-header {
   flex: 0 0 auto;
   align-items: center;
   margin-bottom: 14px;
@@ -3008,24 +3008,24 @@ html:not(.theme-xmas) .imagehost-modal .modal-header {
   border-bottom: 1px solid rgba(0, 255, 229, 0.16);
 }
 
-html:not(.theme-xmas) .imagehost-header-copy {
+html .imagehost-header-copy {
   max-width: 38rem;
 }
 
-html:not(.theme-xmas) .imagehost-header-tools {
+html .imagehost-header-tools {
   max-width: none;
   align-items: center;
   gap: 9px;
 }
 
-html:not(.theme-xmas) .imagehost-save-dock,
-html:not(.theme-xmas) .imagehost-live-chip,
-html:not(.theme-xmas) .imagehost-close-btn {
+html .imagehost-save-dock,
+html .imagehost-live-chip,
+html .imagehost-close-btn {
   box-sizing: border-box;
   min-height: 36px;
 }
 
-html:not(.theme-xmas) .imagehost-save-dock {
+html .imagehost-save-dock {
   border-radius: 9px;
   padding: 4px 5px 4px 10px;
   background:
@@ -3033,17 +3033,17 @@ html:not(.theme-xmas) .imagehost-save-dock {
     rgba(2, 8, 18, 0.78);
 }
 
-html:not(.theme-xmas) .imagehost-close-btn strong {
+html .imagehost-close-btn strong {
   font-size: 0.78rem;
   font-family: ui-sans-serif, system-ui, sans-serif;
 }
 
-html:not(.theme-xmas) .imagehost-tabs {
+html .imagehost-tabs {
   flex: 0 0 auto;
   margin-bottom: 14px;
 }
 
-html:not(.theme-xmas) .imagehost-body {
+html .imagehost-body {
   flex: 1 1 auto;
   min-height: 0;
   max-height: calc(92dvh - 178px);
@@ -3051,47 +3051,47 @@ html:not(.theme-xmas) .imagehost-body {
   scrollbar-gutter: stable;
 }
 
-html:not(.theme-xmas) .imagehost-config-body {
+html .imagehost-config-body {
   display: grid;
   gap: 16px;
 }
 
-html:not(.theme-xmas) .imagehost-cockpit {
+html .imagehost-cockpit {
   display: grid;
   grid-template-columns: minmax(0, 1.38fr) minmax(290px, 0.82fr);
   gap: 16px;
   align-items: stretch;
 }
 
-html:not(.theme-xmas) .imagehost-side-stack {
+html .imagehost-side-stack {
   display: grid;
   min-width: 0;
   gap: 16px;
   align-content: start;
 }
 
-html:not(.theme-xmas) .imagehost-settings-grid {
+html .imagehost-settings-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
   gap: 16px;
   align-items: start;
 }
 
-html:not(.theme-xmas) .imagehost-template-panel,
-html:not(.theme-xmas) .imagehost-site-panel,
-html:not(.theme-xmas) .imagehost-webhook-panel,
-html:not(.theme-xmas) .imagehost-preview-panel,
-html:not(.theme-xmas) .imagehost-vault-panel,
-html:not(.theme-xmas) .imagehost-flags-panel {
+html .imagehost-template-panel,
+html .imagehost-site-panel,
+html .imagehost-webhook-panel,
+html .imagehost-preview-panel,
+html .imagehost-vault-panel,
+html .imagehost-flags-panel {
   grid-column: auto;
   min-width: 0;
 }
 
-html:not(.theme-xmas) .imagehost-webhook-panel {
+html .imagehost-webhook-panel {
   grid-column: 1 / -1;
 }
 
-html:not(.theme-xmas) .imagehost-section {
+html .imagehost-section {
   overflow: visible;
   padding: 15px 16px 16px;
   border-radius: 10px;
@@ -3106,16 +3106,16 @@ html:not(.theme-xmas) .imagehost-section {
     0 18px 36px rgba(0, 0, 0, 0.18);
 }
 
-html:not(.theme-xmas) .imagehost-section-header {
+html .imagehost-section-header {
   margin-bottom: 13px;
   padding-bottom: 10px;
 }
 
-html:not(.theme-xmas) .imagehost-section-kicker {
+html .imagehost-section-kicker {
   letter-spacing: 0.2em;
 }
 
-html:not(.theme-xmas) .imagehost-preview-panel {
+html .imagehost-preview-panel {
   display: grid;
   align-content: start;
   border-color: rgba(88, 101, 242, 0.38);
@@ -3125,7 +3125,7 @@ html:not(.theme-xmas) .imagehost-preview-panel {
     rgba(1, 6, 16, 0.66);
 }
 
-html:not(.theme-xmas) .discord-preview {
+html .discord-preview {
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -3134,24 +3134,24 @@ html:not(.theme-xmas) .discord-preview {
   border-color: rgba(88, 101, 242, 0.46);
 }
 
-html:not(.theme-xmas) .discord-preview-msg {
+html .discord-preview-msg {
   grid-template-columns: 40px minmax(0, 1fr);
   gap: 13px;
 }
 
-html:not(.theme-xmas) .discord-preview-content,
-html:not(.theme-xmas) .discord-preview-embed-body {
+html .discord-preview-content,
+html .discord-preview-embed-body {
   min-width: 0;
 }
 
-html:not(.theme-xmas) .discord-preview-embed {
+html .discord-preview-embed {
   width: fit-content;
   max-width: min(100%, 580px);
   padding: 12px 14px 14px;
   background: #2b2d31;
 }
 
-html:not(.theme-xmas) .discord-preview-embed-site {
+html .discord-preview-embed-site {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -3159,7 +3159,7 @@ html:not(.theme-xmas) .discord-preview-embed-site {
   max-width: 100%;
 }
 
-html:not(.theme-xmas) .discord-preview-embed-image {
+html .discord-preview-embed-image {
   display: block;
   width: fit-content;
   max-width: 100%;
@@ -3167,7 +3167,7 @@ html:not(.theme-xmas) .discord-preview-embed-image {
   background: transparent;
 }
 
-html:not(.theme-xmas) .discord-preview-embed-image img {
+html .discord-preview-embed-image img {
   display: block;
   width: auto;
   max-width: min(100%, 520px);
@@ -3178,7 +3178,7 @@ html:not(.theme-xmas) .discord-preview-embed-image img {
   background: transparent;
 }
 
-html:not(.theme-xmas) .imagehost-vault-panel {
+html .imagehost-vault-panel {
   display: grid;
   gap: 12px;
   align-content: start;
@@ -3191,13 +3191,13 @@ html:not(.theme-xmas) .imagehost-vault-panel {
     rgba(1, 6, 16, 0.72);
 }
 
-html:not(.theme-xmas) .imagehost-vault-panel .imagehost-secret-row {
+html .imagehost-vault-panel .imagehost-secret-row {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
 }
 
-html:not(.theme-xmas) .imagehost-secret-card {
+html .imagehost-secret-card {
   grid-template-columns: 34px minmax(0, 1fr) 34px;
   min-height: 52px;
   border-radius: 9px;
@@ -3210,31 +3210,31 @@ html:not(.theme-xmas) .imagehost-secret-card {
     0 16px 28px rgba(0, 0, 0, 0.24);
 }
 
-html:not(.theme-xmas) .imagehost-secret-value {
+html .imagehost-secret-value {
   font-size: 0.76rem;
   filter: blur(7px);
   opacity: 0.72;
 }
 
-html:not(.theme-xmas) .imagehost-secret-card:hover .imagehost-secret-value,
-html:not(.theme-xmas) .imagehost-secret-card:focus-visible .imagehost-secret-value,
-html:not(.theme-xmas) .imagehost-secret-card:focus-within .imagehost-secret-value,
-html:not(.theme-xmas) .imagehost-secret-card.is-visible .imagehost-secret-value {
+html .imagehost-secret-card:hover .imagehost-secret-value,
+html .imagehost-secret-card:focus-visible .imagehost-secret-value,
+html .imagehost-secret-card:focus-within .imagehost-secret-value,
+html .imagehost-secret-card.is-visible .imagehost-secret-value {
   filter: blur(0);
 }
 
-html:not(.theme-xmas) .imagehost-vault-panel .imagehost-secret-actions {
+html .imagehost-vault-panel .imagehost-secret-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
-html:not(.theme-xmas) .imagehost-flags-panel .imagehost-toggles {
+html .imagehost-flags-panel .imagehost-toggles {
   grid-template-columns: 1fr;
   gap: 9px;
 }
 
-html:not(.theme-xmas) .imagehost-toggle {
+html .imagehost-toggle {
   min-height: 57px;
   border-radius: 8px;
   background:
@@ -3242,18 +3242,18 @@ html:not(.theme-xmas) .imagehost-toggle {
     rgba(1, 6, 16, 0.58);
 }
 
-html:not(.theme-xmas) .imagehost-field {
+html .imagehost-field {
   gap: 7px;
 }
 
-html:not(.theme-xmas) .imagehost-field + .imagehost-field {
+html .imagehost-field + .imagehost-field {
   margin-top: 13px;
 }
 
-html:not(.theme-xmas) .imagehost-field input[type='text'],
-html:not(.theme-xmas) .imagehost-field input[type='url'],
-html:not(.theme-xmas) .imagehost-field textarea,
-html:not(.theme-xmas) .imagehost-control {
+html .imagehost-field input[type='text'],
+html .imagehost-field input[type='url'],
+html .imagehost-field textarea,
+html .imagehost-control {
   border-radius: 8px;
   border-color: rgba(0, 255, 229, 0.24);
   background:
@@ -3261,98 +3261,98 @@ html:not(.theme-xmas) .imagehost-control {
     rgba(0, 0, 0, 0.48);
 }
 
-html:not(.theme-xmas) .imagehost-grid-2 {
+html .imagehost-grid-2 {
   gap: 14px;
 }
 
-html:not(.theme-xmas) .imagehost-template-panel .imagehost-grid-2 {
+html .imagehost-template-panel .imagehost-grid-2 {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
-html:not(.theme-xmas) .imagehost-webhook-panel .imagehost-field {
+html .imagehost-webhook-panel .imagehost-field {
   margin-top: 0;
 }
 
 @media (max-width: 1060px) {
-  html:not(.theme-xmas) .imagehost-cockpit,
-  html:not(.theme-xmas) .imagehost-settings-grid {
+  html .imagehost-cockpit,
+  html .imagehost-settings-grid {
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .imagehost-webhook-panel {
+  html .imagehost-webhook-panel {
     grid-column: auto;
   }
 
-  html:not(.theme-xmas) .imagehost-side-stack {
+  html .imagehost-side-stack {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 
 @media (max-width: 760px) {
-  html:not(.theme-xmas) .modal-card.imagehost-modal {
+  html .modal-card.imagehost-modal {
     width: calc(100vw - 18px);
     max-height: calc(100dvh - 18px);
     padding: 46px 12px 14px !important;
   }
 
-  html:not(.theme-xmas) .imagehost-modal .modal-header {
+  html .imagehost-modal .modal-header {
     align-items: stretch;
     flex-direction: column;
   }
 
-  html:not(.theme-xmas) .imagehost-header-tools,
-  html:not(.theme-xmas) .imagehost-side-stack {
+  html .imagehost-header-tools,
+  html .imagehost-side-stack {
     grid-template-columns: 1fr;
     max-width: none;
   }
 
-  html:not(.theme-xmas) .imagehost-header-tools {
+  html .imagehost-header-tools {
     display: grid;
   }
 
-  html:not(.theme-xmas) .imagehost-save-dock,
-  html:not(.theme-xmas) .imagehost-live-chip,
-  html:not(.theme-xmas) .imagehost-close-btn {
+  html .imagehost-save-dock,
+  html .imagehost-live-chip,
+  html .imagehost-close-btn {
     width: 100%;
     justify-content: center;
   }
 
-  html:not(.theme-xmas) .imagehost-body {
+  html .imagehost-body {
     max-height: calc(100dvh - 190px);
     padding-right: 0;
     padding-bottom: 52px;
   }
 
-  html:not(.theme-xmas) .discord-preview {
+  html .discord-preview {
     padding: 14px 12px;
   }
 
-  html:not(.theme-xmas) .discord-preview-msg {
+  html .discord-preview-msg {
     grid-template-columns: 34px minmax(0, 1fr);
     gap: 10px;
   }
 
-  html:not(.theme-xmas) .discord-preview-avatar {
+  html .discord-preview-avatar {
     width: 34px;
     height: 34px;
   }
 }
 
 @media (max-width: 540px) {
-  html:not(.theme-xmas) .imagehost-template-panel .imagehost-grid-2,
-  html:not(.theme-xmas) .imagehost-grid-2 {
+  html .imagehost-template-panel .imagehost-grid-2,
+  html .imagehost-grid-2 {
     grid-template-columns: 1fr;
   }
 }
 
 /* ---------- ImageHost micro-polish: preview badge + tuning controls ---------- */
 
-html:not(.theme-xmas) .discord-preview {
+html .discord-preview {
   overflow: visible;
   padding-top: 18px;
 }
 
-html:not(.theme-xmas) .discord-preview::before {
+html .discord-preview::before {
   top: -10px;
   left: 14px;
   z-index: 2;
@@ -3370,19 +3370,19 @@ html:not(.theme-xmas) .discord-preview::before {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-template-panel .imagehost-grid-2 {
+html .imagehost-template-panel .imagehost-grid-2 {
   align-items: end;
   grid-template-columns: minmax(220px, 0.82fr) minmax(280px, 1.18fr);
   gap: 12px;
 }
 
-html:not(.theme-xmas) .imagehost-template-panel .imagehost-control {
+html .imagehost-template-panel .imagehost-control {
   min-height: 52px;
   padding: 8px 12px 8px 8px;
 }
 
-html:not(.theme-xmas) .imagehost-color-control,
-html:not(.theme-xmas) .imagehost-length-control {
+html .imagehost-color-control,
+html .imagehost-length-control {
   border-color: rgba(0, 255, 229, 0.30);
   background:
     linear-gradient(90deg, rgba(0, 255, 229, 0.075), transparent 62%),
@@ -3393,37 +3393,37 @@ html:not(.theme-xmas) .imagehost-length-control {
     0 0 18px rgba(0, 255, 229, 0.055);
 }
 
-html:not(.theme-xmas) .imagehost-template-panel .imagehost-color-swatch {
+html .imagehost-template-panel .imagehost-color-swatch {
   width: 32px;
   height: 32px;
   border-radius: 7px;
 }
 
-html:not(.theme-xmas) .imagehost-template-panel .imagehost-color-hex {
+html .imagehost-template-panel .imagehost-color-hex {
   min-height: 32px;
   padding: 0 4px;
 }
 
-html:not(.theme-xmas) .imagehost-length-control {
+html .imagehost-length-control {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
 }
 
-html:not(.theme-xmas) .imagehost-template-panel .imagehost-slider::-webkit-slider-runnable-track {
+html .imagehost-template-panel .imagehost-slider::-webkit-slider-runnable-track {
   height: 5px;
   border-radius: 999px;
   background:
     linear-gradient(90deg, var(--arc-cyan) 0%, var(--arc-cyan) var(--p), rgba(120, 140, 170, 0.18) var(--p), rgba(120, 140, 170, 0.18) 100%);
 }
 
-html:not(.theme-xmas) .imagehost-template-panel .imagehost-slider::-webkit-slider-thumb {
+html .imagehost-template-panel .imagehost-slider::-webkit-slider-thumb {
   width: 16px;
   height: 16px;
   margin-top: -5.5px;
 }
 
-html:not(.theme-xmas) .imagehost-template-panel .imagehost-control-value {
+html .imagehost-template-panel .imagehost-control-value {
   display: inline-flex;
   min-width: 30px;
   min-height: 28px;
@@ -3477,11 +3477,11 @@ html:not(.theme-xmas) .imagehost-template-panel .imagehost-control-value {
 }
 
 @media (max-width: 640px) {
-  html:not(.theme-xmas) .discord-preview {
+  html .discord-preview {
     padding-top: 18px;
   }
 
-  html:not(.theme-xmas) .imagehost-length-control {
+  html .imagehost-length-control {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -3494,7 +3494,7 @@ html:not(.theme-xmas) .imagehost-template-panel .imagehost-control-value {
 
 /* ---------- ImageHost arcade tuner controls ---------- */
 
-html:not(.theme-xmas) .imagehost-tuning-grid {
+html .imagehost-tuning-grid {
   display: grid;
   grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   gap: 12px;
@@ -3504,7 +3504,7 @@ html:not(.theme-xmas) .imagehost-tuning-grid {
   width: 100%;
 }
 
-html:not(.theme-xmas) .imagehost-tune-card {
+html .imagehost-tune-card {
   box-sizing: border-box;
   position: relative;
   display: grid;
@@ -3525,7 +3525,7 @@ html:not(.theme-xmas) .imagehost-tune-card {
     inset 0 -18px 38px rgba(0, 255, 229, 0.018);
 }
 
-html:not(.theme-xmas) .imagehost-tune-card::before {
+html .imagehost-tune-card::before {
   content: '';
   position: absolute;
   inset: 0 0 auto;
@@ -3535,7 +3535,7 @@ html:not(.theme-xmas) .imagehost-tune-card::before {
   pointer-events: none;
 }
 
-html:not(.theme-xmas) .imagehost-tune-label {
+html .imagehost-tune-label {
   display: flex;
   min-width: 0;
   align-items: center;
@@ -3543,7 +3543,7 @@ html:not(.theme-xmas) .imagehost-tune-label {
   gap: 10px;
 }
 
-html:not(.theme-xmas) .imagehost-tune-label label {
+html .imagehost-tune-label label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -3556,12 +3556,12 @@ html:not(.theme-xmas) .imagehost-tune-label label {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-tune-label label span {
+html .imagehost-tune-label label span {
   color: var(--arc-magenta);
   text-shadow: 0 0 8px rgba(255, 43, 214, 0.48);
 }
 
-html:not(.theme-xmas) .imagehost-tune-label code {
+html .imagehost-tune-label code {
   flex: 0 0 auto;
   color: rgba(160, 175, 200, 0.66);
   font-family: var(--font-mono);
@@ -3571,7 +3571,7 @@ html:not(.theme-xmas) .imagehost-tune-label code {
   text-transform: lowercase;
 }
 
-html:not(.theme-xmas) .imagehost-tune-surface {
+html .imagehost-tune-surface {
   position: relative;
   min-height: 48px !important;
   border-radius: 9px;
@@ -3585,7 +3585,7 @@ html:not(.theme-xmas) .imagehost-tune-surface {
     0 10px 26px rgba(0, 0, 0, 0.18);
 }
 
-html:not(.theme-xmas) .imagehost-color-control {
+html .imagehost-color-control {
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr);
   gap: 10px;
@@ -3593,7 +3593,7 @@ html:not(.theme-xmas) .imagehost-color-control {
   padding: 8px 10px 11px 8px !important;
 }
 
-html:not(.theme-xmas) .imagehost-color-control .imagehost-color-swatch {
+html .imagehost-color-control .imagehost-color-swatch {
   width: 34px;
   height: 34px;
   border-radius: 8px;
@@ -3602,7 +3602,7 @@ html:not(.theme-xmas) .imagehost-color-control .imagehost-color-swatch {
     0 0 18px color-mix(in srgb, var(--swatch-color) 34%, transparent);
 }
 
-html:not(.theme-xmas) .imagehost-color-control .imagehost-color-hex {
+html .imagehost-color-control .imagehost-color-hex {
   min-height: 34px;
   border-radius: 8px;
   border: 1px solid rgba(0, 255, 229, 0.16);
@@ -3610,7 +3610,7 @@ html:not(.theme-xmas) .imagehost-color-control .imagehost-color-hex {
   padding: 0 12px;
 }
 
-html:not(.theme-xmas) .imagehost-color-beam {
+html .imagehost-color-beam {
   position: absolute;
   left: 8px;
   right: 10px;
@@ -3623,7 +3623,7 @@ html:not(.theme-xmas) .imagehost-color-beam {
   opacity: 0.86;
 }
 
-html:not(.theme-xmas) .imagehost-length-control {
+html .imagehost-length-control {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr) 28px minmax(58px, auto);
   gap: 8px;
@@ -3632,7 +3632,7 @@ html:not(.theme-xmas) .imagehost-length-control {
   min-width: 0;
 }
 
-html:not(.theme-xmas) .imagehost-stepper {
+html .imagehost-stepper {
   display: inline-flex;
   width: 28px;
   height: 28px;
@@ -3656,17 +3656,17 @@ html:not(.theme-xmas) .imagehost-stepper {
     transform 150ms ease;
 }
 
-html:not(.theme-xmas) .imagehost-stepper:hover {
+html .imagehost-stepper:hover {
   border-color: rgba(0, 255, 229, 0.58);
   box-shadow: 0 0 14px rgba(0, 255, 229, 0.22);
   transform: translateY(-1px);
 }
 
-html:not(.theme-xmas) .imagehost-length-control .imagehost-slider {
+html .imagehost-length-control .imagehost-slider {
   height: 30px;
 }
 
-html:not(.theme-xmas) .imagehost-length-control .imagehost-slider::-webkit-slider-runnable-track {
+html .imagehost-length-control .imagehost-slider::-webkit-slider-runnable-track {
   height: 7px;
   border-radius: 999px;
   border: 1px solid rgba(0, 255, 229, 0.12);
@@ -3677,28 +3677,28 @@ html:not(.theme-xmas) .imagehost-length-control .imagehost-slider::-webkit-slide
     0 0 12px rgba(0, 255, 229, 0.12);
 }
 
-html:not(.theme-xmas) .imagehost-length-control .imagehost-slider::-webkit-slider-thumb {
+html .imagehost-length-control .imagehost-slider::-webkit-slider-thumb {
   width: 17px;
   height: 17px;
   margin-top: -6px;
 }
 
-html:not(.theme-xmas) .imagehost-length-readout {
+html .imagehost-length-readout {
   min-width: 0;
   justify-items: end;
 }
 
-html:not(.theme-xmas) .imagehost-length-readout strong {
+html .imagehost-length-readout strong {
   min-width: 32px;
   min-height: 28px;
   border-color: rgba(0, 255, 229, 0.42);
 }
 
-html:not(.theme-xmas) .imagehost-length-readout code {
+html .imagehost-length-readout code {
   max-width: 72px;
 }
 
-html:not(.theme-xmas) .imagehost-length-ticks {
+html .imagehost-length-ticks {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 6px;
@@ -3710,12 +3710,12 @@ html:not(.theme-xmas) .imagehost-length-ticks {
   padding: 0 76px 0 40px;
 }
 
-html:not(.theme-xmas) .imagehost-length-ticks span {
+html .imagehost-length-ticks span {
   position: relative;
   text-align: center;
 }
 
-html:not(.theme-xmas) .imagehost-length-ticks span::before {
+html .imagehost-length-ticks span::before {
   content: '';
   position: absolute;
   left: 50%;
@@ -3726,44 +3726,44 @@ html:not(.theme-xmas) .imagehost-length-ticks span::before {
 }
 
 @media (max-width: 840px) {
-  html:not(.theme-xmas) .imagehost-tuning-grid {
+  html .imagehost-tuning-grid {
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .imagehost-length-control {
+  html .imagehost-length-control {
     grid-template-columns: 28px minmax(0, 1fr) 28px minmax(58px, auto);
   }
 
-  html:not(.theme-xmas) .imagehost-length-readout {
+  html .imagehost-length-readout {
     grid-column: auto;
     grid-template-columns: 1fr;
     justify-items: end;
   }
 
-  html:not(.theme-xmas) .imagehost-length-ticks {
+  html .imagehost-length-ticks {
     padding: 0 76px 0 40px;
   }
 }
 
 @media (max-width: 520px) {
-  html:not(.theme-xmas) .imagehost-length-control {
+  html .imagehost-length-control {
     grid-template-columns: 28px minmax(0, 1fr) 28px;
   }
 
-  html:not(.theme-xmas) .imagehost-length-readout {
+  html .imagehost-length-readout {
     grid-column: 1 / -1;
     grid-template-columns: auto minmax(0, 1fr);
     justify-items: start;
   }
 
-  html:not(.theme-xmas) .imagehost-length-ticks {
+  html .imagehost-length-ticks {
     padding: 0 38px;
   }
 }
 
 /* ---------- ImageHost styled delete confirmation ---------- */
 
-html:not(.theme-xmas) .imagehost-confirm-overlay {
+html .imagehost-confirm-overlay {
   position: absolute;
   inset: 0;
   z-index: 40;
@@ -3796,7 +3796,7 @@ html:not(.theme-xmas) .imagehost-confirm-overlay {
   }
 }
 
-html:not(.theme-xmas) .imagehost-confirm-card {
+html .imagehost-confirm-card {
   position: relative;
   width: min(440px, 92%);
   padding: 20px 22px 18px;
@@ -3815,7 +3815,7 @@ html:not(.theme-xmas) .imagehost-confirm-card {
   overflow: hidden;
 }
 
-html:not(.theme-xmas) .imagehost-confirm-card::before {
+html .imagehost-confirm-card::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -3829,7 +3829,7 @@ html:not(.theme-xmas) .imagehost-confirm-card::before {
   mix-blend-mode: overlay;
 }
 
-html:not(.theme-xmas) .imagehost-confirm-card::after {
+html .imagehost-confirm-card::after {
   content: '';
   position: absolute;
   left: 0;
@@ -3846,7 +3846,7 @@ html:not(.theme-xmas) .imagehost-confirm-card::after {
   filter: blur(0.4px);
 }
 
-html:not(.theme-xmas) .imagehost-confirm-head {
+html .imagehost-confirm-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3857,18 +3857,18 @@ html:not(.theme-xmas) .imagehost-confirm-head {
   margin-bottom: 10px;
 }
 
-html:not(.theme-xmas) .imagehost-confirm-kicker {
+html .imagehost-confirm-kicker {
   color: #ff5d8f;
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-html:not(.theme-xmas) .imagehost-confirm-kicker span {
+html .imagehost-confirm-kicker span {
   color: rgba(255, 93, 143, 0.55);
 }
 
-html:not(.theme-xmas) .imagehost-confirm-target {
+html .imagehost-confirm-target {
   color: rgba(255, 255, 255, 0.55);
   font-size: 10.5px;
   padding: 3px 7px;
@@ -3877,7 +3877,7 @@ html:not(.theme-xmas) .imagehost-confirm-target {
   background: rgba(255, 78, 130, 0.08);
 }
 
-html:not(.theme-xmas) .imagehost-confirm-title {
+html .imagehost-confirm-title {
   margin: 0 0 6px;
   font-size: 17px;
   font-weight: 600;
@@ -3885,14 +3885,14 @@ html:not(.theme-xmas) .imagehost-confirm-title {
   color: #fff;
 }
 
-html:not(.theme-xmas) .imagehost-confirm-desc {
+html .imagehost-confirm-desc {
   margin: 0 0 18px;
   font-size: 13px;
   line-height: 1.55;
   color: rgba(230, 226, 240, 0.78);
 }
 
-html:not(.theme-xmas) .imagehost-confirm-desc code {
+html .imagehost-confirm-desc code {
   color: #ffd2e0;
   background: rgba(255, 78, 130, 0.12);
   border: 1px solid rgba(255, 78, 130, 0.22);
@@ -3901,32 +3901,32 @@ html:not(.theme-xmas) .imagehost-confirm-desc code {
   font-size: 12px;
 }
 
-html:not(.theme-xmas) .imagehost-confirm-actions {
+html .imagehost-confirm-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 }
 
-html:not(.theme-xmas) .imagehost-confirm-actions .imagehost-mini-btn {
+html .imagehost-confirm-actions .imagehost-mini-btn {
   min-width: 84px;
 }
 
-html:not(.theme-xmas) .imagehost-confirm-go {
+html .imagehost-confirm-go {
   box-shadow: 0 0 18px -4px rgba(255, 78, 130, 0.55);
 }
 
-html:not(.theme-xmas) .imagehost-confirm-go:focus-visible {
+html .imagehost-confirm-go:focus-visible {
   outline: 2px solid rgba(255, 78, 130, 0.7);
   outline-offset: 2px;
 }
 
-html:not(.theme-xmas) .imagehost-confirm-actions .imagehost-mini-btn:disabled {
+html .imagehost-confirm-actions .imagehost-mini-btn:disabled {
   opacity: 0.55;
   cursor: progress;
 }
 
 /* TradeDex owns its full frame: avoid the shared modal chrome/padding. */
-html:not(.theme-xmas) .modal-card.tradedex-modal {
+html .modal-card.tradedex-modal {
   width: min(96vw, 52rem) !important;
   max-width: min(96vw, 52rem) !important;
   height: min(92dvh, 820px) !important;
@@ -3942,20 +3942,20 @@ html:not(.theme-xmas) .modal-card.tradedex-modal {
     linear-gradient(180deg, rgba(7, 12, 25, 0.98), rgba(3, 7, 16, 0.97)) !important;
 }
 
-html:not(.theme-xmas) .modal-card.tradedex-modal::before,
-html:not(.theme-xmas) .modal-card.tradedex-modal::after {
+html .modal-card.tradedex-modal::before,
+html .modal-card.tradedex-modal::after {
   content: none !important;
   display: none !important;
 }
 
 @media (max-width: 640px) {
-  html:not(.theme-xmas) .modal-backdrop.tradedex-modal-backdrop {
+  html .modal-backdrop.tradedex-modal-backdrop {
     padding: 0 !important;
     align-items: stretch !important;
     justify-content: stretch !important;
   }
 
-  html:not(.theme-xmas) .modal-card.tradedex-modal {
+  html .modal-card.tradedex-modal {
     width: 100vw !important;
     max-width: 100vw !important;
     height: 100dvh !important;
@@ -3967,11 +3967,11 @@ html:not(.theme-xmas) .modal-card.tradedex-modal::after {
 
 /* ---------- ImageHost neon cockpit refresh ---------- */
 
-html:not(.theme-xmas) .imagehost-backdrop {
+html .imagehost-backdrop {
   padding: clamp(10px, 2vw, 22px) !important;
 }
 
-html:not(.theme-xmas) .modal-card.imagehost-modal {
+html .modal-card.imagehost-modal {
   --imagehost-panel: rgba(1, 7, 17, 0.78);
   --imagehost-line: rgba(0, 255, 229, 0.28);
   --imagehost-soft: rgba(134, 151, 184, 0.8);
@@ -3996,18 +3996,18 @@ html:not(.theme-xmas) .modal-card.imagehost-modal {
     0 24px 82px -42px rgba(255, 43, 214, 0.34) !important;
 }
 
-html:not(.theme-xmas) .modal-card.imagehost-modal::before {
+html .modal-card.imagehost-modal::before {
   background:
     linear-gradient(90deg, #ff5f57 0 6px, transparent 6px 15px, #ffbd2e 15px 21px, transparent 21px 30px, #28c840 30px 36px, transparent 36px),
     linear-gradient(90deg, rgba(0, 255, 229, 0.22), transparent 40%, rgba(255, 43, 214, 0.2));
   opacity: 1 !important;
 }
 
-html:not(.theme-xmas) .modal-card.imagehost-modal::after {
+html .modal-card.imagehost-modal::after {
   opacity: 0.8;
 }
 
-html:not(.theme-xmas) .imagehost-modal .modal-header {
+html .imagehost-modal .modal-header {
   min-height: 104px;
   margin: -2px 0 16px;
   padding: 0 0 16px;
@@ -4016,16 +4016,16 @@ html:not(.theme-xmas) .imagehost-modal .modal-header {
     linear-gradient(90deg, rgba(0, 255, 229, 0.035), transparent 42%, rgba(255, 43, 214, 0.045));
 }
 
-html:not(.theme-xmas) .imagehost-header-copy {
+html .imagehost-header-copy {
   max-width: 37rem;
 }
 
-html:not(.theme-xmas) .imagehost-header-copy .modal-title {
+html .imagehost-header-copy .modal-title {
   font-size: clamp(1rem, 1.4vw, 1.22rem);
   letter-spacing: 0.015em;
 }
 
-html:not(.theme-xmas) .imagehost-header-copy .modal-text {
+html .imagehost-header-copy .modal-text {
   max-width: 48ch;
   margin-top: 8px;
   color: rgba(209, 222, 248, 0.76);
@@ -4033,22 +4033,22 @@ html:not(.theme-xmas) .imagehost-header-copy .modal-text {
   line-height: 1.55;
 }
 
-html:not(.theme-xmas) .imagehost-header-tools {
+html .imagehost-header-tools {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 9px;
 }
 
-html:not(.theme-xmas) .imagehost-save-dock,
-html:not(.theme-xmas) .imagehost-live-chip,
-html:not(.theme-xmas) .imagehost-close-btn {
+html .imagehost-save-dock,
+html .imagehost-live-chip,
+html .imagehost-close-btn {
   min-height: 38px;
   border-radius: 8px;
   letter-spacing: 0.11em;
 }
 
-html:not(.theme-xmas) .imagehost-save-dock {
+html .imagehost-save-dock {
   padding: 4px 5px 4px 12px;
   border: 1px solid rgba(0, 255, 229, 0.24);
   background:
@@ -4056,12 +4056,12 @@ html:not(.theme-xmas) .imagehost-save-dock {
     rgba(2, 8, 18, 0.9);
 }
 
-html:not(.theme-xmas) .imagehost-save-dock .imagehost-save-status {
+html .imagehost-save-dock .imagehost-save-status {
   min-width: 54px;
   color: rgba(178, 194, 224, 0.82);
 }
 
-html:not(.theme-xmas) .imagehost-live-chip {
+html .imagehost-live-chip {
   padding-inline: 12px;
   border-color: rgba(57, 255, 20, 0.5);
   background:
@@ -4069,18 +4069,18 @@ html:not(.theme-xmas) .imagehost-live-chip {
     rgba(13, 32, 9, 0.56);
 }
 
-html:not(.theme-xmas) .imagehost-close-btn {
+html .imagehost-close-btn {
   padding: 0 9px 0 13px;
 }
 
-html:not(.theme-xmas) .imagehost-close-btn strong {
+html .imagehost-close-btn strong {
   width: 19px;
   height: 19px;
   border-radius: 5px;
   font-size: 0.78rem;
 }
 
-html:not(.theme-xmas) .imagehost-tabs {
+html .imagehost-tabs {
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -4094,7 +4094,7 @@ html:not(.theme-xmas) .imagehost-tabs {
     rgba(1, 6, 16, 0.66);
 }
 
-html:not(.theme-xmas) .imagehost-tab {
+html .imagehost-tab {
   min-height: 40px;
   border-radius: 8px;
   border: 1px solid transparent;
@@ -4103,13 +4103,13 @@ html:not(.theme-xmas) .imagehost-tab {
   text-shadow: none;
 }
 
-html:not(.theme-xmas) .imagehost-tab:hover {
+html .imagehost-tab:hover {
   color: rgba(236, 245, 255, 0.94);
   border-color: rgba(0, 255, 229, 0.18);
   background: rgba(0, 255, 229, 0.045);
 }
 
-html:not(.theme-xmas) .imagehost-tab.is-active {
+html .imagehost-tab.is-active {
   border-color: rgba(0, 255, 229, 0.62);
   background:
     radial-gradient(220px 70px at 50% 0%, rgba(0, 255, 229, 0.19), transparent 68%),
@@ -4120,32 +4120,32 @@ html:not(.theme-xmas) .imagehost-tab.is-active {
     0 0 24px rgba(0, 255, 229, 0.16);
 }
 
-html:not(.theme-xmas) .imagehost-body {
+html .imagehost-body {
   max-height: none !important;
   padding: 0 11px 54px 0;
 }
 
-html:not(.theme-xmas) .imagehost-config-body {
+html .imagehost-config-body {
   gap: 18px;
 }
 
-html:not(.theme-xmas) .imagehost-body:not(.imagehost-config-body) {
+html .imagehost-body:not(.imagehost-config-body) {
   display: grid;
   align-content: start;
   gap: 16px;
 }
 
-html:not(.theme-xmas) .imagehost-cockpit {
+html .imagehost-cockpit {
   grid-template-columns: minmax(0, 1.54fr) minmax(320px, 0.86fr);
   gap: 16px;
 }
 
-html:not(.theme-xmas) .imagehost-settings-grid {
+html .imagehost-settings-grid {
   grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
   gap: 16px;
 }
 
-html:not(.theme-xmas) .imagehost-section {
+html .imagehost-section {
   position: relative;
   overflow: hidden;
   padding: 16px;
@@ -4158,24 +4158,24 @@ html:not(.theme-xmas) .imagehost-section {
     rgba(1, 6, 16, 0.72);
 }
 
-html:not(.theme-xmas) .imagehost-section::before {
+html .imagehost-section::before {
   opacity: 0.6;
 }
 
-html:not(.theme-xmas) .imagehost-section-header {
+html .imagehost-section-header {
   gap: 12px;
   margin-bottom: 14px;
   padding-bottom: 10px;
   border-bottom: 1px dashed rgba(0, 255, 229, 0.18);
 }
 
-html:not(.theme-xmas) .imagehost-section-kicker {
+html .imagehost-section-kicker {
   color: var(--arc-magenta);
   letter-spacing: 0.18em;
   text-shadow: 0 0 8px rgba(255, 43, 214, 0.42);
 }
 
-html:not(.theme-xmas) .imagehost-section-meta {
+html .imagehost-section-meta {
   max-width: 52%;
   overflow: hidden;
   color: rgba(160, 175, 200, 0.72);
@@ -4183,7 +4183,7 @@ html:not(.theme-xmas) .imagehost-section-meta {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-preview-panel {
+html .imagehost-preview-panel {
   min-height: 0;
   border-color: rgba(88, 101, 242, 0.38);
   background:
@@ -4192,7 +4192,7 @@ html:not(.theme-xmas) .imagehost-preview-panel {
     rgba(1, 6, 16, 0.72);
 }
 
-html:not(.theme-xmas) .discord-preview {
+html .discord-preview {
   overflow: hidden;
   padding: 16px;
   border-color: rgba(88, 101, 242, 0.45);
@@ -4201,7 +4201,7 @@ html:not(.theme-xmas) .discord-preview {
     #313338;
 }
 
-html:not(.theme-xmas) .discord-preview::before {
+html .discord-preview::before {
   top: 9px;
   left: 15px;
   border-color: rgba(160, 172, 255, 0.34);
@@ -4209,35 +4209,35 @@ html:not(.theme-xmas) .discord-preview::before {
   color: rgba(236, 241, 255, 0.9);
 }
 
-html:not(.theme-xmas) .discord-preview-msg {
+html .discord-preview-msg {
   grid-template-columns: 42px minmax(0, 1fr);
   gap: 13px;
   padding-top: 14px;
 }
 
-html:not(.theme-xmas) .discord-preview-content,
-html:not(.theme-xmas) .discord-preview-embed-body,
-html:not(.theme-xmas) .discord-preview-embed-title,
-html:not(.theme-xmas) .discord-preview-embed-desc,
-html:not(.theme-xmas) .discord-preview-url {
+html .discord-preview-content,
+html .discord-preview-embed-body,
+html .discord-preview-embed-title,
+html .discord-preview-embed-desc,
+html .discord-preview-url {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-html:not(.theme-xmas) .discord-preview-embed {
+html .discord-preview-embed {
   max-width: min(100%, 540px);
   border-radius: 7px;
   background: #2b2d31;
   box-shadow: inset 4px 0 0 var(--embed-color);
 }
 
-html:not(.theme-xmas) .discord-preview-embed-image img {
+html .discord-preview-embed-image img {
   max-width: min(100%, 500px);
   max-height: 218px;
   border-radius: 5px;
 }
 
-html:not(.theme-xmas) .imagehost-vault-panel {
+html .imagehost-vault-panel {
   border-color: rgba(255, 147, 54, 0.36);
   background:
     radial-gradient(340px 150px at 0% 0%, rgba(255, 147, 54, 0.14), transparent 66%),
@@ -4245,28 +4245,28 @@ html:not(.theme-xmas) .imagehost-vault-panel {
     rgba(1, 6, 16, 0.78);
 }
 
-html:not(.theme-xmas) .imagehost-secret-card {
+html .imagehost-secret-card {
   min-height: 54px;
   border-color: rgba(255, 147, 54, 0.22);
 }
 
-html:not(.theme-xmas) .imagehost-flags-panel {
+html .imagehost-flags-panel {
   border-color: rgba(0, 255, 229, 0.3);
 }
 
-html:not(.theme-xmas) .imagehost-toggle {
+html .imagehost-toggle {
   min-height: 58px;
   padding: 10px 12px;
   border-radius: 8px;
 }
 
-html:not(.theme-xmas) .imagehost-toggle-text span {
+html .imagehost-toggle-text span {
   line-height: 1.35;
 }
 
-html:not(.theme-xmas) .imagehost-template-panel,
-html:not(.theme-xmas) .imagehost-site-panel,
-html:not(.theme-xmas) .imagehost-webhook-panel {
+html .imagehost-template-panel,
+html .imagehost-site-panel,
+html .imagehost-webhook-panel {
   background:
     radial-gradient(520px 220px at 0% 0%, rgba(0, 255, 229, 0.085), transparent 68%),
     radial-gradient(420px 210px at 100% 100%, rgba(255, 43, 214, 0.07), transparent 72%),
@@ -4274,15 +4274,15 @@ html:not(.theme-xmas) .imagehost-webhook-panel {
     rgba(1, 6, 16, 0.72);
 }
 
-html:not(.theme-xmas) .imagehost-field label {
+html .imagehost-field label {
   color: var(--arc-magenta);
   letter-spacing: 0.15em;
 }
 
-html:not(.theme-xmas) .imagehost-field input[type='text'],
-html:not(.theme-xmas) .imagehost-field input[type='url'],
-html:not(.theme-xmas) .imagehost-field textarea,
-html:not(.theme-xmas) .imagehost-control {
+html .imagehost-field input[type='text'],
+html .imagehost-field input[type='url'],
+html .imagehost-field textarea,
+html .imagehost-control {
   min-height: 39px;
   border-radius: 7px;
   color: rgba(230, 242, 255, 0.92);
@@ -4291,7 +4291,7 @@ html:not(.theme-xmas) .imagehost-control {
     rgba(0, 0, 0, 0.55);
 }
 
-html:not(.theme-xmas) .imagehost-steps {
+html .imagehost-steps {
   display: grid;
   gap: 10px;
   margin: 0;
@@ -4299,7 +4299,7 @@ html:not(.theme-xmas) .imagehost-steps {
   counter-reset: imagehost-step;
 }
 
-html:not(.theme-xmas) .imagehost-steps li {
+html .imagehost-steps li {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr);
   align-items: center;
@@ -4312,13 +4312,13 @@ html:not(.theme-xmas) .imagehost-steps li {
     rgba(1, 6, 16, 0.66);
 }
 
-html:not(.theme-xmas) .imagehost-steps li strong {
+html .imagehost-steps li strong {
   color: var(--arc-cyan);
   font-size: 0.86rem;
   text-shadow: 0 0 8px rgba(0, 255, 229, 0.42);
 }
 
-html:not(.theme-xmas) .imagehost-steps li code {
+html .imagehost-steps li code {
   display: inline-block;
   margin-inline: 3px;
   padding: 2px 5px;
@@ -4327,12 +4327,12 @@ html:not(.theme-xmas) .imagehost-steps li code {
   background: rgba(255, 43, 214, 0.1);
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-actions {
+html .imagehost-sxcu-actions {
   margin-top: 14px;
   gap: 10px;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-note {
+html .imagehost-sxcu-note {
   display: grid;
   grid-template-columns: 46px minmax(0, 1fr);
   gap: 10px;
@@ -4346,7 +4346,7 @@ html:not(.theme-xmas) .imagehost-sxcu-note {
   padding: 10px;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-note span {
+html .imagehost-sxcu-note span {
   display: inline-flex;
   min-height: 28px;
   align-items: center;
@@ -4360,7 +4360,7 @@ html:not(.theme-xmas) .imagehost-sxcu-note span {
   letter-spacing: 0.12em;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-note strong {
+html .imagehost-sxcu-note strong {
   min-width: 0;
   overflow: hidden;
   color: rgba(210, 255, 225, 0.82);
@@ -4371,12 +4371,12 @@ html:not(.theme-xmas) .imagehost-sxcu-note strong {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-kv {
+html .imagehost-kv {
   display: grid;
   gap: 8px;
 }
 
-html:not(.theme-xmas) .imagehost-kv > div {
+html .imagehost-kv > div {
   display: grid;
   grid-template-columns: minmax(78px, 0.15fr) minmax(0, 1fr);
   align-items: center;
@@ -4388,11 +4388,11 @@ html:not(.theme-xmas) .imagehost-kv > div {
   background: rgba(0, 0, 0, 0.32);
 }
 
-html:not(.theme-xmas) .imagehost-kv span {
+html .imagehost-kv span {
   color: var(--arc-magenta);
 }
 
-html:not(.theme-xmas) .imagehost-kv code {
+html .imagehost-kv code {
   min-width: 0;
   overflow: hidden;
   color: var(--arc-cyan);
@@ -4400,7 +4400,7 @@ html:not(.theme-xmas) .imagehost-kv code {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-empty {
+html .imagehost-empty {
   display: flex;
   min-height: 96px;
   align-items: center;
@@ -4414,41 +4414,41 @@ html:not(.theme-xmas) .imagehost-empty {
   text-align: center;
 }
 
-html:not(.theme-xmas) .imagehost-gallery {
+html .imagehost-gallery {
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 12px;
 }
 
-html:not(.theme-xmas) .imagehost-gallery-item {
+html .imagehost-gallery-item {
   grid-template-columns: 112px minmax(0, 1fr);
   gap: 12px;
   border-radius: 10px;
 }
 
-html:not(.theme-xmas) .imagehost-gallery-actions {
+html .imagehost-gallery-actions {
   grid-column: 1 / -1;
   justify-content: flex-end;
 }
 
 @media (max-width: 1060px) {
-  html:not(.theme-xmas) .imagehost-cockpit,
-  html:not(.theme-xmas) .imagehost-settings-grid {
+  html .imagehost-cockpit,
+  html .imagehost-settings-grid {
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .imagehost-side-stack {
+  html .imagehost-side-stack {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 
 @media (max-width: 760px) {
-  html:not(.theme-xmas) .imagehost-backdrop {
+  html .imagehost-backdrop {
     padding: 0 !important;
     align-items: stretch !important;
     justify-content: stretch !important;
   }
 
-  html:not(.theme-xmas) .modal-card.imagehost-modal {
+  html .modal-card.imagehost-modal {
     width: 100vw !important;
     max-width: 100vw !important;
     height: 100dvh !important;
@@ -4458,31 +4458,31 @@ html:not(.theme-xmas) .imagehost-gallery-actions {
     border-radius: 0 !important;
   }
 
-  html:not(.theme-xmas) .imagehost-modal .modal-header {
+  html .imagehost-modal .modal-header {
     min-height: auto;
     gap: 13px;
     margin-bottom: 12px;
     padding-bottom: 12px;
   }
 
-  html:not(.theme-xmas) .imagehost-header-tools {
+  html .imagehost-header-tools {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
 
-  html:not(.theme-xmas) .imagehost-save-dock {
+  html .imagehost-save-dock {
     grid-column: 1 / -1;
   }
 
-  html:not(.theme-xmas) .imagehost-save-dock,
-  html:not(.theme-xmas) .imagehost-live-chip,
-  html:not(.theme-xmas) .imagehost-close-btn {
+  html .imagehost-save-dock,
+  html .imagehost-live-chip,
+  html .imagehost-close-btn {
     width: 100%;
     justify-content: center;
   }
 
-  html:not(.theme-xmas) .imagehost-tabs {
+  html .imagehost-tabs {
     display: flex;
     gap: 8px;
     overflow-x: auto;
@@ -4490,94 +4490,94 @@ html:not(.theme-xmas) .imagehost-gallery-actions {
     scrollbar-width: none;
   }
 
-  html:not(.theme-xmas) .imagehost-tabs::-webkit-scrollbar {
+  html .imagehost-tabs::-webkit-scrollbar {
     display: none;
   }
 
-  html:not(.theme-xmas) .imagehost-tab {
+  html .imagehost-tab {
     flex: 1 0 150px;
   }
 
-  html:not(.theme-xmas) .imagehost-body {
+  html .imagehost-body {
     padding-right: 0;
     padding-bottom: 44px;
   }
 
-  html:not(.theme-xmas) .imagehost-side-stack {
+  html .imagehost-side-stack {
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .imagehost-section {
+  html .imagehost-section {
     padding: 14px;
   }
 
-  html:not(.theme-xmas) .imagehost-section-header {
+  html .imagehost-section-header {
     align-items: flex-start;
     flex-direction: column;
     gap: 6px;
   }
 
-  html:not(.theme-xmas) .imagehost-section-meta {
+  html .imagehost-section-meta {
     max-width: 100%;
     white-space: normal;
   }
 
-  html:not(.theme-xmas) .discord-preview {
+  html .discord-preview {
     padding: 14px 11px;
   }
 
-  html:not(.theme-xmas) .discord-preview-msg {
+  html .discord-preview-msg {
     grid-template-columns: 34px minmax(0, 1fr);
     gap: 10px;
   }
 
-  html:not(.theme-xmas) .discord-preview-embed-image img {
+  html .discord-preview-embed-image img {
     max-height: 190px;
   }
 
-  html:not(.theme-xmas) .imagehost-kv > div,
-  html:not(.theme-xmas) .imagehost-steps li {
+  html .imagehost-kv > div,
+  html .imagehost-steps li {
     grid-template-columns: 1fr;
     gap: 6px;
   }
 
-  html:not(.theme-xmas) .imagehost-kv code {
+  html .imagehost-kv code {
     white-space: normal;
     overflow-wrap: anywhere;
   }
 }
 
 @media (max-width: 520px) {
-  html:not(.theme-xmas) .imagehost-header-tools {
+  html .imagehost-header-tools {
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .imagehost-tab {
+  html .imagehost-tab {
     flex-basis: 132px;
     min-height: 38px;
     font-size: 0.64rem;
   }
 
-  html:not(.theme-xmas) .imagehost-toggle {
+  html .imagehost-toggle {
     grid-template-columns: 26px minmax(0, 1fr);
   }
 
-  html:not(.theme-xmas) .imagehost-secret-card {
+  html .imagehost-secret-card {
     grid-template-columns: 32px minmax(0, 1fr) 32px;
   }
 
-  html:not(.theme-xmas) .imagehost-gallery-item {
+  html .imagehost-gallery-item {
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .imagehost-gallery-thumb {
+  html .imagehost-gallery-thumb {
     min-height: 150px;
   }
 }
 
 /* ---------- ImageHost redesign pass: visible structure ---------- */
 
-html:not(.theme-xmas) .modal-card.imagehost-modal {
+html .modal-card.imagehost-modal {
   width: min(98vw, 78rem) !important;
   height: min(94dvh, 890px) !important;
   max-height: min(94dvh, 890px) !important;
@@ -4592,7 +4592,7 @@ html:not(.theme-xmas) .modal-card.imagehost-modal {
     linear-gradient(180deg, rgba(8, 12, 26, 0.99), rgba(1, 4, 11, 0.996)) !important;
 }
 
-html:not(.theme-xmas) .imagehost-modal .modal-header {
+html .imagehost-modal .modal-header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px;
@@ -4602,7 +4602,7 @@ html:not(.theme-xmas) .imagehost-modal .modal-header {
   padding: 0 4px 15px;
 }
 
-html:not(.theme-xmas) .imagehost-title-mark {
+html .imagehost-title-mark {
   display: inline-flex;
   width: 21px;
   height: 21px;
@@ -4616,14 +4616,14 @@ html:not(.theme-xmas) .imagehost-title-mark {
   box-shadow: 0 0 16px rgba(0, 255, 229, 0.12);
 }
 
-html:not(.theme-xmas) .imagehost-status-strip {
+html .imagehost-status-strip {
   display: grid;
   grid-template-columns: 1.05fr 0.75fr 0.75fr 1.1fr;
   gap: 8px;
   margin: 0 0 12px;
 }
 
-html:not(.theme-xmas) .imagehost-status-strip span {
+html .imagehost-status-strip span {
   min-width: 0;
   border-radius: 8px;
   border: 1px solid rgba(0, 255, 229, 0.17);
@@ -4634,7 +4634,7 @@ html:not(.theme-xmas) .imagehost-status-strip span {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.018);
 }
 
-html:not(.theme-xmas) .imagehost-status-strip em {
+html .imagehost-status-strip em {
   display: block;
   color: rgba(139, 154, 188, 0.78);
   font-family: var(--font-mono);
@@ -4645,7 +4645,7 @@ html:not(.theme-xmas) .imagehost-status-strip em {
   text-transform: uppercase;
 }
 
-html:not(.theme-xmas) .imagehost-status-strip strong {
+html .imagehost-status-strip strong {
   display: block;
   min-width: 0;
   margin-top: 4px;
@@ -4658,7 +4658,7 @@ html:not(.theme-xmas) .imagehost-status-strip strong {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-tabs {
+html .imagehost-tabs {
   gap: 8px;
   padding: 0;
   border: 0;
@@ -4666,7 +4666,7 @@ html:not(.theme-xmas) .imagehost-tabs {
   box-shadow: none;
 }
 
-html:not(.theme-xmas) .imagehost-tab {
+html .imagehost-tab {
   position: relative;
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr);
@@ -4680,7 +4680,7 @@ html:not(.theme-xmas) .imagehost-tab {
   text-align: left;
 }
 
-html:not(.theme-xmas) .imagehost-tab::before {
+html .imagehost-tab::before {
   content: '';
   position: absolute;
   inset: auto 10px 7px 10px;
@@ -4692,7 +4692,7 @@ html:not(.theme-xmas) .imagehost-tab::before {
   transition: opacity 160ms ease, transform 160ms ease;
 }
 
-html:not(.theme-xmas) .imagehost-tab-index {
+html .imagehost-tab-index {
   display: inline-flex;
   width: 26px;
   height: 26px;
@@ -4707,13 +4707,13 @@ html:not(.theme-xmas) .imagehost-tab-index {
   font-weight: 900;
 }
 
-html:not(.theme-xmas) .imagehost-tab-copy {
+html .imagehost-tab-copy {
   display: grid;
   min-width: 0;
   gap: 4px;
 }
 
-html:not(.theme-xmas) .imagehost-tab-copy strong {
+html .imagehost-tab-copy strong {
   overflow: hidden;
   color: rgba(228, 239, 255, 0.86);
   font-size: 0.7rem;
@@ -4722,11 +4722,11 @@ html:not(.theme-xmas) .imagehost-tab-copy strong {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-tab-copy strong span {
+html .imagehost-tab-copy strong span {
   color: var(--arc-magenta);
 }
 
-html:not(.theme-xmas) .imagehost-tab-copy em {
+html .imagehost-tab-copy em {
   overflow: hidden;
   color: rgba(139, 154, 188, 0.68);
   font-size: 0.52rem;
@@ -4737,7 +4737,7 @@ html:not(.theme-xmas) .imagehost-tab-copy em {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-tab.is-active {
+html .imagehost-tab.is-active {
   border-color: rgba(0, 255, 229, 0.62);
   background:
     radial-gradient(240px 80px at 20% 0%, rgba(0, 255, 229, 0.18), transparent 72%),
@@ -4745,25 +4745,25 @@ html:not(.theme-xmas) .imagehost-tab.is-active {
     rgba(1, 9, 22, 0.92);
 }
 
-html:not(.theme-xmas) .imagehost-tab.is-active::before {
+html .imagehost-tab.is-active::before {
   opacity: 1;
   transform: scaleX(1);
 }
 
-html:not(.theme-xmas) .imagehost-tab.is-active .imagehost-tab-index {
+html .imagehost-tab.is-active .imagehost-tab-index {
   background: rgba(0, 255, 229, 0.12);
   box-shadow: 0 0 18px rgba(0, 255, 229, 0.2);
 }
 
-html:not(.theme-xmas) .imagehost-config-body {
+html .imagehost-config-body {
   padding-top: 2px;
 }
 
-html:not(.theme-xmas) .imagehost-cockpit {
+html .imagehost-cockpit {
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.9fr);
 }
 
-html:not(.theme-xmas) .imagehost-section {
+html .imagehost-section {
   border-radius: 12px;
   border-color: rgba(0, 255, 229, 0.28);
   background:
@@ -4773,15 +4773,15 @@ html:not(.theme-xmas) .imagehost-section {
     rgba(1, 6, 16, 0.74);
 }
 
-html:not(.theme-xmas) .imagehost-preview-panel {
+html .imagehost-preview-panel {
   padding: 12px;
 }
 
-html:not(.theme-xmas) .imagehost-preview-panel .imagehost-section-header {
+html .imagehost-preview-panel .imagehost-section-header {
   margin: 0 4px 12px;
 }
 
-html:not(.theme-xmas) .imagehost-preview-stage {
+html .imagehost-preview-stage {
   position: relative;
   overflow: hidden;
   border-radius: 11px;
@@ -4792,7 +4792,7 @@ html:not(.theme-xmas) .imagehost-preview-stage {
   padding: 12px;
 }
 
-html:not(.theme-xmas) .imagehost-preview-stage::before {
+html .imagehost-preview-stage::before {
   content: 'DISCORD.PREVIEW';
   position: absolute;
   top: 10px;
@@ -4804,29 +4804,29 @@ html:not(.theme-xmas) .imagehost-preview-stage::before {
   letter-spacing: 0.18em;
 }
 
-html:not(.theme-xmas) .discord-preview {
+html .discord-preview {
   border: 0;
   background: transparent;
   box-shadow: none;
 }
 
-html:not(.theme-xmas) .discord-preview::before {
+html .discord-preview::before {
   content: none;
 }
 
-html:not(.theme-xmas) .discord-preview-embed {
+html .discord-preview-embed {
   box-shadow:
     inset 4px 0 0 var(--embed-color),
     0 12px 30px rgba(0, 0, 0, 0.25);
 }
 
-html:not(.theme-xmas) .imagehost-vault-stats {
+html .imagehost-vault-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 7px;
 }
 
-html:not(.theme-xmas) .imagehost-vault-stats span {
+html .imagehost-vault-stats span {
   min-width: 0;
   border-radius: 8px;
   border: 1px solid rgba(255, 147, 54, 0.18);
@@ -4834,8 +4834,8 @@ html:not(.theme-xmas) .imagehost-vault-stats span {
   padding: 8px;
 }
 
-html:not(.theme-xmas) .imagehost-vault-stats em,
-html:not(.theme-xmas) .imagehost-vault-stats strong {
+html .imagehost-vault-stats em,
+html .imagehost-vault-stats strong {
   display: block;
   min-width: 0;
   overflow: hidden;
@@ -4844,7 +4844,7 @@ html:not(.theme-xmas) .imagehost-vault-stats strong {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-vault-stats em {
+html .imagehost-vault-stats em {
   color: rgba(160, 175, 200, 0.6);
   font-size: 0.48rem;
   font-style: normal;
@@ -4852,30 +4852,30 @@ html:not(.theme-xmas) .imagehost-vault-stats em {
   text-transform: uppercase;
 }
 
-html:not(.theme-xmas) .imagehost-vault-stats strong {
+html .imagehost-vault-stats strong {
   margin-top: 4px;
   color: rgba(255, 230, 198, 0.94);
   font-size: 0.63rem;
 }
 
-html:not(.theme-xmas) .imagehost-sharex-body {
+html .imagehost-sharex-body {
   grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   align-items: start;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-hero {
+html .imagehost-sxcu-hero {
   min-height: 100%;
   border-color: rgba(0, 255, 229, 0.36);
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-topline {
+html .imagehost-sxcu-topline {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   margin-bottom: 14px;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-file {
+html .imagehost-sxcu-file {
   display: grid;
   grid-template-columns: 54px minmax(0, 1fr);
   gap: 12px;
@@ -4889,7 +4889,7 @@ html:not(.theme-xmas) .imagehost-sxcu-file {
   padding: 12px;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-icon {
+html .imagehost-sxcu-icon {
   display: inline-flex;
   width: 50px;
   height: 50px;
@@ -4906,8 +4906,8 @@ html:not(.theme-xmas) .imagehost-sxcu-icon {
   text-transform: uppercase;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-file strong,
-html:not(.theme-xmas) .imagehost-sxcu-file span {
+html .imagehost-sxcu-file strong,
+html .imagehost-sxcu-file span {
   display: block;
   min-width: 0;
   overflow: hidden;
@@ -4915,18 +4915,18 @@ html:not(.theme-xmas) .imagehost-sxcu-file span {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-file strong {
+html .imagehost-sxcu-file strong {
   color: rgba(236, 245, 255, 0.95);
   font-size: 0.88rem;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-file span,
-html:not(.theme-xmas) .imagehost-sxcu-route {
+html .imagehost-sxcu-file span,
+html .imagehost-sxcu-route {
   color: rgba(160, 175, 200, 0.72);
   font-size: 0.64rem;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-route {
+html .imagehost-sxcu-route {
   display: block;
   overflow: hidden;
   border-radius: 8px;
@@ -4939,15 +4939,15 @@ html:not(.theme-xmas) .imagehost-sxcu-route {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-endpoint-panel {
+html .imagehost-endpoint-panel {
   border-color: rgba(255, 43, 214, 0.28);
 }
 
-html:not(.theme-xmas) .imagehost-gallery-panel {
+html .imagehost-gallery-panel {
   min-height: min(42dvh, 360px);
 }
 
-html:not(.theme-xmas) .imagehost-empty-gallery {
+html .imagehost-empty-gallery {
   display: grid;
   min-height: 170px;
   align-content: center;
@@ -4956,7 +4956,7 @@ html:not(.theme-xmas) .imagehost-empty-gallery {
   padding: 26px;
 }
 
-html:not(.theme-xmas) .imagehost-empty-glyph {
+html .imagehost-empty-glyph {
   display: inline-flex;
   width: 58px;
   height: 58px;
@@ -4974,7 +4974,7 @@ html:not(.theme-xmas) .imagehost-empty-glyph {
   box-shadow: 0 0 28px rgba(0, 255, 229, 0.12);
 }
 
-html:not(.theme-xmas) .imagehost-empty-gallery strong {
+html .imagehost-empty-gallery strong {
   color: rgba(236, 245, 255, 0.9);
   font-family: var(--font-mono);
   font-size: 0.86rem;
@@ -4982,65 +4982,65 @@ html:not(.theme-xmas) .imagehost-empty-gallery strong {
   text-transform: uppercase;
 }
 
-html:not(.theme-xmas) .imagehost-empty-gallery span:last-child {
+html .imagehost-empty-gallery span:last-child {
   color: rgba(160, 175, 200, 0.7);
   font-size: 0.72rem;
 }
 
 @media (max-width: 1060px) {
-  html:not(.theme-xmas) .imagehost-status-strip,
-  html:not(.theme-xmas) .imagehost-sharex-body {
+  html .imagehost-status-strip,
+  html .imagehost-sharex-body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 760px) {
-  html:not(.theme-xmas) .modal-card.imagehost-modal {
+  html .modal-card.imagehost-modal {
     padding: 38px 10px 10px !important;
   }
 
-  html:not(.theme-xmas) .imagehost-modal .modal-header,
-  html:not(.theme-xmas) .imagehost-status-strip,
-  html:not(.theme-xmas) .imagehost-sharex-body {
+  html .imagehost-modal .modal-header,
+  html .imagehost-status-strip,
+  html .imagehost-sharex-body {
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .imagehost-status-strip {
+  html .imagehost-status-strip {
     gap: 7px;
   }
 
-  html:not(.theme-xmas) .imagehost-tabs {
+  html .imagehost-tabs {
     display: grid;
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .imagehost-tab {
+  html .imagehost-tab {
     min-height: 52px;
   }
 
-  html:not(.theme-xmas) .imagehost-preview-stage {
+  html .imagehost-preview-stage {
     padding: 8px;
   }
 
-  html:not(.theme-xmas) .imagehost-vault-stats {
+  html .imagehost-vault-stats {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 520px) {
-  html:not(.theme-xmas) .imagehost-status-strip {
+  html .imagehost-status-strip {
     display: none;
   }
 
-  html:not(.theme-xmas) .imagehost-header-copy .modal-text {
+  html .imagehost-header-copy .modal-text {
     font-size: 0.68rem;
   }
 
-  html:not(.theme-xmas) .imagehost-sxcu-file {
+  html .imagehost-sxcu-file {
     grid-template-columns: 44px minmax(0, 1fr);
   }
 
-  html:not(.theme-xmas) .imagehost-sxcu-icon {
+  html .imagehost-sxcu-icon {
     width: 42px;
     height: 42px;
   }
@@ -5048,18 +5048,18 @@ html:not(.theme-xmas) .imagehost-empty-gallery span:last-child {
 
 /* ---------- ImageHost ShareX repair + stronger cockpit composition ---------- */
 
-html:not(.theme-xmas) .imagehost-sharex-body {
+html .imagehost-sharex-body {
   grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.1fr);
   gap: 16px;
   min-height: min(54dvh, 520px);
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-hero,
-html:not(.theme-xmas) .imagehost-endpoint-panel {
+html .imagehost-sxcu-hero,
+html .imagehost-endpoint-panel {
   min-height: 100%;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-hero {
+html .imagehost-sxcu-hero {
   display: grid;
   align-content: start;
   border-color: rgba(0, 255, 229, 0.42);
@@ -5070,12 +5070,12 @@ html:not(.theme-xmas) .imagehost-sxcu-hero {
     rgba(1, 6, 16, 0.78);
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-topline {
+html .imagehost-sxcu-topline {
   gap: 12px;
   margin-bottom: 12px;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-file {
+html .imagehost-sxcu-file {
   grid-template-columns: 60px minmax(0, 1fr);
   padding: 13px;
   border-color: rgba(0, 255, 229, 0.32);
@@ -5085,17 +5085,17 @@ html:not(.theme-xmas) .imagehost-sxcu-file {
     rgba(0, 0, 0, 0.3);
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-icon {
+html .imagehost-sxcu-icon {
   width: 56px;
   height: 56px;
   border-radius: 12px;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-file strong {
+html .imagehost-sxcu-file strong {
   font-size: 0.96rem;
 }
 
-html:not(.theme-xmas) .imagehost-sxcu-route {
+html .imagehost-sxcu-route {
   border-color: rgba(255, 43, 214, 0.32);
   background:
     linear-gradient(90deg, rgba(255, 43, 214, 0.12), rgba(0, 0, 0, 0.22)),
@@ -5103,14 +5103,14 @@ html:not(.theme-xmas) .imagehost-sxcu-route {
   color: rgba(235, 213, 255, 0.78);
 }
 
-html:not(.theme-xmas) .imagehost-flow {
+html .imagehost-flow {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin: 0 0 12px;
 }
 
-html:not(.theme-xmas) .imagehost-flow span {
+html .imagehost-flow span {
   position: relative;
   min-width: 0;
   overflow: hidden;
@@ -5129,7 +5129,7 @@ html:not(.theme-xmas) .imagehost-flow span {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-flow span:not(:last-child)::after {
+html .imagehost-flow span:not(:last-child)::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -5139,12 +5139,12 @@ html:not(.theme-xmas) .imagehost-flow span:not(:last-child)::after {
   background: rgba(0, 255, 229, 0.5);
 }
 
-html:not(.theme-xmas) .imagehost-steps {
+html .imagehost-steps {
   gap: 9px;
   margin: 0 0 14px;
 }
 
-html:not(.theme-xmas) .imagehost-steps li {
+html .imagehost-steps li {
   display: grid !important;
   grid-template-columns: 42px minmax(0, 1fr) !important;
   align-items: start;
@@ -5158,7 +5158,7 @@ html:not(.theme-xmas) .imagehost-steps li {
     rgba(0, 0, 0, 0.31) !important;
 }
 
-html:not(.theme-xmas) .imagehost-steps li strong {
+html .imagehost-steps li strong {
   display: inline-flex;
   width: 34px;
   height: 34px;
@@ -5173,14 +5173,14 @@ html:not(.theme-xmas) .imagehost-steps li strong {
   line-height: 1;
 }
 
-html:not(.theme-xmas) .imagehost-step-copy {
+html .imagehost-step-copy {
   display: block;
   min-width: 0;
   color: rgba(220, 231, 255, 0.86);
   line-height: 1.55;
 }
 
-html:not(.theme-xmas) .imagehost-step-copy code {
+html .imagehost-step-copy code {
   display: inline-flex !important;
   max-width: 100%;
   align-items: center;
@@ -5191,7 +5191,7 @@ html:not(.theme-xmas) .imagehost-step-copy code {
   overflow-wrap: anywhere;
 }
 
-html:not(.theme-xmas) .imagehost-endpoint-panel {
+html .imagehost-endpoint-panel {
   border-color: rgba(255, 43, 214, 0.34);
   background:
     radial-gradient(520px 190px at 100% 0%, rgba(255, 43, 214, 0.14), transparent 68%),
@@ -5200,7 +5200,7 @@ html:not(.theme-xmas) .imagehost-endpoint-panel {
     rgba(1, 6, 16, 0.78);
 }
 
-html:not(.theme-xmas) .imagehost-endpoint-shell {
+html .imagehost-endpoint-shell {
   overflow: hidden;
   margin-bottom: 13px;
   border-radius: 10px;
@@ -5213,7 +5213,7 @@ html:not(.theme-xmas) .imagehost-endpoint-shell {
     0 14px 28px rgba(0, 0, 0, 0.22);
 }
 
-html:not(.theme-xmas) .imagehost-shell-bar {
+html .imagehost-shell-bar {
   display: grid;
   grid-template-columns: 7px 7px 7px minmax(0, 1fr);
   gap: 6px;
@@ -5226,17 +5226,17 @@ html:not(.theme-xmas) .imagehost-shell-bar {
   padding: 0 11px;
 }
 
-html:not(.theme-xmas) .imagehost-shell-bar span {
+html .imagehost-shell-bar span {
   width: 6px;
   height: 6px;
   border-radius: 50%;
 }
 
-html:not(.theme-xmas) .imagehost-shell-bar span:nth-child(1) { background: #ff5f57; }
-html:not(.theme-xmas) .imagehost-shell-bar span:nth-child(2) { background: #ffbd2e; }
-html:not(.theme-xmas) .imagehost-shell-bar span:nth-child(3) { background: #28c840; }
+html .imagehost-shell-bar span:nth-child(1) { background: #ff5f57; }
+html .imagehost-shell-bar span:nth-child(2) { background: #ffbd2e; }
+html .imagehost-shell-bar span:nth-child(3) { background: #28c840; }
 
-html:not(.theme-xmas) .imagehost-shell-bar strong {
+html .imagehost-shell-bar strong {
   min-width: 0;
   overflow: hidden;
   color: rgba(160, 175, 200, 0.72);
@@ -5249,7 +5249,7 @@ html:not(.theme-xmas) .imagehost-shell-bar strong {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-endpoint-shell > code {
+html .imagehost-endpoint-shell > code {
   display: block;
   overflow: hidden;
   color: rgba(0, 255, 229, 0.9);
@@ -5262,11 +5262,11 @@ html:not(.theme-xmas) .imagehost-endpoint-shell > code {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-kv {
+html .imagehost-kv {
   gap: 9px;
 }
 
-html:not(.theme-xmas) .imagehost-kv > div {
+html .imagehost-kv > div {
   grid-template-columns: 88px minmax(0, 1fr);
   min-height: 46px;
   border-color: rgba(0, 255, 229, 0.18);
@@ -5275,25 +5275,25 @@ html:not(.theme-xmas) .imagehost-kv > div {
     rgba(0, 0, 0, 0.28);
 }
 
-html:not(.theme-xmas) .imagehost-kv span {
+html .imagehost-kv span {
   padding-left: 2px;
 }
 
-html:not(.theme-xmas) .imagehost-kv code {
+html .imagehost-kv code {
   min-height: 31px;
   align-content: center;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.46);
 }
 
-html:not(.theme-xmas) .imagehost-response-grid {
+html .imagehost-response-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin-top: 13px;
 }
 
-html:not(.theme-xmas) .imagehost-response-grid span {
+html .imagehost-response-grid span {
   min-width: 0;
   border-radius: 9px;
   border: 1px solid rgba(0, 255, 229, 0.16);
@@ -5303,8 +5303,8 @@ html:not(.theme-xmas) .imagehost-response-grid span {
   padding: 10px 9px;
 }
 
-html:not(.theme-xmas) .imagehost-response-grid em,
-html:not(.theme-xmas) .imagehost-response-grid strong {
+html .imagehost-response-grid em,
+html .imagehost-response-grid strong {
   display: block;
   min-width: 0;
   overflow: hidden;
@@ -5313,7 +5313,7 @@ html:not(.theme-xmas) .imagehost-response-grid strong {
   white-space: nowrap;
 }
 
-html:not(.theme-xmas) .imagehost-response-grid em {
+html .imagehost-response-grid em {
   color: rgba(255, 43, 214, 0.82);
   font-size: 0.5rem;
   font-style: normal;
@@ -5322,7 +5322,7 @@ html:not(.theme-xmas) .imagehost-response-grid em {
   text-transform: uppercase;
 }
 
-html:not(.theme-xmas) .imagehost-response-grid strong {
+html .imagehost-response-grid strong {
   margin-top: 5px;
   color: rgba(236, 245, 255, 0.9);
   font-size: 0.64rem;
@@ -5330,41 +5330,187 @@ html:not(.theme-xmas) .imagehost-response-grid strong {
 }
 
 @media (max-width: 1060px) {
-  html:not(.theme-xmas) .imagehost-sharex-body {
+  html .imagehost-sharex-body {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
-  html:not(.theme-xmas) .imagehost-flow {
+  html .imagehost-flow {
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .imagehost-flow span:not(:last-child)::after {
+  html .imagehost-flow span:not(:last-child)::after {
     display: none;
   }
 
-  html:not(.theme-xmas) .imagehost-steps li {
+  html .imagehost-steps li {
     grid-template-columns: 36px minmax(0, 1fr) !important;
   }
 
-  html:not(.theme-xmas) .imagehost-steps li strong {
+  html .imagehost-steps li strong {
     width: 30px;
     height: 30px;
   }
 
-  html:not(.theme-xmas) .imagehost-endpoint-shell > code {
+  html .imagehost-endpoint-shell > code {
     white-space: normal;
     overflow-wrap: anywhere;
   }
 
-  html:not(.theme-xmas) .imagehost-sxcu-note,
-  html:not(.theme-xmas) .imagehost-response-grid {
+  html .imagehost-sxcu-note,
+  html .imagehost-response-grid {
     grid-template-columns: 1fr;
   }
 
-  html:not(.theme-xmas) .imagehost-sxcu-note strong {
+  html .imagehost-sxcu-note strong {
     white-space: normal;
+  }
+}
+
+/* ---------- ImageHost gallery interaction repair ---------- */
+
+html .modal-card.imagehost-modal {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+html .imagehost-modal .modal-header,
+html .imagehost-status-strip,
+html .imagehost-tabs {
+  flex: 0 0 auto;
+}
+
+html .imagehost-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 10px 22px 0;
+}
+
+html .imagehost-gallery-body {
+  display: block !important;
+}
+
+html .imagehost-gallery-panel {
+  overflow: visible;
+  min-height: 0;
+  padding: 16px;
+}
+
+html .imagehost-gallery {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 292px), 1fr));
+  align-items: start;
+  gap: 16px;
+  padding-bottom: 10px;
+}
+
+html .imagehost-gallery-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  overflow: visible;
+  padding: 10px;
+  border-radius: 11px;
+  background:
+    radial-gradient(300px 140px at 12% 0%, rgba(0, 255, 229, 0.12), transparent 66%),
+    radial-gradient(260px 160px at 100% 100%, rgba(255, 43, 214, 0.08), transparent 72%),
+    rgba(1, 6, 16, 0.76);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.018),
+    0 16px 36px rgba(0, 0, 0, 0.18);
+}
+
+html .imagehost-gallery-thumb {
+  min-height: 218px;
+  border-radius: 9px;
+  border-color: rgba(0, 255, 229, 0.24);
+  aspect-ratio: 16 / 10;
+  box-shadow: inset 0 -32px 80px rgba(0, 0, 0, 0.22);
+}
+
+html .imagehost-gallery-code {
+  left: 8px;
+  top: 8px;
+  z-index: 2;
+  border-radius: 5px;
+  padding: 4px 7px;
+}
+
+html .imagehost-gallery-meta {
+  min-height: 40px;
+  gap: 3px;
+  padding-inline: 1px;
+}
+
+html .imagehost-gallery-meta span:first-child {
+  font-size: 0.66rem;
+}
+
+html .imagehost-gallery-meta span:last-child {
+  color: rgba(160, 175, 200, 0.78);
+  font-size: 0.57rem;
+  overflow-wrap: anywhere;
+}
+
+html .imagehost-gallery-actions {
+  display: grid;
+  grid-column: auto;
+  grid-template-columns: minmax(0, 1.1fr) minmax(64px, 0.72fr) minmax(82px, 0.88fr);
+  gap: 8px;
+  justify-content: stretch;
+}
+
+html .imagehost-gallery-actions .imagehost-mini-btn {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 0.57rem;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+html .imagehost-gallery-actions .imagehost-mini-btn:focus-visible {
+  outline: 2px solid rgba(0, 255, 229, 0.74);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  html .imagehost-body {
+    padding-right: 0;
+    padding-bottom: 18px;
+  }
+
+  html .imagehost-gallery-panel {
+    padding: 12px;
+  }
+
+  html .imagehost-gallery {
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+
+  html .imagehost-gallery-thumb {
+    min-height: 184px;
+  }
+}
+
+@media (max-width: 440px) {
+  html .imagehost-gallery-actions {
+    grid-template-columns: 1fr;
+  }
+
+  html .imagehost-gallery-actions .imagehost-mini-btn {
+    min-height: 36px;
   }
 }
 
