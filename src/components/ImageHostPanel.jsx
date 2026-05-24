@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import ModalPortal from './ModalPortal'
 
 const TABS = [
-  { id: 'config', label: 'config.toml' },
-  { id: 'sharex', label: 'sharex.sxcu' },
-  { id: 'gallery', label: 'gallery.sh' },
+  { id: 'config', label: 'config.toml', index: '01', summary: 'embed + auth' },
+  { id: 'sharex', label: 'sharex.sxcu', index: '02', summary: 'ShareX route' },
+  { id: 'gallery', label: 'gallery.sh', index: '03', summary: 'public vault' },
 ]
 
 const formatBytes = (bytes) => {
@@ -461,6 +461,20 @@ export default function ImageHostPanel({ open, onClose, me }) {
     return 'offline'
   }, [liveStatus])
 
+  const galleryBytes = useMemo(
+    () => gallery.reduce((total, img) => total + (Number(img.size) || 0), 0),
+    [gallery],
+  )
+
+  const activeTabMeta = useMemo(
+    () => TABS.find((item) => item.id === tab) || TABS[0],
+    [tab],
+  )
+
+  const publicHost = typeof window !== 'undefined'
+    ? window.location.host
+    : 'daivr.dev'
+
   if (!open) return null
 
   return (
@@ -476,6 +490,7 @@ export default function ImageHostPanel({ open, onClose, me }) {
           <div className="modal-header imagehost-header">
             <div className="imagehost-header-copy">
               <h3 className="modal-title" id="imagehost-title">
+                <span className="imagehost-title-mark" aria-hidden="true">/</span>
                 imagehost.daivr.dev
               </h3>
               <p className="modal-text">
@@ -515,6 +530,25 @@ export default function ImageHostPanel({ open, onClose, me }) {
             </div>
           </div>
 
+          <div className="imagehost-status-strip" aria-label="ImageHost status">
+            <span>
+              <em>screen</em>
+              <strong>{activeTabMeta.summary}</strong>
+            </span>
+            <span>
+              <em>vault</em>
+              <strong>{gallery.length} files</strong>
+            </span>
+            <span>
+              <em>storage</em>
+              <strong>{formatBytes(galleryBytes)}</strong>
+            </span>
+            <span>
+              <em>public</em>
+              <strong>{publicHost}</strong>
+            </span>
+          </div>
+
           <nav className="imagehost-tabs" role="tablist">
             {TABS.map((t) => (
               <button
@@ -525,7 +559,13 @@ export default function ImageHostPanel({ open, onClose, me }) {
                 aria-selected={tab === t.id}
                 className={`imagehost-tab ${tab === t.id ? 'is-active' : ''}`}
               >
-                <span aria-hidden="true">$</span> {t.label}
+                <span className="imagehost-tab-index" aria-hidden="true">
+                  {t.index}
+                </span>
+                <span className="imagehost-tab-copy">
+                  <strong><span aria-hidden="true">$</span> {t.label}</strong>
+                  <em>{t.summary}</em>
+                </span>
               </button>
             ))}
           </nav>
@@ -544,11 +584,13 @@ export default function ImageHostPanel({ open, onClose, me }) {
                       live · cómo se ve cuando lo pegás en un canal
                     </span>
                   </header>
-                  <DiscordEmbedPreview
-                    settings={settings}
-                    previewImage={previewImage}
-                    me={me}
-                  />
+                  <div className="imagehost-preview-stage">
+                    <DiscordEmbedPreview
+                      settings={settings}
+                      previewImage={previewImage}
+                      me={me}
+                    />
+                  </div>
                 </section>
 
                 <aside className="imagehost-side-stack">
@@ -603,6 +645,20 @@ export default function ImageHostPanel({ open, onClose, me }) {
                           {rotateConfirm ? 'confirmar?' : 'rotate'}
                         </button>
                       </div>
+                    </div>
+                    <div className="imagehost-vault-stats">
+                      <span>
+                        <em>token</em>
+                        <strong>{settings.secret ? 'armed' : 'missing'}</strong>
+                      </span>
+                      <span>
+                        <em>code</em>
+                        <strong>{normalizeCodeLength(settings.fileNameLength)} chars</strong>
+                      </span>
+                      <span>
+                        <em>sample</em>
+                        <strong>/{sampleCtx.code}</strong>
+                      </span>
                     </div>
                   </section>
 
@@ -875,26 +931,51 @@ export default function ImageHostPanel({ open, onClose, me }) {
           )}
 
           {settings && tab === 'sharex' && (
-            <div className="imagehost-body">
-              <section className="imagehost-section">
+            <div className="imagehost-body imagehost-sharex-body">
+              <section className="imagehost-section imagehost-sxcu-hero">
                 <header className="imagehost-section-header">
                   <span className="imagehost-section-kicker">sharex.setup</span>
                   <span className="imagehost-section-meta">3 pasos · una sola vez</span>
                 </header>
 
+                <div className="imagehost-sxcu-topline">
+                  <div className="imagehost-sxcu-file">
+                    <span className="imagehost-sxcu-icon" aria-hidden="true">sx</span>
+                    <div>
+                      <strong>{settings.siteName || 'daivr.dev'}.sxcu</strong>
+                      <span>custom uploader profile · ready to import</span>
+                    </div>
+                  </div>
+                  <span className="imagehost-sxcu-route">
+                    POST /api/imagehost/upload
+                  </span>
+                </div>
+
+                <div className="imagehost-flow" aria-hidden="true">
+                  <span>download</span>
+                  <span>import</span>
+                  <span>select</span>
+                </div>
+
                 <ol className="imagehost-steps">
                   <li>
-                    <strong>1.</strong> Descargá el archivo de configuración
-                    <code>.sxcu</code>.
+                    <strong>01</strong>
+                    <span className="imagehost-step-copy">
+                      Descargá el archivo de configuración <code>.sxcu</code>.
+                    </span>
                   </li>
                   <li>
-                    <strong>2.</strong> Doble click sobre él → ShareX lo importa
-                    como destino.
+                    <strong>02</strong>
+                    <span className="imagehost-step-copy">
+                      Doble click sobre él → ShareX lo importa como destino.
+                    </span>
                   </li>
                   <li>
-                    <strong>3.</strong> En ShareX: <code>Destinations</code> →
-                    <code>Image uploader</code> → seleccioná{' '}
-                    <code>{settings.siteName || 'daivr.dev'}</code>.
+                    <strong>03</strong>
+                    <span className="imagehost-step-copy">
+                      En ShareX: <code>Destinations</code> → <code>Image uploader</code> → seleccioná{' '}
+                      <code>{settings.siteName || 'daivr.dev'}</code>.
+                    </span>
                   </li>
                 </ol>
 
@@ -915,12 +996,28 @@ export default function ImageHostPanel({ open, onClose, me }) {
                     obtener ShareX ↗
                   </a>
                 </div>
+                <div className="imagehost-sxcu-note">
+                  <span aria-hidden="true">AUTH</span>
+                  <strong>el token viaja en header, no en la URL pública</strong>
+                </div>
               </section>
 
-              <section className="imagehost-section">
+              <section className="imagehost-section imagehost-endpoint-panel">
                 <header className="imagehost-section-header">
                   <span className="imagehost-section-kicker">endpoint</span>
+                  <span className="imagehost-section-meta">request contract</span>
                 </header>
+                <div className="imagehost-endpoint-shell" aria-label="Upload request example">
+                  <div className="imagehost-shell-bar">
+                    <span aria-hidden="true" />
+                    <span aria-hidden="true" />
+                    <span aria-hidden="true" />
+                    <strong>upload.request</strong>
+                  </div>
+                  <code>
+                    curl -X POST -H "Authorization: Bearer &lt;secret&gt;" -F "file=@screenshot.png" /api/imagehost/upload
+                  </code>
+                </div>
                 <div className="imagehost-kv">
                   <div>
                     <span>method</span>
@@ -945,6 +1042,20 @@ export default function ImageHostPanel({ open, onClose, me }) {
                     <span>returns</span>
                     <code>{'{ url, rawUrl, deletionUrl }'}</code>
                   </div>
+                </div>
+                <div className="imagehost-response-grid" aria-label="Response preview">
+                  <span>
+                    <em>url</em>
+                    <strong>/i/{sampleCtx.code}</strong>
+                  </span>
+                  <span>
+                    <em>raw</em>
+                    <strong>/i/{sampleCtx.code}/raw</strong>
+                  </span>
+                  <span>
+                    <em>delete</em>
+                    <strong>tokenized</strong>
+                  </span>
                 </div>
               </section>
             </div>
@@ -1003,8 +1114,8 @@ export default function ImageHostPanel({ open, onClose, me }) {
           )}
 
           {tab === 'gallery' && (
-            <div className="imagehost-body">
-              <section className="imagehost-section">
+            <div className="imagehost-body imagehost-gallery-body">
+              <section className="imagehost-section imagehost-gallery-panel">
                 <header className="imagehost-section-header">
                   <span className="imagehost-section-kicker">gallery</span>
                   <span className="imagehost-section-meta">
@@ -1019,9 +1130,11 @@ export default function ImageHostPanel({ open, onClose, me }) {
                   <p className="imagehost-empty is-error">{galleryError}</p>
                 )}
                 {!galleryLoading && !galleryError && gallery.length === 0 && (
-                  <p className="imagehost-empty">
-                    no hay imágenes todavía. usá ShareX para subir.
-                  </p>
+                  <div className="imagehost-empty imagehost-empty-gallery">
+                    <span className="imagehost-empty-glyph" aria-hidden="true">/i</span>
+                    <strong>vault empty</strong>
+                    <span>no hay imágenes todavía. usá ShareX para subir.</span>
+                  </div>
                 )}
 
                 {gallery.length > 0 && (

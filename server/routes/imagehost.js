@@ -709,6 +709,260 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
     color: #00ffe5;
     text-shadow: 0 0 8px rgba(0, 255, 229, 0.4);
   }
+  .frame {
+    overflow: hidden;
+    max-width: min(92vw, 1120px);
+    padding: 0;
+    border-color: rgba(0, 255, 229, 0.38);
+    background:
+      radial-gradient(780px 300px at 0% 0%, rgba(0, 255, 229, 0.12), transparent 64%),
+      radial-gradient(720px 320px at 100% 10%, rgba(255, 43, 214, 0.11), transparent 66%),
+      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 14px 14px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px) 0 0 / 14px 14px,
+      rgba(2, 7, 17, 0.9);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+      inset 0 1px 0 rgba(255, 255, 255, 0.09),
+      0 34px 110px -46px rgba(0, 255, 229, 0.5),
+      0 28px 90px -52px rgba(255, 43, 214, 0.38);
+  }
+  .frame::before {
+    content: '';
+    display: block;
+    height: 32px;
+    border-bottom: 1px solid rgba(0, 255, 229, 0.2);
+    background:
+      linear-gradient(90deg, #ff5f57 0 5px, transparent 5px 14px, #ffbd2e 14px 19px, transparent 19px 28px, #28c840 28px 33px, transparent 33px),
+      linear-gradient(90deg, rgba(0, 255, 229, 0.18), transparent 42%, rgba(255, 43, 214, 0.2));
+    background-position: 14px 13px, 0 0;
+    background-repeat: no-repeat;
+  }
+  .frame::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 76px;
+    pointer-events: none;
+    background: linear-gradient(0deg, rgba(0, 255, 229, 0.12), transparent);
+    opacity: 0.8;
+  }
+  .head {
+    margin: 0;
+    padding: 18px 20px 15px;
+    border-bottom: 1px dashed rgba(0, 255, 229, 0.22);
+    background:
+      linear-gradient(90deg, rgba(0, 255, 229, 0.055), transparent 42%, rgba(255, 43, 214, 0.055)),
+      rgba(1, 6, 16, 0.22);
+  }
+  .head .kicker {
+    color: #ff2bd6;
+    text-shadow: 0 0 10px rgba(255, 43, 214, 0.48);
+  }
+  .head .meta {
+    max-width: 58%;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .img-wrap {
+    height: min(68dvh, 620px);
+    margin: 16px 16px 0;
+    border-radius: 10px;
+    border-color: rgba(0, 255, 229, 0.28);
+    background:
+      radial-gradient(500px 220px at 18% 0%, rgba(0, 255, 229, 0.08), transparent 66%),
+      radial-gradient(460px 240px at 100% 100%, rgba(255, 43, 214, 0.08), transparent 70%),
+      rgba(1, 6, 16, 0.78);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.024),
+      inset 0 -32px 80px rgba(0, 255, 229, 0.055);
+  }
+  .img-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 12px 12px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px) 0 0 / 12px 12px;
+    opacity: 0.6;
+  }
+  .img-wrap img {
+    position: relative;
+    z-index: 1;
+    max-height: calc(100% - 28px);
+    border-radius: 6px;
+    box-shadow: 0 20px 58px rgba(0, 0, 0, 0.34);
+  }
+  .foot {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 16px 20px 18px;
+    background:
+      linear-gradient(90deg, rgba(0, 255, 229, 0.05), transparent 42%, rgba(255, 43, 214, 0.045));
+  }
+  .title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .foot a {
+    flex: 0 0 auto;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 255, 229, 0.28);
+    padding: 7px 10px;
+    background: rgba(0, 255, 229, 0.055);
+    font-weight: 900;
+  }
+  .foot a:hover {
+    border-color: rgba(0, 255, 229, 0.58);
+    box-shadow: 0 0 18px rgba(0, 255, 229, 0.16);
+    text-decoration: none;
+  }
+  @media (max-width: 720px) {
+    body { padding: 10px; }
+    .frame { max-width: 100%; border-radius: 10px; }
+    .head {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 7px;
+      padding: 14px;
+    }
+    .head .meta {
+      max-width: 100%;
+      text-align: left;
+      white-space: normal;
+    }
+    .img-wrap {
+      height: min(58dvh, 520px);
+      margin: 12px 12px 0;
+      min-height: 220px;
+    }
+    .foot {
+      align-items: stretch;
+      flex-direction: column;
+      padding: 13px 14px 15px;
+    }
+    .title {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    .foot a {
+      text-align: center;
+    }
+  }
+  .viewer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 14px;
+    padding: 16px;
+  }
+  .viewer .img-wrap {
+    height: min(66dvh, 610px);
+    margin: 0;
+  }
+  .info-panel {
+    display: grid;
+    align-content: space-between;
+    gap: 14px;
+    min-width: 0;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 43, 214, 0.23);
+    background:
+      radial-gradient(280px 150px at 0% 0%, rgba(255, 43, 214, 0.13), transparent 70%),
+      radial-gradient(260px 160px at 100% 100%, rgba(0, 255, 229, 0.09), transparent 72%),
+      rgba(1, 6, 16, 0.66);
+    padding: 16px;
+  }
+  .info-eyebrow {
+    color: #ff2bd6;
+    font-size: 0.56rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-shadow: 0 0 9px rgba(255, 43, 214, 0.42);
+  }
+  .info-panel h1 {
+    margin: 10px 0 0;
+    color: rgba(236, 245, 255, 0.94);
+    font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+  }
+  .info-panel h1 span {
+    color: #00ffe5;
+    text-shadow: 0 0 10px rgba(0, 255, 229, 0.42);
+  }
+  .info-grid {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+  }
+  .info-grid div {
+    min-width: 0;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 229, 0.15);
+    background: rgba(0, 0, 0, 0.28);
+    padding: 9px;
+  }
+  .info-grid dt {
+    color: rgba(160, 175, 200, 0.64);
+    font-size: 0.5rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .info-grid dd {
+    min-width: 0;
+    margin: 4px 0 0;
+    overflow: hidden;
+    color: rgba(236, 245, 255, 0.9);
+    font-size: 0.67rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .raw-button {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 229, 0.42);
+    background:
+      linear-gradient(180deg, rgba(0, 255, 229, 0.14), rgba(0, 255, 229, 0.035)),
+      rgba(0, 0, 0, 0.22);
+    color: #00ffe5;
+    font-size: 0.64rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+    text-shadow: 0 0 8px rgba(0, 255, 229, 0.42);
+    text-transform: uppercase;
+  }
+  .raw-button:hover {
+    box-shadow: 0 0 24px rgba(0, 255, 229, 0.18);
+  }
+  .foot {
+    border-top: 1px dashed rgba(0, 255, 229, 0.18);
+  }
+  @media (max-width: 900px) {
+    .viewer {
+      grid-template-columns: 1fr;
+    }
+    .info-panel {
+      align-content: start;
+    }
+    .viewer .img-wrap {
+      height: min(54dvh, 520px);
+      min-height: 220px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -717,9 +971,36 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
       <span class="kicker">&gt; ${escapeHtml(siteName)}</span>
       <span class="meta">${escapeHtml(ctx.filesize)} · ${escapeHtml(record.code)}${publishedAt ? ` · ${escapeHtml(new Date(publishedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }))}` : ''}</span>
     </div>
-    <div class="img-wrap">
-      <img src="${escapeHtml(rawUrl)}" alt="${escapeHtml(record.originalName)}" />
-    </div>
+    <section class="viewer">
+      <div class="img-wrap">
+        <img src="${escapeHtml(rawUrl)}" alt="${escapeHtml(record.originalName)}" />
+      </div>
+      <aside class="info-panel">
+        <div>
+          <span class="info-eyebrow">image packet</span>
+          <h1>${escapeHtml(title)} <span>/ ${escapeHtml(record.code)}</span></h1>
+        </div>
+        <dl class="info-grid">
+          <div>
+            <dt>file</dt>
+            <dd>${escapeHtml(record.originalName)}</dd>
+          </div>
+          <div>
+            <dt>size</dt>
+            <dd>${escapeHtml(ctx.filesize)}</dd>
+          </div>
+          <div>
+            <dt>mime</dt>
+            <dd>${escapeHtml(record.mimeType || 'image')}</dd>
+          </div>
+          <div>
+            <dt>route</dt>
+            <dd>/i/${escapeHtml(record.code)}/raw</dd>
+          </div>
+        </dl>
+        <a class="raw-button" href="${escapeHtml(rawUrl)}" target="_blank" rel="noreferrer">open raw</a>
+      </aside>
+    </section>
     <div class="foot">
       <span class="title">${escapeHtml(title)}</span>
       <a href="${escapeHtml(rawUrl)}" target="_blank" rel="noreferrer">open raw ↗</a>

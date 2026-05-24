@@ -172,6 +172,20 @@ export default function About() {
     return { tone: 'pending', label: 'esperando verdict', detail: '' }
   }, [scan, isErrored, isDone, notScanned, isMalicious, isSuspicious, isClean])
 
+  const cleanEngineCount = stats ? (stats.harmless || 0) + (stats.undetected || 0) : null
+  const flaggedEngineCount = stats ? (stats.malicious || 0) + (stats.suspicious || 0) : null
+  const stageNudge = stageId === 'downloading' ? downloadProgress : stageIndex > 0 ? 0.35 : 0.18
+  const stageWeight = isDone
+    ? STAGES.length - 1
+    : isErrored
+      ? stageIndex
+      : Math.min(STAGES.length - 1, stageIndex + stageNudge)
+  const scanProgressPercent = Math.max(
+    0,
+    Math.min(100, Math.round((stageWeight / (STAGES.length - 1)) * 100)),
+  )
+  const activeStageLabel = STAGES[stageIndex]?.label || 'scanner ready'
+
   const canDownload = isDone && !isMalicious && !isErrored && !!scan?.asset?.downloadUrl
 
   const handleDownload = () => {
@@ -336,6 +350,9 @@ export default function About() {
               <div className="current-project-media">
                 <span className="current-project-grid" aria-hidden="true" />
                 <span className="current-project-glow" aria-hidden="true" />
+                <span className="current-project-orbit current-project-orbit-a" aria-hidden="true" />
+                <span className="current-project-orbit current-project-orbit-b" aria-hidden="true" />
+                <span className="current-project-logo-beam" aria-hidden="true" />
                 <img
                   className="current-project-logo"
                   src={TRADEDEX_LOGO}
@@ -348,6 +365,7 @@ export default function About() {
                   }}
                 />
                 <span className="current-project-tag">[ 01 ]</span>
+                <span className="current-project-release">latest · v1.5.2</span>
                 <span className="current-project-scan" aria-hidden="true" />
                 <span className="current-project-corner current-project-corner-tl" aria-hidden="true" />
                 <span className="current-project-corner current-project-corner-tr" aria-hidden="true" />
@@ -387,9 +405,15 @@ export default function About() {
               </div>
 
               <div className="current-project-body">
-                <div className="current-project-meta">
-                  <span>./project</span>
-                  <span>open-source · main</span>
+                <div className="current-project-body-head">
+                  <div className="current-project-meta">
+                    <span>./project</span>
+                    <span>open-source · main</span>
+                  </div>
+                  <span className="current-project-verify">
+                    <span aria-hidden="true" />
+                    VT clean
+                  </span>
                 </div>
 
                 <h3 className="current-project-title">
@@ -411,6 +435,21 @@ export default function About() {
                   <span>PKHeX</span>
                 </div>
 
+                <div className="current-project-signal-row" aria-label="Release checks">
+                  <span>
+                    <em>release</em>
+                    <strong>v1.5.2</strong>
+                  </span>
+                  <span>
+                    <em>binary</em>
+                    <strong>63 MB</strong>
+                  </span>
+                  <span>
+                    <em>scan</em>
+                    <strong>69/71</strong>
+                  </span>
+                </div>
+
                 <div className="current-project-footer">
                   <span className="current-project-cta">
                     <span aria-hidden="true">$</span> view options
@@ -423,259 +462,374 @@ export default function About() {
         </div>
       </div>
 
-      {modalOpen && (
-        <ModalPortal>
-          <div className="modal-backdrop tradedex-modal-backdrop" onClick={closeModal}>
-            <div
-              className={`modal-card tradedex-modal tradedex-modal-tone-${verdictMeta?.tone || 'pending'}`}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="tradedex-modal-title"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="modal-header">
-                <div>
-                  <h3 className="modal-title" id="tradedex-modal-title">
-                    TradeDex // safe download gate
+      {modalOpen && (() => {
+        const stateOf = (id) => {
+          const idx = STAGE_INDEX[id]
+          if (isErrored && idx === stageIndex) return 'error'
+          if (idx < stageIndex || (isDone && idx <= stageIndex)) return 'done'
+          if (idx === stageIndex) return 'active'
+          return 'pending'
+        }
+
+        const lines = []
+        lines.push({ kind: 'prompt', text: 'tradedex scan --release latest --validate' })
+        lines.push({ kind: 'blank' })
+
+        lines.push({
+          kind: 'step',
+          label: 'init scanner',
+          state: stateOf('init'),
+        })
+
+        const dlState = stateOf('downloading')
+        lines.push({
+          kind: 'step',
+          label: 'pull asset',
+          state: dlState,
+          badge: dlState === 'active' ? `${Math.round(downloadProgress * 100)}%` : undefined,
+        })
+        if (scan?.asset?.name) {
+          lines.push({
+            kind: 'detail',
+            text: `${scan.asset.name} · ${formatBytes(scan.asset.size)}`,
+          })
+        }
+
+        lines.push({
+          kind: 'step',
+          label: 'compute sha-256',
+          state: stateOf('hashing'),
+        })
+        if (scan?.sha256) {
+          lines.push({ kind: 'detail', text: shortHash(scan.sha256) })
+        }
+
+        lines.push({
+          kind: 'step',
+          label: 'query virustotal',
+          state: stateOf('querying'),
+        })
+
+        if (scan?.vt?.submitted) {
+          lines.push({ kind: 'step', label: 'upload sample', state: stateOf('submitting') })
+          lines.push({ kind: 'step', label: 'await verdict', state: stateOf('analyzing') })
+        }
+
+        if (stats) {
+          const safe = (stats.harmless || 0) + (stats.undetected || 0)
+          lines.push({
+            kind: 'detail',
+            text: `engines ${stats.total} · clean ${safe} · susp ${stats.suspicious} · mal ${stats.malicious}`,
+          })
+        }
+
+        if (isDone) {
+          lines.push({ kind: 'blank' })
+          if (isClean) {
+            lines.push({ kind: 'verdict', tone: 'safe', text: 'verdict · clean — gate unlocked' })
+          } else if (isSuspicious) {
+            lines.push({ kind: 'verdict', tone: 'warn', text: 'verdict · suspicious — review report' })
+          } else if (isMalicious) {
+            lines.push({ kind: 'verdict', tone: 'danger', text: 'verdict · malicious — gate sealed' })
+          } else if (notScanned) {
+            lines.push({ kind: 'verdict', tone: 'warn', text: 'verdict · unknown — not scanned by vt' })
+          }
+        }
+
+        if (isErrored) {
+          lines.push({ kind: 'blank' })
+          lines.push({ kind: 'verdict', tone: 'danger', text: `scanner.fail — ${scan?.error || 'unknown error'}` })
+        }
+
+        if (scanError) {
+          lines.push({ kind: 'blank' })
+          lines.push({ kind: 'verdict', tone: 'danger', text: scanError })
+        }
+
+        lines.push({ kind: 'blank' })
+        lines.push({ kind: 'prompt-cursor' })
+
+        const summaryTone = verdictMeta?.tone || 'pending'
+        const verdictLabel = verdictMeta?.label || 'scanner booting'
+        const verdictDetail = verdictMeta?.detail || 'resolviendo release latest'
+
+        return (
+          <ModalPortal>
+            <div className="modal-backdrop tradedex-modal-backdrop" onClick={closeModal}>
+              <div
+                className={`modal-card tradedex-modal tradedex-modal-tone-${summaryTone}`}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="tradedex-modal-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {/* Terminal chrome */}
+                <div className="tdx-titlebar" aria-hidden="true">
+                  <span className="tdx-dots">
+                    <span /><span /><span />
+                  </span>
+                  <span className="tdx-titlebar-path">
+                    daivr@scanner <em>:</em> ~/tradedex
+                  </span>
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="tdx-titlebar-close"
+                    aria-label="Cerrar"
+                  >
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M6 6l12 12" /><path d="M18 6L6 18" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Heading inside terminal */}
+                <div className="tdx-heading">
+                  <h3 className="tdx-heading-title" id="tradedex-modal-title">
+                    <span className="tdx-heading-glyph" aria-hidden="true">▍</span>
+                    TradeDex<span className="tdx-heading-dim">.exe</span>{' '}
+                    <span className="tdx-heading-sep">//</span>{' '}
+                    <span className="tdx-heading-accent">safe download gate</span>
                   </h3>
-                  <p className="modal-text">
-                    El binario se hashea en el server y se valida contra VirusTotal
-                    antes de habilitar la descarga. Si el verdict no es limpio, la
-                    gate queda cerrada.
+                  <p className="tdx-heading-sub">
+                    Hash + VirusTotal antes de habilitar la descarga. Si el verdict
+                    no es limpio, la gate queda cerrada.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="modal-close"
-                  aria-label="Cerrar"
-                >
-                  x
-                </button>
-              </div>
 
-              <div className="tradedex-body">
-                {/* Horizontal stepper */}
-                <div className="tradedex-pipeline">
-                  <div className="tradedex-pipeline-header">
-                    <span>scanner.pipeline</span>
-                    <span>
-                      {isErrored ? 'error' : isDone ? 'completed' : 'running'}
+                {/* Security summary */}
+                <div className={`tdx-summary is-${summaryTone}`}>
+                  <div className="tdx-summary-main">
+                    <span className="tdx-summary-eyebrow">security verdict</span>
+                    <strong>{verdictLabel}</strong>
+                    <span>{verdictDetail}</span>
+                  </div>
+
+                  <div className="tdx-summary-grid" aria-label="Scan summary">
+                    <span className="tdx-summary-metric">
+                      <em>release</em>
+                      <strong>{scan?.tag || 'latest'}</strong>
+                    </span>
+                    <span className="tdx-summary-metric">
+                      <em>asset</em>
+                      <strong>{scan?.asset?.size ? formatBytes(scan.asset.size) : 'queued'}</strong>
+                    </span>
+                    <span className="tdx-summary-metric">
+                      <em>sha</em>
+                      <strong>{scan?.sha256 ? shortHash(scan.sha256) : 'pending'}</strong>
+                    </span>
+                    <span className={`tdx-summary-metric ${flaggedEngineCount > 0 ? 'is-threat' : ''}`}>
+                      <em>engines</em>
+                      <strong>
+                        {stats
+                          ? `${cleanEngineCount}/${stats.total} clean`
+                          : 'queued'}
+                      </strong>
                     </span>
                   </div>
-                  <ol className="tradedex-stepper">
-                    {STAGES
-                      .filter((s) => s.id !== 'submitting' || stageId === 'submitting' || scan?.vt?.submitted)
-                      .filter((s) => s.id !== 'analyzing' || stageId === 'analyzing' || scan?.vt?.submitted)
-                      .map((s) => {
-                        const idx = STAGE_INDEX[s.id]
-                        let state = 'pending'
-                        if (isErrored && idx === stageIndex) state = 'error'
-                        else if (idx < stageIndex || (isDone && idx <= stageIndex)) state = 'done'
-                        else if (idx === stageIndex) state = 'active'
+
+                  <div className="tdx-stage-rail" aria-label={`Scan progress ${scanProgressPercent}%`}>
+                    <div className="tdx-stage-rail-top">
+                      <span>{activeStageLabel}</span>
+                      <strong>{scanProgressPercent}%</strong>
+                    </div>
+                    <div className="tdx-stage-bar" aria-hidden="true">
+                      <span style={{ '--tdx-progress': `${scanProgressPercent}%` }} />
+                    </div>
+                    <div className="tdx-stage-dots" aria-hidden="true">
+                      {STAGES.map((stage) => (
+                        <span
+                          key={stage.id}
+                          className={`tdx-stage-dot is-${stateOf(stage.id)}`}
+                          title={stage.label}
+                        >
+                          <i />
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Terminal log body */}
+                <div className="tdx-console">
+                  <span className="tdx-scanlines" aria-hidden="true" />
+
+                  <ol className="tdx-log">
+                    {lines.map((line, idx) => {
+                      const num = String(idx + 1).padStart(2, '0')
+                      if (line.kind === 'blank') {
+                        return <li key={idx} className="tdx-line tdx-line-blank"><span className="tdx-num">{num}</span></li>
+                      }
+                      if (line.kind === 'prompt') {
                         return (
-                          <li key={s.id} className={`tradedex-step is-${state}`}>
-                            <span className="tradedex-step-dot" aria-hidden="true">
-                              <span className="tradedex-step-dot-inner" />
-                            </span>
-                            <span className="tradedex-step-label">{s.label}</span>
-                            {s.id === 'downloading' && state === 'active' && (
-                              <span className="tradedex-step-progress">
-                                {Math.round(downloadProgress * 100)}%
-                              </span>
-                            )}
+                          <li key={idx} className="tdx-line tdx-line-prompt">
+                            <span className="tdx-num">{num}</span>
+                            <span className="tdx-prompt-user">user@daivr</span>
+                            <span className="tdx-prompt-sigil">$</span>
+                            <span className="tdx-prompt-cmd">{line.text}</span>
                           </li>
                         )
-                      })}
+                      }
+                      if (line.kind === 'prompt-cursor') {
+                        return (
+                          <li key={idx} className="tdx-line tdx-line-prompt">
+                            <span className="tdx-num">{num}</span>
+                            <span className="tdx-prompt-user">user@daivr</span>
+                            <span className="tdx-prompt-sigil">$</span>
+                            <span className="tdx-cursor" aria-hidden="true" />
+                          </li>
+                        )
+                      }
+                      if (line.kind === 'detail') {
+                        return (
+                          <li key={idx} className="tdx-line tdx-line-detail">
+                            <span className="tdx-num">{num}</span>
+                            <span className="tdx-detail-arrow" aria-hidden="true">└─</span>
+                            <span className="tdx-detail-text">{line.text}</span>
+                          </li>
+                        )
+                      }
+                      if (line.kind === 'verdict') {
+                        return (
+                          <li key={idx} className={`tdx-line tdx-line-verdict is-${line.tone}`}>
+                            <span className="tdx-num">{num}</span>
+                            <span className="tdx-verdict-glyph" aria-hidden="true">
+                              {line.tone === 'safe' ? '✓' : line.tone === 'danger' ? '✗' : '!'}
+                            </span>
+                            <span className="tdx-verdict-text">{line.text}</span>
+                          </li>
+                        )
+                      }
+                      // step
+                      return (
+                        <li key={idx} className={`tdx-line tdx-line-step is-${line.state}`}>
+                          <span className="tdx-num">{num}</span>
+                          <span className="tdx-step-arrow" aria-hidden="true">→</span>
+                          <span className="tdx-step-label">{line.label}</span>
+                          <span className="tdx-step-fill" aria-hidden="true" />
+                          <span className="tdx-step-tag">
+                            {line.badge
+                              ? line.badge
+                              : line.state === 'done'
+                                ? 'ok'
+                                : line.state === 'active'
+                                  ? '...'
+                                  : line.state === 'error'
+                                    ? 'fail'
+                                    : '—'}
+                          </span>
+                        </li>
+                      )
+                    })}
                   </ol>
                 </div>
 
-                {/* Hero verdict with integrated stats */}
-                <div className={`tradedex-verdict tradedex-verdict-hero tone-${verdictMeta?.tone || 'pending'}`}>
-                  <div className="tradedex-verdict-left">
-                    <span className="tradedex-verdict-led" aria-hidden="true" />
-                    <div className="tradedex-verdict-text">
-                      <span className="tradedex-verdict-kicker">vt.gate</span>
-                      <strong className="tradedex-verdict-label">
-                        {verdictMeta?.label || 'inicializando'}
-                      </strong>
-                      {verdictMeta?.detail && (
-                        <span className="tradedex-verdict-detail">{verdictMeta.detail}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="tradedex-verdict-chips">
-                    <div className="tradedex-chip is-malicious">
-                      <span>malicious</span>
-                      <strong>{stats ? stats.malicious : '·'}</strong>
-                    </div>
-                    <div className="tradedex-chip is-suspicious">
-                      <span>suspicious</span>
-                      <strong>{stats ? stats.suspicious : '·'}</strong>
-                    </div>
-                    <div className="tradedex-chip is-harmless">
-                      <span>harmless</span>
-                      <strong>{stats ? stats.harmless + stats.undetected : '·'}</strong>
-                    </div>
-                    <div className="tradedex-chip is-total">
-                      <span>engines</span>
-                      <strong>{stats ? stats.total : '·'}</strong>
-                    </div>
-                    {scan?.vt?.permalink && (
-                      <a
-                        className="tradedex-verdict-link"
-                        href={scan.vt.permalink}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        full report ↗
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {/* Release info as horizontal row */}
-                <div className="tradedex-release-strip">
-                  <div className="tradedex-release-cell">
-                    <span className="tradedex-release-label">release.tag</span>
-                    <span className="tradedex-release-value">{scan?.tag || '...'}</span>
-                  </div>
-                  <div className="tradedex-release-cell tradedex-release-cell-wide">
-                    <span className="tradedex-release-label">asset</span>
-                    <span className="tradedex-release-value tradedex-release-asset">
-                      {scan?.asset?.name || '...'}
-                    </span>
-                  </div>
-                  <div className="tradedex-release-cell">
-                    <span className="tradedex-release-label">size</span>
-                    <span className="tradedex-release-value">
-                      {scan?.asset?.size ? formatBytes(scan.asset.size) : '—'}
-                    </span>
-                  </div>
-                  <div className="tradedex-release-cell tradedex-release-cell-wide">
-                    <span className="tradedex-release-label">sha-256</span>
-                    <span className="tradedex-release-value tradedex-release-hash">
-                      {scan?.sha256
-                        ? <code title={scan.sha256}>{shortHash(scan.sha256)}</code>
-                        : <span className="tradedex-pulse">computando...</span>}
-                    </span>
-                  </div>
-                </div>
-
-                {scanError && (
-                  <p className="tradedex-release-error">{scanError}</p>
-                )}
-
-                {/* Actions */}
-                <div className="tradedex-modal-options">
-                <a
-                  href={TRADEDEX_REPO}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="tradedex-option"
-                  onClick={closeModal}
-                >
-                  <span className="tradedex-option-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-                      <path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55v-1.93c-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18.92-.26 1.91-.39 2.89-.39.98 0 1.97.13 2.89.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.41-5.25 5.69.42.36.79 1.07.79 2.16v3.2c0 .31.21.66.79.55C20.21 21.4 23.5 17.1 23.5 12.02 23.5 5.74 18.27.5 12 .5z" />
-                    </svg>
-                  </span>
-                  <span className="tradedex-option-body">
-                    <span className="tradedex-option-kicker">github.com</span>
-                    <span className="tradedex-option-title">Ver repositorio</span>
-                    <span className="tradedex-option-desc">
-                      Abre Daiivr/TradeDex — código, issues, releases y docs.
-                    </span>
-                  </span>
-                  <span className="tradedex-option-arrow" aria-hidden="true">↗</span>
-                </a>
-
-                <button
-                  type="button"
-                  onClick={handleDownload}
-                  disabled={!canDownload || downloading}
-                  className="tradedex-option tradedex-option-primary"
-                >
-                  <span className="tradedex-option-icon" aria-hidden="true">
-                    {canDownload ? (
-                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 3v12" />
-                        <path d="M6 11l6 6 6-6" />
-                        <path d="M5 21h14" />
-                      </svg>
-                    ) : (
-                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="4" y="10" width="16" height="11" rx="2" />
-                        <path d="M8 10V7a4 4 0 018 0v3" />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="tradedex-option-body">
-                    <span className="tradedex-option-kicker">
-                      {isErrored
-                        ? 'scanner offline'
-                        : !isDone
-                          ? 'gate locked · scanning'
-                          : isMalicious
-                            ? 'gate locked · flagged'
-                            : notScanned
-                              ? 'gate · unknown sample'
-                              : `release · ${scan?.tag || 'latest'}`}
-                    </span>
-                    <span className="tradedex-option-title">
-                      {downloading
-                        ? 'iniciando descarga...'
-                        : canDownload
-                          ? 'Descargar último release'
-                          : isMalicious
-                            ? 'Bloqueado por VirusTotal'
-                            : notScanned
-                              ? 'Descarga sin verificar bloqueada'
-                              : 'Descarga bloqueada'}
-                    </span>
-                    <span className="tradedex-option-desc">
-                      {canDownload && scan?.asset
-                        ? `${scan.asset.name} · ${formatBytes(scan.asset.size)}`
-                        : isMalicious
-                          ? `${stats?.malicious || 0}/${stats?.total || '?'} engines lo marcan como malicioso.`
-                          : !isDone
-                            ? 'Esperando verdict del pipeline antes de habilitar.'
-                            : notScanned
-                              ? 'Abre el reporte de VT y vuelve a intentar.'
-                              : 'No disponible.'}
-                    </span>
-                  </span>
-                  <span className="tradedex-option-arrow" aria-hidden="true">
-                    {canDownload ? '↓' : '✕'}
-                  </span>
-                </button>
-                </div>
-              </div>
-
-              <div className="modal-actions">
-                {(isMalicious || notScanned || isErrored) && (
+                {/* Action buttons */}
+                <div className="tdx-actions">
                   <a
-                    href={TRADEDEX_RELEASE_PAGE}
+                    href={TRADEDEX_REPO}
                     target="_blank"
                     rel="noreferrer"
-                    className="modal-btn-cancel tradedex-bypass-link"
+                    className="tdx-btn tdx-btn-secondary"
+                    onClick={closeModal}
                   >
-                    abrir releases en github
+                    <span className="tdx-btn-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55v-1.93c-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18.92-.26 1.91-.39 2.89-.39.98 0 1.97.13 2.89.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.41-5.25 5.69.42.36.79 1.07.79 2.16v3.2c0 .31.21.66.79.55C20.21 21.4 23.5 17.1 23.5 12.02 23.5 5.74 18.27.5 12 .5z" />
+                      </svg>
+                    </span>
+                    <span className="tdx-btn-body">
+                      <span className="tdx-btn-cmd">./open-repo</span>
+                      <span className="tdx-btn-desc">Daiivr/TradeDex en GitHub</span>
+                    </span>
+                    <span className="tdx-btn-arrow" aria-hidden="true">↗</span>
                   </a>
-                )}
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="modal-btn-cancel"
-                >
-                  Cancelar
-                </button>
+
+                  <button
+                    type="button"
+                    onClick={handleDownload}
+                    disabled={!canDownload || downloading}
+                    className={`tdx-btn tdx-btn-primary is-${summaryTone}`}
+                  >
+                    <span className="tdx-btn-icon" aria-hidden="true">
+                      {canDownload ? (
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 4v12" /><path d="M6 12l6 6 6-6" /><path d="M5 21h14" />
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 018 0v3" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="tdx-btn-body">
+                      <span className="tdx-btn-cmd">
+                        {downloading
+                          ? './downloading...'
+                          : canDownload
+                            ? './download'
+                            : isMalicious
+                              ? './gate-sealed'
+                              : !isDone
+                                ? './waiting...'
+                                : './gate-locked'}
+                      </span>
+                      <span className="tdx-btn-desc">
+                        {canDownload && scan?.asset
+                          ? `${scan.asset.name} · ${formatBytes(scan.asset.size)}`
+                          : isMalicious
+                            ? `${stats?.malicious || 0}/${stats?.total || '?'} engines flagged`
+                            : !isDone
+                              ? 'Esperando verdict del pipeline'
+                              : notScanned
+                                ? 'Sample sin escanear · revisa VT'
+                                : 'No disponible'}
+                      </span>
+                    </span>
+                    <span className="tdx-btn-arrow" aria-hidden="true">
+                      {canDownload ? '▼' : '✕'}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Status bar (single line, VSCode style) */}
+                <div className={`tdx-statusbar is-${summaryTone}`} aria-hidden="true">
+                  <span className="tdx-statusbar-led" />
+                  <span className="tdx-statusbar-state">
+                    {isErrored ? 'fault' : isDone ? 'ready' : 'streaming'}
+                  </span>
+                  <span className="tdx-statusbar-sep" />
+                  <span className="tdx-statusbar-item">
+                    <em>tag</em> {scan?.tag || 'latest'}
+                  </span>
+                  <span className="tdx-statusbar-item">
+                    <em>vt</em> {stats ? `${stats.harmless + stats.undetected}/${stats.total}` : '—/—'}
+                  </span>
+                  {scan?.vt?.permalink && (
+                    <a
+                      className="tdx-statusbar-link"
+                      href={scan.vt.permalink}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      vt.report ↗
+                    </a>
+                  )}
+                  <span className="tdx-statusbar-spacer" />
+                  <span className="tdx-statusbar-kbd">esc</span>
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="tdx-statusbar-close"
+                  >
+                    close
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </ModalPortal>
-      )}
+          </ModalPortal>
+        )
+      })()}
     </section>
   )
 }
