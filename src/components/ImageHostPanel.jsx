@@ -2,9 +2,30 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import ModalPortal from './ModalPortal'
 
 const TABS = [
-  { id: 'config', label: 'config.toml', index: '01', summary: 'embed + auth' },
-  { id: 'sharex', label: 'sharex.sxcu', index: '02', summary: 'ShareX route' },
-  { id: 'gallery', label: 'gallery.sh', index: '03', summary: 'public vault' },
+  {
+    id: 'config',
+    label: 'broadcast',
+    index: '01',
+    summary: 'embed + auth',
+    heading: 'Broadcast lab',
+    detail: 'Shape the public card and watch its Discord output in real time.',
+  },
+  {
+    id: 'sharex',
+    label: 'uplink',
+    index: '02',
+    summary: 'ShareX route',
+    heading: 'Uploader uplink',
+    detail: 'Install the ShareX cartridge and inspect the upload contract.',
+  },
+  {
+    id: 'gallery',
+    label: 'vault',
+    index: '03',
+    summary: 'public vault',
+    heading: 'Asset vault',
+    detail: 'Review every capture and its public display surface.',
+  },
 ]
 
 const formatBytes = (bytes) => {
@@ -101,96 +122,125 @@ function DiscordEmbedPreview({ settings, previewImage, me }) {
   const showFooter = notAnonymous && (Boolean(footer) || showTimestamp)
 
   return (
-    <div className="discord-preview" aria-label="Discord embed preview">
-      <div className="discord-preview-msg">
-        <div className="discord-preview-avatar">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" />
-          ) : (
-            <div className="discord-preview-avatar-fallback">{username[0]?.toUpperCase() || 'D'}</div>
-          )}
-        </div>
-        <div className="discord-preview-content">
-          <div className="discord-preview-meta">
-            <strong className="discord-preview-name">{username}</strong>
-            <time className="discord-preview-time">{timeLabel}</time>
+    <div
+      className="imagehost-broadcast"
+      style={{ '--preview-accent': color, '--preview-image': `url("${previewImage}")` }}
+    >
+      <div className="imagehost-broadcast-bar">
+        <span className="imagehost-broadcast-signal">
+          <i aria-hidden="true" />
+          output.preview
+        </span>
+        <span className="imagehost-broadcast-metrics">
+          <code>OG: ON</code>
+          <code>IMG: 200</code>
+          <code>DISCORD</code>
+        </span>
+      </div>
+      <div className="imagehost-broadcast-screen">
+        <div className="imagehost-broadcast-corners" aria-hidden="true" />
+        <div className="discord-preview" aria-label="Discord embed preview">
+          <div className="discord-preview-channel">
+            <span># share-feed</span>
+            <strong>embed transmission simulator</strong>
           </div>
-          <a
-            href={ctx.url}
-            target="_blank"
-            rel="noreferrer"
-            className="discord-preview-url"
-            onClick={(e) => e.preventDefault()}
-          >
-            {ctx.url}
-          </a>
-
-          {showEmbed && (
-            <div
-              className="discord-preview-embed"
-              style={{ '--embed-color': color }}
-            >
-              <div className="discord-preview-embed-body">
-                {showSite && (
-                  <div className="discord-preview-embed-site">
-                    {siteIconUrl && (
-                      <img src={siteIconUrl} alt="" className="discord-preview-embed-author-icon" />
-                    )}
-                    {siteUrl ? (
-                      <a
-                        href={siteUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        {siteName}
-                      </a>
-                    ) : (
-                      <span>{siteName}</span>
-                    )}
-                  </div>
-                )}
-                {showAuthor && (
-                  <div className="discord-preview-embed-author">
-                    <span className="discord-preview-embed-author-label">by</span>
-                    {authorUrl ? (
-                      <a
-                        href={authorUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        {author}
-                      </a>
-                    ) : (
-                      <span>{author}</span>
-                    )}
-                  </div>
-                )}
-                {title && (
-                  <div className="discord-preview-embed-title">{title}</div>
-                )}
-                {description && (
-                  <div className="discord-preview-embed-desc">{description}</div>
-                )}
-                {previewImage && (
-                  <div className="discord-preview-embed-image">
-                    <img src={previewImage} alt="" />
-                  </div>
-                )}
-                {showFooter && (
-                  <div className="discord-preview-embed-footer">
-                    {footer && <span>{footer}</span>}
-                    {footer && showTimestamp && (
-                      <span className="discord-preview-embed-footer-sep">•</span>
-                    )}
-                    {showTimestamp && <time>{timeLabel}</time>}
-                  </div>
-                )}
-              </div>
+          <div className="discord-preview-msg">
+            <div className="discord-preview-avatar">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" />
+              ) : (
+                <div className="discord-preview-avatar-fallback">{username[0]?.toUpperCase() || 'D'}</div>
+              )}
             </div>
-          )}
+            <div className="discord-preview-content">
+              <div className="discord-preview-meta">
+                <strong className="discord-preview-name">{username}</strong>
+                <span className="discord-preview-bot">APP</span>
+                <time className="discord-preview-time">{timeLabel}</time>
+              </div>
+              <a
+                href={ctx.url}
+                target="_blank"
+                rel="noreferrer"
+                className="discord-preview-url"
+                onClick={(e) => e.preventDefault()}
+              >
+                {ctx.url}
+              </a>
+
+              {showEmbed && (
+                <div
+                  className="discord-preview-embed"
+                  style={{ '--embed-color': color }}
+                >
+                  <div className="discord-preview-embed-body">
+                    {showSite && (
+                      <div className="discord-preview-embed-site">
+                        {siteIconUrl && (
+                          <img src={siteIconUrl} alt="" className="discord-preview-embed-author-icon" />
+                        )}
+                        {siteUrl ? (
+                          <a
+                            href={siteUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            {siteName}
+                          </a>
+                        ) : (
+                          <span>{siteName}</span>
+                        )}
+                      </div>
+                    )}
+                    {showAuthor && (
+                      <div className="discord-preview-embed-author">
+                        <span className="discord-preview-embed-author-label">by</span>
+                        {authorUrl ? (
+                          <a
+                            href={authorUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            {author}
+                          </a>
+                        ) : (
+                          <span>{author}</span>
+                        )}
+                      </div>
+                    )}
+                    {title && (
+                      <div className="discord-preview-embed-title">{title}</div>
+                    )}
+                    {description && (
+                      <div className="discord-preview-embed-desc">{description}</div>
+                    )}
+                    {previewImage && (
+                      <div className="discord-preview-embed-image">
+                        <img src={previewImage} alt="" />
+                      </div>
+                    )}
+                    {showFooter && (
+                      <div className="discord-preview-embed-footer">
+                        {footer && <span>{footer}</span>}
+                        {footer && showTimestamp && (
+                          <span className="discord-preview-embed-footer-sep">•</span>
+                        )}
+                        {showTimestamp && <time>{timeLabel}</time>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
+      </div>
+      <div className="imagehost-broadcast-footer">
+        <span>public route</span>
+        <code>{ctx.url}</code>
+        <strong>{showEmbed ? 'READY' : 'DISABLED'}</strong>
       </div>
     </div>
   )
@@ -211,6 +261,7 @@ export default function ImageHostPanel({ open, onClose, me }) {
   const [liveStatus, setLiveStatus] = useState('idle')
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [deletingCode, setDeletingCode] = useState(null)
+  const [selectedGalleryCode, setSelectedGalleryCode] = useState(null)
 
   const fetchSettings = useCallback(async () => {
     setLoading(true)
@@ -467,6 +518,14 @@ export default function ImageHostPanel({ open, onClose, me }) {
     [gallery],
   )
 
+  const selectedGalleryImage = useMemo(
+    () =>
+      gallery.find((image) => image.code === selectedGalleryCode) ||
+      gallery[0] ||
+      null,
+    [gallery, selectedGalleryCode],
+  )
+
   const activeTabMeta = useMemo(
     () => TABS.find((item) => item.id === tab) || TABS[0],
     [tab],
@@ -488,101 +547,118 @@ export default function ImageHostPanel({ open, onClose, me }) {
           aria-labelledby="imagehost-title"
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="modal-header imagehost-header">
-            <div className="imagehost-header-copy">
-              <h3 className="modal-title" id="imagehost-title">
-                <span className="imagehost-title-mark" aria-hidden="true">/</span>
-                imagehost.daivr.dev
-              </h3>
-              <p className="modal-text">
-                Panel de admin para configurar ShareX, gestionar la galería y
-                rotar el secret. Solo vos podés ver esto.
-              </p>
-            </div>
-            <div className="imagehost-header-tools">
-              {settings && tab === 'config' && (
-                <div className="imagehost-save-dock">
-                  <span className={`imagehost-save-status is-${saveStatus.kind}`}>
-                    {saveStatus.message || 'ready'}
-                  </span>
+          <div className="imagehost-workstation">
+            <aside className="imagehost-rail">
+              <div className="imagehost-rail-brand">
+                <span>CAPTURE OS</span>
+                <h3 className="modal-title" id="imagehost-title">
+                  <strong aria-hidden="true">/i</strong>
+                  imagehost
+                  <small>.daivr.dev</small>
+                </h3>
+                <p>private media console</p>
+              </div>
+
+              <nav className="imagehost-tabs imagehost-rail-tabs" role="tablist">
+                {TABS.map((t) => (
                   <button
                     type="button"
-                    onClick={saveSettings}
-                    disabled={saving}
-                    className="imagehost-btn-save"
+                    key={t.id}
+                    onClick={() => setTab(t.id)}
+                    role="tab"
+                    aria-selected={tab === t.id}
+                    className={`imagehost-tab ${tab === t.id ? 'is-active' : ''}`}
                   >
-                    {saving ? 'saving' : 'save'}
+                    <span className="imagehost-tab-index" aria-hidden="true">
+                      {t.index}
+                    </span>
+                    <span className="imagehost-tab-copy">
+                      <strong>{t.label}</strong>
+                      <em>{t.summary}</em>
+                    </span>
+                  </button>
+                ))}
+              </nav>
+
+              <div className="imagehost-rail-monitor" aria-label="ImageHost status">
+                <span className="imagehost-rail-label">telemetry</span>
+                <span className={`imagehost-live-chip is-${liveStatus}`}>
+                  <span aria-hidden="true" />
+                  {liveLabel}
+                </span>
+                <div>
+                  <em>vault</em>
+                  <strong>{gallery.length} files</strong>
+                </div>
+                <div>
+                  <em>storage</em>
+                  <strong>{formatBytes(galleryBytes)}</strong>
+                </div>
+                <div>
+                  <em>host</em>
+                  <strong>{publicHost}</strong>
+                </div>
+              </div>
+            </aside>
+
+            <section className="imagehost-desk">
+              <div className="imagehost-desk-header">
+                <div className="imagehost-desk-title">
+                  <span>workspace / {activeTabMeta.label}</span>
+                  <h4>{activeTabMeta.heading}</h4>
+                  <p>{activeTabMeta.detail}</p>
+                </div>
+                <div className="imagehost-header-tools">
+                  {settings && tab === 'config' && (
+                    <div className="imagehost-save-dock">
+                      <span className={`imagehost-save-status is-${saveStatus.kind}`}>
+                        {saveStatus.message || 'unsaved buffer'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={saveSettings}
+                        disabled={saving}
+                        className="imagehost-btn-save"
+                      >
+                        {saving ? 'saving' : 'commit'}
+                      </button>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="imagehost-close-btn"
+                    aria-label="Cerrar modal"
+                  >
+                    <span>exit</span>
+                    <strong>x</strong>
                   </button>
                 </div>
-              )}
-              <span className={`imagehost-live-chip is-${liveStatus}`}>
-                <span aria-hidden="true" />
-                {liveLabel}
-              </span>
-              <button
-                type="button"
-                onClick={onClose}
-                className="imagehost-close-btn"
-                aria-label="Cerrar modal"
-              >
-                <span>close</span>
-                <strong>x</strong>
-              </button>
-            </div>
-          </div>
+              </div>
 
-          <div className="imagehost-status-strip" aria-label="ImageHost status">
-            <span>
-              <em>screen</em>
-              <strong>{activeTabMeta.summary}</strong>
-            </span>
-            <span>
-              <em>vault</em>
-              <strong>{gallery.length} files</strong>
-            </span>
-            <span>
-              <em>storage</em>
-              <strong>{formatBytes(galleryBytes)}</strong>
-            </span>
-            <span>
-              <em>public</em>
-              <strong>{publicHost}</strong>
-            </span>
-          </div>
+              <div className="imagehost-desk-readouts" aria-hidden="true">
+                <span><em>mode</em><strong>{activeTabMeta.summary}</strong></span>
+                <span><em>route</em><strong>/i/{sampleCtx.code}</strong></span>
+                <span><em>renderer</em><strong>og + raw</strong></span>
+                <div className="imagehost-commandline">
+                  <code>imagehost.open('{tab}')</code>
+                  <i />
+                </div>
+              </div>
 
-          <nav className="imagehost-tabs" role="tablist">
-            {TABS.map((t) => (
-              <button
-                type="button"
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                role="tab"
-                aria-selected={tab === t.id}
-                className={`imagehost-tab ${tab === t.id ? 'is-active' : ''}`}
-              >
-                <span className="imagehost-tab-index" aria-hidden="true">
-                  {t.index}
-                </span>
-                <span className="imagehost-tab-copy">
-                  <strong><span aria-hidden="true">$</span> {t.label}</strong>
-                  <em>{t.summary}</em>
-                </span>
-              </button>
-            ))}
-          </nav>
-
-          {loading && !settings && (
-            <div className="imagehost-loading">cargando settings...</div>
-          )}
+              <div className="imagehost-screen">
+                {loading && !settings && (
+                  <div className="imagehost-loading">booting capture console...</div>
+                )}
 
           {settings && tab === 'config' && (
             <div className="imagehost-body imagehost-config-body">
               <div className="imagehost-cockpit">
                 <section className="imagehost-section imagehost-section-preview imagehost-preview-panel">
                   <header className="imagehost-section-header">
-                    <span className="imagehost-section-kicker">preview.discord</span>
+                    <span className="imagehost-section-kicker">broadcast.monitor</span>
                     <span className="imagehost-section-meta">
-                      live · cómo se ve cuando lo pegás en un canal
+                      salida real del link en Discord
                     </span>
                   </header>
                   <div className="imagehost-preview-stage">
@@ -689,10 +765,7 @@ export default function ImageHostPanel({ open, onClose, me }) {
                       ))}
                     </div>
                   </section>
-                </aside>
-              </div>
-
-              <div className="imagehost-settings-grid">
+                  <div className="imagehost-settings-grid">
                   <section className="imagehost-section imagehost-template-panel">
                     <header className="imagehost-section-header">
                       <span className="imagehost-section-kicker">embed.tpl</span>
@@ -926,8 +999,9 @@ export default function ImageHostPanel({ open, onClose, me }) {
                       />
                     </div>
                   </section>
+                  </div>
+                </aside>
               </div>
-
             </div>
           )}
 
@@ -1119,9 +1193,76 @@ export default function ImageHostPanel({ open, onClose, me }) {
 
           {tab === 'gallery' && (
             <div className="imagehost-body imagehost-gallery-body">
+              {selectedGalleryImage && (
+                <section className="imagehost-section imagehost-gallery-focus">
+                  <div className="imagehost-gallery-focus-stage">
+                    <header>
+                      <span className="imagehost-section-kicker">asset.viewport</span>
+                      <code>/i/{selectedGalleryImage.code}/raw</code>
+                    </header>
+                    <div className="imagehost-gallery-focus-media">
+                      <img
+                        src={selectedGalleryImage.rawUrl}
+                        alt={selectedGalleryImage.originalName}
+                      />
+                      <span className="imagehost-gallery-reticle" aria-hidden="true" />
+                    </div>
+                  </div>
+                  <aside className="imagehost-gallery-inspector">
+                    <span className="imagehost-inspector-status">
+                      <i aria-hidden="true" />
+                      selected asset
+                    </span>
+                    <h4>{selectedGalleryImage.originalName}</h4>
+                    <code className="imagehost-inspector-route">
+                      GET /i/{selectedGalleryImage.code}
+                    </code>
+                    <dl>
+                      <div>
+                        <dt>code</dt>
+                        <dd>/{selectedGalleryImage.code}</dd>
+                      </div>
+                      <div>
+                        <dt>size</dt>
+                        <dd>{formatBytes(selectedGalleryImage.size)}</dd>
+                      </div>
+                      <div>
+                        <dt>uploaded</dt>
+                        <dd>{formatDateShort(selectedGalleryImage.uploadedAt)}</dd>
+                      </div>
+                    </dl>
+                    <div className="imagehost-inspector-actions">
+                      <a
+                        className="imagehost-btn-save"
+                        href={selectedGalleryImage.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        preview page
+                      </a>
+                      <button
+                        type="button"
+                        className="imagehost-mini-btn"
+                        onClick={() => copyToClipboard(selectedGalleryImage.url)}
+                      >
+                        copy url
+                      </button>
+                      <a
+                        className="imagehost-mini-btn"
+                        href={selectedGalleryImage.rawUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        open raw
+                      </a>
+                    </div>
+                  </aside>
+                </section>
+              )}
+
               <section className="imagehost-section imagehost-gallery-panel">
                 <header className="imagehost-section-header">
-                  <span className="imagehost-section-kicker">gallery</span>
+                  <span className="imagehost-section-kicker">asset.library</span>
                   <span className="imagehost-section-meta">
                     {gallery.length} item{gallery.length === 1 ? '' : 's'} · {liveLabel}
                   </span>
@@ -1144,16 +1285,24 @@ export default function ImageHostPanel({ open, onClose, me }) {
                 {gallery.length > 0 && (
                   <ul className="imagehost-gallery">
                     {gallery.map((img) => (
-                      <li key={img.code} className="imagehost-gallery-item">
-                        <a
-                          href={img.url}
-                          target="_blank"
-                          rel="noreferrer"
+                      <li
+                        key={img.code}
+                        className={`imagehost-gallery-item ${
+                          selectedGalleryImage?.code === img.code ? 'is-selected' : ''
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGalleryCode(img.code)}
                           className="imagehost-gallery-thumb"
+                          aria-label={`Inspect ${img.originalName}`}
                         >
                           <img src={img.rawUrl} alt={img.originalName} loading="lazy" />
                           <span className="imagehost-gallery-code">/{img.code}</span>
-                        </a>
+                          <span className="imagehost-gallery-select">
+                            {selectedGalleryImage?.code === img.code ? 'selected' : 'inspect'}
+                          </span>
+                        </button>
                         <div className="imagehost-gallery-meta">
                           <span title={img.originalName}>{img.originalName}</span>
                           <span>{formatBytes(img.size)} · {formatDateShort(img.uploadedAt)}</span>
@@ -1164,15 +1313,15 @@ export default function ImageHostPanel({ open, onClose, me }) {
                             className="imagehost-mini-btn"
                             onClick={() => copyToClipboard(img.url)}
                           >
-                            copy url
+                            copy
                           </button>
                           <a
                             className="imagehost-mini-btn"
-                            href={img.rawUrl}
+                            href={img.url}
                             target="_blank"
                             rel="noreferrer"
                           >
-                            raw
+                            view
                           </a>
                           <button
                             type="button"
@@ -1190,6 +1339,9 @@ export default function ImageHostPanel({ open, onClose, me }) {
               </section>
             </div>
           )}
+              </div>
+            </section>
+          </div>
         </div>
       </div>
     </ModalPortal>

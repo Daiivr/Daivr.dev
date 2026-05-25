@@ -1633,12 +1633,280 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
       width: 100%;
     }
   }
+
+  /* Public packet viewer: arcade capture terminal */
+  .frame {
+    width: min(96vw, 1320px);
+    max-width: min(96vw, 1320px);
+    padding: 0;
+    overflow: hidden;
+  }
+  .head {
+    min-height: 76px;
+    margin: 0;
+    padding: 18px 20px;
+    border-bottom-style: solid;
+  }
+  .head-brand {
+    display: grid;
+    gap: 6px;
+  }
+  .head-label {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 7px;
+    color: var(--green);
+    font-size: 0.5rem;
+    font-weight: 900;
+    letter-spacing: 0.23em;
+  }
+  .head-label::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 11px currentColor;
+  }
+  .head-brand .kicker {
+    gap: 8px;
+  }
+  .head-brand .kicker::before {
+    content: '/i';
+    display: inline-flex;
+    height: 24px;
+    align-items: center;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 255, 229, 0.36);
+    background: rgba(0, 255, 229, 0.09);
+    color: var(--pink);
+    padding: 0 7px;
+    text-shadow: 0 0 9px rgba(255, 43, 214, 0.4);
+  }
+  .head-brand small {
+    color: rgba(139, 155, 188, 0.78);
+    font-size: 0.52rem;
+    font-weight: 850;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .viewer {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) minmax(278px, 306px);
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+  }
+  .route-rail {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    align-items: start;
+    justify-items: center;
+    gap: 12px;
+    min-height: 100%;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 229, 0.2);
+    background:
+      linear-gradient(180deg, rgba(0, 255, 229, 0.085), transparent 44%, rgba(255, 43, 214, 0.06)),
+      rgba(0, 0, 0, 0.28);
+    padding: 12px 7px;
+  }
+  .route-rail strong {
+    display: inline-flex;
+    width: 39px;
+    height: 39px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    border: 1px solid rgba(0, 255, 229, 0.34);
+    color: var(--cyan);
+    font-size: 0.65rem;
+    text-shadow: 0 0 9px rgba(0, 255, 229, 0.42);
+  }
+  .route-rail span {
+    align-self: center;
+    color: rgba(139, 155, 188, 0.7);
+    font-size: 0.49rem;
+    font-weight: 900;
+    letter-spacing: 0.23em;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+  .route-rail i {
+    display: block;
+    width: 1px;
+    height: 42px;
+    background: linear-gradient(var(--cyan), var(--pink));
+    box-shadow: 0 0 10px var(--cyan);
+  }
+  .media-shell {
+    gap: 9px;
+    padding: 10px;
+    border-color: rgba(0, 255, 229, 0.32);
+  }
+  .media-shell::after {
+    inset: 47px 18px 46px;
+    z-index: 2;
+  }
+  .media-topline {
+    min-height: 34px;
+    padding: 0 9px 9px;
+  }
+  .media-readout {
+    display: flex;
+    gap: 7px;
+    padding: 0 2px;
+  }
+  .media-readout span {
+    display: inline-flex;
+    min-height: 24px;
+    align-items: center;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 255, 229, 0.17);
+    background: rgba(0, 0, 0, 0.34);
+    color: rgba(145, 162, 196, 0.84);
+    font-size: 0.49rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    padding: 0 8px;
+    text-transform: uppercase;
+  }
+  .media-readout span:first-child {
+    border-color: rgba(57, 255, 138, 0.25);
+    color: var(--green);
+  }
+  .img-wrap {
+    height: min(68dvh, 700px);
+    min-height: 440px;
+    border-color: rgba(0, 255, 229, 0.26);
+    background:
+      radial-gradient(560px 320px at 50% 3%, rgba(0, 255, 229, 0.1), transparent 67%),
+      radial-gradient(420px 240px at 100% 100%, rgba(255, 43, 214, 0.07), transparent 68%),
+      rgba(0, 0, 0, 0.4);
+  }
+  .img-wrap img {
+    max-width: calc(100% - 42px);
+    max-height: calc(100% - 42px);
+    z-index: 1;
+    box-shadow: 0 24px 68px rgba(0, 0, 0, 0.44);
+  }
+  .viewport-tag {
+    position: absolute;
+    right: 18px;
+    bottom: 15px;
+    z-index: 3;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 255, 229, 0.3);
+    background: rgba(1, 6, 16, 0.88);
+    color: var(--cyan);
+    font-size: 0.49rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    padding: 6px 8px;
+  }
+  .media-bottom {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-height: 34px;
+    border-top: 1px dashed rgba(0, 255, 229, 0.16);
+    padding: 8px 4px 0;
+    color: rgba(139, 155, 188, 0.72);
+    font-size: 0.5rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .media-bottom code {
+    overflow: hidden;
+    color: rgba(203, 255, 248, 0.86);
+    font: inherit;
+    letter-spacing: 0.04em;
+    text-overflow: ellipsis;
+    text-transform: none;
+    white-space: nowrap;
+  }
+  .info-panel {
+    gap: 11px;
+    border-color: rgba(255, 43, 214, 0.33);
+    padding: 12px;
+  }
+  .inspector-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+    color: rgba(139, 155, 188, 0.76);
+    font-size: 0.5rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .inspector-label strong {
+    color: var(--pink);
+  }
+  .info-panel h1 {
+    font-size: clamp(1.04rem, 1.6vw, 1.34rem);
+  }
+  .primary-actions {
+    margin-top: auto;
+  }
+  .foot {
+    border-top-style: solid;
+    background:
+      linear-gradient(90deg, rgba(0, 255, 229, 0.04), transparent 48%, rgba(255, 43, 214, 0.04));
+  }
+  @media (max-width: 1080px) {
+    .viewer {
+      grid-template-columns: minmax(0, 1fr) minmax(264px, 298px);
+    }
+    .route-rail {
+      display: none;
+    }
+    .img-wrap {
+      min-height: 360px;
+    }
+  }
+  @media (max-width: 840px) {
+    .viewer {
+      grid-template-columns: 1fr;
+    }
+    .img-wrap {
+      height: min(58dvh, 580px);
+      min-height: 280px;
+    }
+  }
+  @media (max-width: 620px) {
+    .head {
+      padding: 14px 12px;
+    }
+    .media-shell::after {
+      inset: 73px 15px 42px;
+    }
+    .media-readout {
+      flex-wrap: wrap;
+    }
+    .img-wrap {
+      min-height: 220px;
+    }
+    .viewport-tag {
+      right: 12px;
+      bottom: 11px;
+    }
+  }
 </style>
 </head>
 <body>
   <main class="frame" style="--accent: ${escapeHtml(accent)}; --packet-image: url('${escapeHtml(rawUrl)}');">
     <div class="head">
-      <span class="kicker"><strong>${escapeHtml(siteName)}</strong></span>
+      <div class="head-brand">
+        <span class="head-label">public asset online</span>
+        <span class="kicker"><strong>${escapeHtml(siteName)}</strong></span>
+        <small>capture packet / read-only viewport</small>
+      </div>
       <span class="meta">
         <span>${escapeHtml(ctx.filesize)}</span>
         <span>${escapeHtml(record.code)}</span>
@@ -1646,19 +1914,37 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
       </span>
     </div>
     <section class="viewer">
+      <aside class="route-rail" aria-hidden="true">
+        <strong>/i</strong>
+        <span>asset viewport</span>
+        <i></i>
+      </aside>
       <div class="media-shell">
         <div class="media-topline">
           <strong>/i/${escapeHtml(record.code)}</strong>
-          <span>${escapeHtml(record.mimeType || 'image')} · ${escapeHtml(record.originalName)}</span>
+          <span>${escapeHtml(record.mimeType || 'image')} / ${escapeHtml(record.originalName)}</span>
+        </div>
+        <div class="media-readout" aria-hidden="true">
+          <span>decoded</span>
+          <span>raw render</span>
+          <span>fit containment</span>
         </div>
         <div class="img-wrap">
           <img src="${escapeHtml(rawUrl)}" alt="${escapeHtml(record.originalName)}" />
+          <span class="viewport-tag">RAW / 100%</span>
+        </div>
+        <div class="media-bottom">
+          <span>source</span>
+          <code>${escapeHtml(rawUrl)}</code>
         </div>
       </div>
       <aside class="info-panel">
         <div>
+          <div class="inspector-label">
+            <strong>packet.inspect</strong>
+            <span>read only</span>
+          </div>
           <span class="packet-badge">asset clean</span>
-          <span class="info-eyebrow">packet.inspect</span>
           <h1>${escapeHtml(record.originalName)} <span>/ ${escapeHtml(record.code)}</span></h1>
           <p class="info-subtitle">${escapeHtml(title)}</p>
         </div>

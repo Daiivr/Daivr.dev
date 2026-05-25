@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import usePageScrollLock from '../hooks/usePageScrollLock'
 
 const formatDisplayName = (name) => (name ? String(name).replace(/#0$/, '') : '')
 const DISCORD_FALLBACK_AVATAR = 'https://cdn.discordapp.com/embed/avatars/0.png'
@@ -12,6 +13,8 @@ export default function Splash({ onEnter }) {
   const [phase, setPhase] = useState('loading')
   const [me, setMe] = useState(null)
   const [cardVisible, setCardVisible] = useState(false)
+
+  usePageScrollLock()
 
   useEffect(() => {
     const timer = setTimeout(() => {

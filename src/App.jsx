@@ -12,6 +12,7 @@ import CodeWaves from './components/CodeWaves'
 import CommandPalette from './components/CommandPalette'
 import ModalPortal from './components/ModalPortal'
 import ImageHostPanel from './components/ImageHostPanel'
+import usePageScrollLock from './hooks/usePageScrollLock'
 
 const KONAMI_VOLUME_STORAGE_KEY = 'daivr_konami_volume'
 const DEFAULT_KONAMI_VOLUME_PERCENT = 8
@@ -114,6 +115,8 @@ function KonamiGameOverlay({ open, activeGame, me, onClose }) {
   const targetVolumeRef = useRef(normalizedVolume)
   const volumeBootstrappedRef = useRef(false)
   const leaderboardOpenedOnceRef = useRef(false)
+
+  usePageScrollLock(isMounted)
 
   useEffect(() => {
     if (open && activeGame) {
