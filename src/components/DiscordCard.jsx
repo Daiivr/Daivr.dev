@@ -7,7 +7,10 @@ import originallyKnownBadge from '../assets/discord-badge-originally-known-as.pn
 import serverBoostBadge from '../assets/discord-badge-boost.svg'
 
 const DISCORD_ID = '271701484922601472'
+const LANYARD_API = `https://api.lanyard.rest/v1/users/${DISCORD_ID}`
 const LANYARD_WS = 'wss://api.lanyard.rest/socket'
+const SOCKET_RETRY_MIN_MS = 1000
+const SOCKET_RETRY_MAX_MS = 30000
 
 
 // ----- BADGES FROM DISCORD PUBLIC FLAGS -----
@@ -89,49 +92,124 @@ export default function DiscordCard() {
   const [badgeTooltip, setBadgeTooltip] = useState(null)
   const [streak, setStreak] = useState(null)
 
-  // WebSocket Lanyard
+  // Seed over HTTP so a slow or suspended mobile WebSocket cannot leave the
+  // card empty; keep the socket attached for live updates when available.
   useEffect(() => {
-    const ws = new WebSocket(LANYARD_WS)
+    let active = true
+    let ws = null
     let heartbeat = null
+    let reconnectTimer = null
+    let retryDelay = SOCKET_RETRY_MIN_MS
 
-    ws.onmessage = (event) => {
-      const payload = JSON.parse(event.data)
+    const clearHeartbeat = () => {
+      if (!heartbeat) return
+      clearInterval(heartbeat)
+      heartbeat = null
+    }
 
-      if (payload.op === 1) {
-        const interval = payload.d.heartbeat_interval
-        heartbeat = setInterval(() => {
-          ws.send(JSON.stringify({ op: 3 }))
-        }, interval)
+    const applyPresence = (nextData) => {
+      if (active && nextData) setData(nextData)
+    }
 
-        ws.send(
-          JSON.stringify({
-            op: 2,
-            d: { subscribe_to_id: DISCORD_ID },
-          })
-        )
+    const loadSnapshot = async () => {
+      try {
+        const res = await axios.get(LANYARD_API)
+        if (res.data?.success) applyPresence(res.data.data)
+      } catch {
+        // Socket reconnect below may still deliver presence.
       }
+    }
 
-      if (
-        payload.op === 0 &&
-        (payload.t === 'INIT_STATE' || payload.t === 'PRESENCE_UPDATE')
-      ) {
-        let userData = payload.d
-        if (userData && userData[DISCORD_ID]) {
-          userData = userData[DISCORD_ID]
+    const scheduleReconnect = () => {
+      if (!active || reconnectTimer) return
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null
+        connectSocket()
+      }, retryDelay)
+      retryDelay = Math.min(retryDelay * 2, SOCKET_RETRY_MAX_MS)
+    }
+
+    const connectSocket = () => {
+      if (!active) return
+
+      clearHeartbeat()
+      ws = new WebSocket(LANYARD_WS)
+
+      ws.onmessage = (event) => {
+        let payload
+        try {
+          payload = JSON.parse(event.data)
+        } catch {
+          return
         }
-        setData(userData)
-        setConnected(true)
+
+        if (payload.op === 1) {
+          const interval = payload.d.heartbeat_interval
+          heartbeat = setInterval(() => {
+            if (ws?.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ op: 3 }))
+            }
+          }, interval)
+
+          ws.send(
+            JSON.stringify({
+              op: 2,
+              d: { subscribe_to_id: DISCORD_ID },
+            })
+          )
+        }
+
+        if (
+          payload.op === 0 &&
+          (payload.t === 'INIT_STATE' || payload.t === 'PRESENCE_UPDATE')
+        ) {
+          let userData = payload.d
+          if (userData && userData[DISCORD_ID]) {
+            userData = userData[DISCORD_ID]
+          }
+          applyPresence(userData)
+          setConnected(true)
+          retryDelay = SOCKET_RETRY_MIN_MS
+        }
+      }
+
+      ws.onerror = () => {
+        ws?.close()
+      }
+
+      ws.onclose = () => {
+        clearHeartbeat()
+        if (!active) return
+        setConnected(false)
+        loadSnapshot()
+        scheduleReconnect()
       }
     }
 
-    ws.onclose = () => {
-      if (heartbeat) clearInterval(heartbeat)
-      setConnected(false)
+    const resumePresence = () => {
+      if (document.visibilityState !== 'visible') return
+      loadSnapshot()
+
+      if (!ws || ws.readyState === WebSocket.CLOSED) {
+        if (reconnectTimer) clearTimeout(reconnectTimer)
+        reconnectTimer = null
+        retryDelay = SOCKET_RETRY_MIN_MS
+        connectSocket()
+      }
     }
+
+    loadSnapshot()
+    connectSocket()
+    document.addEventListener('visibilitychange', resumePresence)
+    window.addEventListener('online', resumePresence)
 
     return () => {
-      if (heartbeat) clearInterval(heartbeat)
-      ws.close()
+      active = false
+      clearHeartbeat()
+      if (reconnectTimer) clearTimeout(reconnectTimer)
+      document.removeEventListener('visibilitychange', resumePresence)
+      window.removeEventListener('online', resumePresence)
+      ws?.close()
     }
   }, [])
 
