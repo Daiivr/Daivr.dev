@@ -7,7 +7,9 @@ const TRADEDEX_REPO_API = 'https://api.github.com/repos/Daiivr/TradeDex'
 const TRADEDEX_LOGO = '/projects/tradedex.png'
 const TRADEDEX_LOGO_FALLBACK = 'https://opengraph.githubassets.com/1/Daiivr/TradeDex'
 const SCAN_ENDPOINT = '/api/tradedex/scan'
+const INFO_ENDPOINT = '/api/tradedex/info'
 const POLL_INTERVAL_MS = 1500
+const INFO_REFRESH_MS = 5 * 60 * 1000
 
 const STAGES = [
   { id: 'init', label: 'init scanner' },
@@ -45,6 +47,7 @@ export default function About() {
   const [scanError, setScanError] = useState('')
   const [downloading, setDownloading] = useState(false)
   const [repoStats, setRepoStats] = useState(null)
+  const [releaseInfo, setReleaseInfo] = useState(null)
   const pollTimerRef = useRef(0)
 
   // Fetch repo stats (stars, forks, open issues) on mount + every 5 min.
@@ -69,6 +72,30 @@ export default function About() {
 
     loadStats()
     const interval = window.setInterval(loadStats, 5 * 60 * 1000)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(interval)
+    }
+  }, [])
+
+  // Pull live release tag, binary size, and cached VT scan from our own backend
+  // so the card reflects whatever the latest GitHub release is.
+  useEffect(() => {
+    let cancelled = false
+
+    const loadInfo = () => {
+      fetch(INFO_ENDPOINT, { credentials: 'include' })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (cancelled || !data) return
+          setReleaseInfo(data)
+        })
+        .catch(() => {})
+    }
+
+    loadInfo()
+    const interval = window.setInterval(loadInfo, INFO_REFRESH_MS)
 
     return () => {
       cancelled = true
@@ -187,6 +214,17 @@ export default function About() {
   const activeStageLabel = STAGES[stageIndex]?.label || 'scanner ready'
 
   const canDownload = isDone && !isMalicious && !isErrored && !!scan?.asset?.downloadUrl
+
+  // Card display values — prefer live info from /api/tradedex/info, fall back to
+  // whatever the scan poll has produced, and finally to a sensible placeholder.
+  const cardTag = releaseInfo?.tag || scan?.tag || null
+  const cardAssetSize = releaseInfo?.asset?.size ?? scan?.asset?.size ?? null
+  const cardScanStats = releaseInfo?.scan?.stats || null
+  const cardReleaseLabel = cardTag || 'latest'
+  const cardBinaryLabel = cardAssetSize ? formatBytes(cardAssetSize) : '—'
+  const cardScanLabel = cardScanStats
+    ? `${cardScanStats.clean}/${cardScanStats.total}`
+    : '—'
 
   const handleDownload = () => {
     if (!canDownload || downloading) return
@@ -365,7 +403,7 @@ export default function About() {
                   }}
                 />
                 <span className="current-project-tag">[ 01 ]</span>
-                <span className="current-project-release">latest · v1.5.2</span>
+                <span className="current-project-release">latest · {cardReleaseLabel}</span>
                 <span className="current-project-scan" aria-hidden="true" />
                 <span className="current-project-corner current-project-corner-tl" aria-hidden="true" />
                 <span className="current-project-corner current-project-corner-tr" aria-hidden="true" />
@@ -438,15 +476,15 @@ export default function About() {
                 <div className="current-project-signal-row" aria-label="Release checks">
                   <span>
                     <em>release</em>
-                    <strong>v1.5.2</strong>
+                    <strong>{cardReleaseLabel}</strong>
                   </span>
                   <span>
                     <em>binary</em>
-                    <strong>63 MB</strong>
+                    <strong>{cardBinaryLabel}</strong>
                   </span>
                   <span>
                     <em>scan</em>
-                    <strong>69/71</strong>
+                    <strong>{cardScanLabel}</strong>
                   </span>
                 </div>
 
