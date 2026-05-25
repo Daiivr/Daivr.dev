@@ -299,10 +299,13 @@ async function submitFileToVirusTotal(buffer, filename) {
   return res.data?.data?.id || null
 }
 
-async function pollAnalysis(analysisId, state) {
+// Free-tier VT analyses for fresh uploads typically finish in 2–8 minutes but
+// occasionally sit in the queue for 10+ min. We poll for up to maxMs; if the
+// analysis still isn't done we return null and let the caller persist a
+// "pending" state that the next request can resume.
+async function pollAnalysis(analysisId, state, { maxMs = 10 * 60 * 1000 } = {}) {
   state.stage = 'analyzing'
   const start = Date.now()
-  const maxMs = 4 * 60 * 1000 // 4 minutes hard cap
 
   while (Date.now() - start < maxMs) {
     const res = await withRetry(
@@ -320,7 +323,28 @@ async function pollAnalysis(analysisId, state) {
     }
     await new Promise((r) => setTimeout(r, 4000))
   }
-  throw new Error('vt-analysis-timeout')
+  return null // still queued — caller should persist pending state
+}
+
+// Quick one-shot check used when resuming a previously-pending analysis from
+// the cache. Doesn't block — returns null if not yet done.
+async function checkAnalysisOnce(analysisId) {
+  try {
+    const res = await withRetry(
+      () =>
+        axios.get(`${VT_BASE}/analyses/${analysisId}`, {
+          headers: { 'x-apikey': VT_API_KEY },
+          timeout: 20000,
+        }),
+      { label: 'vt analysis resume', retries: 1 },
+    )
+    const attrs = res.data?.data?.attributes || {}
+    if (attrs.status === 'completed') return summariseStats(attrs.stats)
+    return null
+  } catch (err) {
+    console.warn('[tradedex] resume check failed', err.message || err)
+    return null
+  }
 }
 
 async function runScan(state, cache) {
@@ -342,14 +366,37 @@ async function runScan(state, cache) {
     } else if (buffer && buffer.length <= VT_LARGE_UPLOAD_LIMIT) {
       state.stage = 'submitting'
       const analysisId = await submitFileToVirusTotal(buffer, state.asset.name)
-      const summary = await pollAnalysis(analysisId, state)
-      state.vt = {
-        status: 'scanned',
-        stats: summary,
-        verdict: summary.verdict,
-        scanDate: Math.floor(Date.now() / 1000),
-        permalink: `https://www.virustotal.com/gui/file/${sha256}`,
-        submitted: true,
+      let summary = await pollAnalysis(analysisId, state)
+
+      // If the analysis didn't finish in time, try one more hash lookup — VT
+      // often has the file indexed in the regular hash database before the
+      // analysis API flips to "completed".
+      if (!summary) {
+        const recheck = await queryVirusTotalByHash(sha256).catch(() => null)
+        if (recheck?.found && recheck.summary) {
+          summary = recheck.summary
+        }
+      }
+
+      if (summary) {
+        state.vt = {
+          status: 'scanned',
+          stats: summary,
+          verdict: summary.verdict,
+          scanDate: Math.floor(Date.now() / 1000),
+          permalink: `https://www.virustotal.com/gui/file/${sha256}`,
+          submitted: true,
+        }
+      } else {
+        // Still queued. Persist enough state to resume on the next request
+        // instead of re-uploading the whole file.
+        state.vt = {
+          status: 'pending',
+          analysisId,
+          permalink: `https://www.virustotal.com/gui/file/${sha256}`,
+          submitted: true,
+          queuedAt: Math.floor(Date.now() / 1000),
+        }
       }
     } else {
       state.vt = {
@@ -437,6 +484,44 @@ router.get('/scan', async (req, res) => {
     const cached = cache.scans[release.tag]
 
     if (cached && cached.sha256 && cached.vt) {
+      // If the cached scan is still pending (analysis was queued past our poll
+      // window), try to resolve it now via a quick re-check. If it's done,
+      // upgrade the cache to the final verdict. If not, fall through and return
+      // the pending state so the UI can keep waiting.
+      if (cached.vt.status === 'pending' && cached.vt.analysisId) {
+        const summary = await checkAnalysisOnce(cached.vt.analysisId)
+        if (summary) {
+          cached.vt = {
+            status: 'scanned',
+            stats: summary,
+            verdict: summary.verdict,
+            scanDate: Math.floor(Date.now() / 1000),
+            permalink: cached.vt.permalink,
+            submitted: true,
+          }
+          cached.scannedAt = Date.now()
+          cache.scans[release.tag] = cached
+          writeCache(cache)
+        } else {
+          // Sometimes VT indexes the hash before the analysis API flips —
+          // try the hash endpoint as a secondary resolution path.
+          const recheck = await queryVirusTotalByHash(cached.sha256).catch(() => null)
+          if (recheck?.found && recheck.summary) {
+            cached.vt = {
+              status: 'scanned',
+              stats: recheck.summary,
+              verdict: recheck.summary.verdict,
+              scanDate: recheck.scanDate || Math.floor(Date.now() / 1000),
+              permalink: cached.vt.permalink,
+              submitted: true,
+            }
+            cached.scannedAt = Date.now()
+            cache.scans[release.tag] = cached
+            writeCache(cache)
+          }
+        }
+      }
+
       return res.json({
         tag: release.tag,
         releaseUrl: release.htmlUrl,
@@ -483,6 +568,25 @@ router.get('/info', async (req, res) => {
     const release = await resolveLatestRelease()
     const cache = readCache()
     const cached = release ? cache.scans[release.tag] : null
+
+    // Opportunistically resolve pending analyses so the card eventually shows
+    // the real verdict without anyone having to open the modal.
+    if (cached?.vt?.status === 'pending' && cached.vt.analysisId) {
+      const summary = await checkAnalysisOnce(cached.vt.analysisId)
+      if (summary) {
+        cached.vt = {
+          status: 'scanned',
+          stats: summary,
+          verdict: summary.verdict,
+          scanDate: Math.floor(Date.now() / 1000),
+          permalink: cached.vt.permalink,
+          submitted: true,
+        }
+        cached.scannedAt = Date.now()
+        cache.scans[release.tag] = cached
+        writeCache(cache)
+      }
+    }
 
     let scanSummary = null
     if (cached && cached.vt) {

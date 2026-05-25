@@ -167,6 +167,7 @@ export default function About() {
   const isSuspicious = verdict === 'suspicious'
   const isClean = verdict === 'clean'
   const notScanned = scan?.vt?.status === 'not-scanned'
+  const vtPending = scan?.vt?.status === 'pending'
 
   const verdictMeta = useMemo(() => {
     if (!scan) return null
@@ -175,6 +176,13 @@ export default function About() {
     }
     if (!isDone) {
       return { tone: 'pending', label: 'scanning...', detail: 'gate locked' }
+    }
+    if (vtPending) {
+      return {
+        tone: 'pending',
+        label: 'queued en virustotal',
+        detail: 'binario subido, esperando verdict del motor',
+      }
     }
     if (notScanned) {
       const reason = scan?.vt?.reason
@@ -197,7 +205,7 @@ export default function About() {
       return { tone: 'safe', label: 'verified · clean', detail: 'gate desbloqueada' }
     }
     return { tone: 'pending', label: 'esperando verdict', detail: '' }
-  }, [scan, isErrored, isDone, notScanned, isMalicious, isSuspicious, isClean])
+  }, [scan, isErrored, isDone, vtPending, notScanned, isMalicious, isSuspicious, isClean])
 
   const cleanEngineCount = stats ? (stats.harmless || 0) + (stats.undetected || 0) : null
   const flaggedEngineCount = stats ? (stats.malicious || 0) + (stats.suspicious || 0) : null
@@ -213,18 +221,23 @@ export default function About() {
   )
   const activeStageLabel = STAGES[stageIndex]?.label || 'scanner ready'
 
-  const canDownload = isDone && !isMalicious && !isErrored && !!scan?.asset?.downloadUrl
+  // Gate stays locked until VT actually returns a clean verdict — pending /
+  // not-scanned / suspicious / malicious all leave the download disabled.
+  const canDownload = isClean && !isErrored && !!scan?.asset?.downloadUrl
 
   // Card display values — prefer live info from /api/tradedex/info, fall back to
   // whatever the scan poll has produced, and finally to a sensible placeholder.
   const cardTag = releaseInfo?.tag || scan?.tag || null
   const cardAssetSize = releaseInfo?.asset?.size ?? scan?.asset?.size ?? null
   const cardScanStats = releaseInfo?.scan?.stats || null
+  const cardScanStatus = releaseInfo?.scan?.status || null
   const cardReleaseLabel = cardTag || 'latest'
   const cardBinaryLabel = cardAssetSize ? formatBytes(cardAssetSize) : '—'
   const cardScanLabel = cardScanStats
     ? `${cardScanStats.clean}/${cardScanStats.total}`
-    : '—'
+    : cardScanStatus === 'pending'
+      ? 'queued'
+      : '—'
 
   const handleDownload = () => {
     if (!canDownload || downloading) return
@@ -569,6 +582,8 @@ export default function About() {
             lines.push({ kind: 'verdict', tone: 'warn', text: 'verdict · suspicious — review report' })
           } else if (isMalicious) {
             lines.push({ kind: 'verdict', tone: 'danger', text: 'verdict · malicious — gate sealed' })
+          } else if (vtPending) {
+            lines.push({ kind: 'verdict', tone: 'pending', text: 'verdict · queued — vt aún analizando, vuelve en unos minutos' })
           } else if (notScanned) {
             lines.push({ kind: 'verdict', tone: 'warn', text: 'verdict · unknown — not scanned by vt' })
           }
