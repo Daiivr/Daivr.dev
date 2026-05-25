@@ -9,7 +9,11 @@ const router = express.Router()
 
 const VT_API_KEY = process.env.VIRUSTOTAL_API_KEY || process.env.VT_API_KEY || null
 const VT_BASE = 'https://www.virustotal.com/api/v3'
-const VT_UPLOAD_LIMIT_BYTES = 32 * 1024 * 1024 // free tier file upload cap
+// VirusTotal's standard /files endpoint accepts up to 32 MB. For larger binaries
+// (TradeDex releases routinely run 60+ MB) we fetch a one-time signed URL from
+// /files/upload_url which accepts up to 650 MB on the free tier.
+const VT_DIRECT_UPLOAD_LIMIT = 32 * 1024 * 1024
+const VT_LARGE_UPLOAD_LIMIT = 650 * 1024 * 1024
 
 const GITHUB_REPO = process.env.TRADEDEX_REPO || 'Daiivr/TradeDex'
 const GITHUB_RELEASE_API = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`
@@ -178,7 +182,9 @@ async function downloadAndHash(url, state) {
   const chunks = []
   let received = 0
   let bufferTotal = 0
-  const canBufferForUpload = total > 0 && total <= VT_UPLOAD_LIMIT_BYTES
+  // Buffer the whole file if it could possibly be uploaded to VT (either via the
+  // direct 32 MB endpoint or the large-file 650 MB upload-URL flow).
+  const canBufferForUpload = total > 0 && total <= VT_LARGE_UPLOAD_LIMIT
 
   await new Promise((resolve, reject) => {
     resp.data.on('data', (chunk) => {
@@ -253,17 +259,43 @@ async function queryVirusTotalByHash(sha256) {
   }
 }
 
+async function getLargeUploadUrl() {
+  const res = await withRetry(
+    () =>
+      axios.get(`${VT_BASE}/files/upload_url`, {
+        headers: { 'x-apikey': VT_API_KEY },
+        timeout: 20000,
+      }),
+    { label: 'vt upload-url' },
+  )
+  const url = res.data?.data
+  if (!url || typeof url !== 'string') {
+    throw new Error('vt-upload-url-missing')
+  }
+  return url
+}
+
 async function submitFileToVirusTotal(buffer, filename) {
+  const size = buffer.length
+  // For files >32 MB we route through a one-time upload URL from VT; the URL is
+  // host-specific but still requires the x-apikey header for authentication.
+  const target =
+    size > VT_DIRECT_UPLOAD_LIMIT ? await getLargeUploadUrl() : `${VT_BASE}/files`
+
   const form = new FormData()
   form.append('file', buffer, { filename })
-  const res = await axios.post(`${VT_BASE}/files`, form, {
-    headers: {
-      ...form.getHeaders(),
-      'x-apikey': VT_API_KEY,
-    },
-    timeout: 120000,
-    maxBodyLength: Infinity,
-  })
+  const headers = { ...form.getHeaders(), 'x-apikey': VT_API_KEY }
+
+  const res = await withRetry(
+    () =>
+      axios.post(target, form, {
+        headers,
+        timeout: 5 * 60 * 1000, // large uploads take a while
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+      }),
+    { label: 'vt file upload', retries: 2 },
+  )
   return res.data?.data?.id || null
 }
 
@@ -307,7 +339,7 @@ async function runScan(state, cache) {
         permalink: lookup.permalink,
         submitted: false,
       }
-    } else if (buffer && buffer.length <= VT_UPLOAD_LIMIT_BYTES) {
+    } else if (buffer && buffer.length <= VT_LARGE_UPLOAD_LIMIT) {
       state.stage = 'submitting'
       const analysisId = await submitFileToVirusTotal(buffer, state.asset.name)
       const summary = await pollAnalysis(analysisId, state)
@@ -322,11 +354,9 @@ async function runScan(state, cache) {
     } else {
       state.vt = {
         status: 'not-scanned',
-        reason: buffer
-          ? 'unknown-hash'
-          : 'file-too-large',
+        reason: 'file-too-large',
         permalink: `https://www.virustotal.com/gui/file/${sha256}`,
-        sizeLimitBytes: VT_UPLOAD_LIMIT_BYTES,
+        sizeLimitBytes: VT_LARGE_UPLOAD_LIMIT,
       }
     }
 
@@ -422,14 +452,11 @@ router.get('/scan', async (req, res) => {
       })
     }
 
-    // Already scanning? return its current state without re-starting.
-    // But if the previous attempt errored, kick off a fresh one — transient
-    // upstream failures (GitHub CDN 502s, VT timeouts) shouldn't lock the gate.
+    // Already scanning? return its current state without re-starting. Errored
+    // state expires from inflight after ERROR_STATE_TTL_MS so the next poll
+    // after that window will naturally start a fresh scan — that gives the UI
+    // time to surface the failure instead of looping silently.
     let state = inflight.get(release.tag)
-    if (state && state.status === 'error') {
-      inflight.delete(release.tag)
-      state = null
-    }
     if (!state) state = startScan(release)
 
     return res.json({
