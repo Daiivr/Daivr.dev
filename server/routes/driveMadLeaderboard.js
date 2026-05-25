@@ -2,6 +2,7 @@ const express = require('express')
 const fs = require('fs')
 const path = require('path')
 const { getUserFromRequest } = require('../utils/session')
+const { DEFAULT_AVATAR_URL, getDiscordUserProfile } = require('../utils/discordAvatar')
 
 const router = express.Router()
 
@@ -107,7 +108,7 @@ function publicScore(score, index = 0) {
     rank: index + 1,
     discordId: String(score.discordId || ''),
     username: score.username || 'Discord user',
-    avatarUrl: score.avatarUrl || 'https://cdn.discordapp.com/embed/avatars/0.png',
+    avatarUrl: score.avatarUrl || DEFAULT_AVATAR_URL,
     highestLevel: score.highestLevel || 0,
     bestTimeMs: Number.isFinite(score.bestTimeMs) ? score.bestTimeMs : null,
     updatedAt: score.updatedAt || null,
@@ -115,20 +116,43 @@ function publicScore(score, index = 0) {
   }
 }
 
-function leaderboardResponse(limit = 10) {
+async function currentPublicScore(score, index = 0) {
+  if (!score || !process.env.DISCORD_BOT_TOKEN || !score.discordId) {
+    return publicScore(score || {}, index)
+  }
+
+  const profile = await getDiscordUserProfile(
+    score.discordId,
+    64,
+    {
+      displayName: score.username || 'Discord user',
+      avatarUrl: score.avatarUrl || DEFAULT_AVATAR_URL,
+    },
+  )
+
+  return publicScore({
+    ...score,
+    username: profile.displayName,
+    avatarUrl: profile.avatarUrl,
+  }, index)
+}
+
+async function leaderboardResponse(limit = 10) {
   const safeLimit = Math.min(Math.max(Number(limit) || 10, 1), 50)
   const data = readData()
-  const leaderboard = sortScores(data.scores)
-    .slice(0, safeLimit)
-    .map((score, index) => publicScore(score, index))
+  const leaderboard = await Promise.all(
+    sortScores(data.scores)
+      .slice(0, safeLimit)
+      .map((score, index) => currentPublicScore(score, index)),
+  )
   return { leaderboard }
 }
 
-router.get('/leaderboard', (req, res) => {
-  res.json(leaderboardResponse(req.query.limit))
+router.get('/leaderboard', async (req, res) => {
+  res.json(await leaderboardResponse(req.query.limit))
 })
 
-router.get('/me', (req, res) => {
+router.get('/me', async (req, res) => {
   const user = getUserFromRequest(req)
   if (!user) return res.json({ score: null })
 
@@ -137,10 +161,10 @@ router.get('/me', (req, res) => {
   const index = scores.findIndex((score) => String(score.discordId) === String(user.id))
   if (index === -1) return res.json({ score: null })
 
-  res.json({ score: publicScore(scores[index], index) })
+  res.json({ score: await currentPublicScore(scores[index], index) })
 })
 
-router.delete('/me', (req, res) => {
+router.delete('/me', async (req, res) => {
   const user = getUserFromRequest(req)
   if (!user) {
     return res.status(401).json({ error: 'Debes iniciar sesion con Discord' })
@@ -157,11 +181,11 @@ router.delete('/me', (req, res) => {
 
   res.json({
     score: null,
-    ...leaderboardResponse(10),
+    ...(await leaderboardResponse(10)),
   })
 })
 
-router.post('/progress', (req, res) => {
+router.post('/progress', async (req, res) => {
   const user = getUserFromRequest(req)
   if (!user) {
     return res.status(401).json({ error: 'Debes iniciar sesion con Discord' })
@@ -183,8 +207,8 @@ router.post('/progress', (req, res) => {
     return res.status(202).json({
       ignored: true,
       reason: 'completion-required',
-      score: index >= 0 ? publicScore(scores[index], index) : null,
-      ...leaderboardResponse(10),
+      score: index >= 0 ? await currentPublicScore(scores[index], index) : null,
+      ...(await leaderboardResponse(10)),
     })
   }
 
@@ -239,7 +263,7 @@ router.post('/progress', (req, res) => {
     avatarUrl:
       user.avatarUrl ||
       current.avatarUrl ||
-      'https://cdn.discordapp.com/embed/avatars/0.png',
+      DEFAULT_AVATAR_URL,
     highestLevel: isBetter ? highestLevel : currentLevel,
     bestTimeMs: isBetter ? bestTimeMs : current.bestTimeMs,
     bestSessionId: isBetter ? String(body.sessionId || '') : current.bestSessionId,
@@ -260,8 +284,8 @@ router.post('/progress', (req, res) => {
   const sorted = sortScores(scores)
   const rank = sorted.findIndex((score) => String(score.discordId) === userId)
   res.json({
-    score: publicScore(next, rank >= 0 ? rank : 0),
-    ...leaderboardResponse(10),
+    score: await currentPublicScore(next, rank >= 0 ? rank : 0),
+    ...(await leaderboardResponse(10)),
   })
 })
 
