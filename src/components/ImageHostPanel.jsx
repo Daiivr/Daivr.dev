@@ -261,7 +261,6 @@ export default function ImageHostPanel({ open, onClose, me }) {
   const [liveStatus, setLiveStatus] = useState('idle')
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [deletingCode, setDeletingCode] = useState(null)
-  const [selectedGalleryCode, setSelectedGalleryCode] = useState(null)
 
   const fetchSettings = useCallback(async () => {
     setLoading(true)
@@ -516,14 +515,6 @@ export default function ImageHostPanel({ open, onClose, me }) {
   const galleryBytes = useMemo(
     () => gallery.reduce((total, img) => total + (Number(img.size) || 0), 0),
     [gallery],
-  )
-
-  const selectedGalleryImage = useMemo(
-    () =>
-      gallery.find((image) => image.code === selectedGalleryCode) ||
-      gallery[0] ||
-      null,
-    [gallery, selectedGalleryCode],
   )
 
   const activeTabMeta = useMemo(
@@ -1193,149 +1184,97 @@ export default function ImageHostPanel({ open, onClose, me }) {
 
           {tab === 'gallery' && (
             <div className="imagehost-body imagehost-gallery-body">
-              {selectedGalleryImage && (
-                <section className="imagehost-section imagehost-gallery-focus">
-                  <div className="imagehost-gallery-focus-stage">
-                    <header>
-                      <span className="imagehost-section-kicker">asset.viewport</span>
-                      <code>/i/{selectedGalleryImage.code}/raw</code>
-                    </header>
-                    <div className="imagehost-gallery-focus-media">
-                      <img
-                        src={selectedGalleryImage.rawUrl}
-                        alt={selectedGalleryImage.originalName}
-                      />
-                      <span className="imagehost-gallery-reticle" aria-hidden="true" />
-                    </div>
-                  </div>
-                  <aside className="imagehost-gallery-inspector">
-                    <span className="imagehost-inspector-status">
-                      <i aria-hidden="true" />
-                      selected asset
-                    </span>
-                    <h4>{selectedGalleryImage.originalName}</h4>
-                    <code className="imagehost-inspector-route">
-                      GET /i/{selectedGalleryImage.code}
-                    </code>
-                    <dl>
-                      <div>
-                        <dt>code</dt>
-                        <dd>/{selectedGalleryImage.code}</dd>
-                      </div>
-                      <div>
-                        <dt>size</dt>
-                        <dd>{formatBytes(selectedGalleryImage.size)}</dd>
-                      </div>
-                      <div>
-                        <dt>uploaded</dt>
-                        <dd>{formatDateShort(selectedGalleryImage.uploadedAt)}</dd>
-                      </div>
-                    </dl>
-                    <div className="imagehost-inspector-actions">
-                      <a
-                        className="imagehost-btn-save"
-                        href={selectedGalleryImage.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        preview page
-                      </a>
-                      <button
-                        type="button"
-                        className="imagehost-mini-btn"
-                        onClick={() => copyToClipboard(selectedGalleryImage.url)}
-                      >
-                        copy url
-                      </button>
-                      <a
-                        className="imagehost-mini-btn"
-                        href={selectedGalleryImage.rawUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        open raw
-                      </a>
-                    </div>
-                  </aside>
-                </section>
-              )}
-
               <section className="imagehost-section imagehost-gallery-panel">
-                <header className="imagehost-section-header">
-                  <span className="imagehost-section-kicker">asset.library</span>
-                  <span className="imagehost-section-meta">
-                    {gallery.length} item{gallery.length === 1 ? '' : 's'} · {liveLabel}
-                  </span>
+                <header className="imagehost-library-header">
+                  <div className="imagehost-library-heading">
+                    <span className="imagehost-section-kicker">asset.library</span>
+                    <h5>Captured media</h5>
+                    <p>Public links ready for ShareX and Discord delivery.</p>
+                  </div>
+                  <div className="imagehost-library-stats" aria-label="Vault totals">
+                    <span>
+                      <em>assets</em>
+                      <strong>{gallery.length}</strong>
+                    </span>
+                    <span>
+                      <em>storage</em>
+                      <strong>{formatBytes(galleryBytes)}</strong>
+                    </span>
+                    <span className={`is-${liveStatus}`}>
+                      <em>sync</em>
+                      <strong><i aria-hidden="true" />{liveLabel}</strong>
+                    </span>
+                  </div>
                 </header>
 
-                {galleryLoading && (
-                  <p className="imagehost-empty">cargando...</p>
-                )}
-                {galleryError && (
-                  <p className="imagehost-empty is-error">{galleryError}</p>
-                )}
-                {!galleryLoading && !galleryError && gallery.length === 0 && (
-                  <div className="imagehost-empty imagehost-empty-gallery">
-                    <span className="imagehost-empty-glyph" aria-hidden="true">/i</span>
-                    <strong>vault empty</strong>
-                    <span>no hay imágenes todavía. usá ShareX para subir.</span>
-                  </div>
-                )}
+                <div className="imagehost-gallery-scroll">
+                  {galleryLoading && (
+                    <p className="imagehost-empty">cargando...</p>
+                  )}
+                  {galleryError && (
+                    <p className="imagehost-empty is-error">{galleryError}</p>
+                  )}
+                  {!galleryLoading && !galleryError && gallery.length === 0 && (
+                    <div className="imagehost-empty imagehost-empty-gallery">
+                      <span className="imagehost-empty-glyph" aria-hidden="true">/i</span>
+                      <strong>vault empty</strong>
+                      <span>no hay imágenes todavía. usá ShareX para subir.</span>
+                    </div>
+                  )}
 
-                {gallery.length > 0 && (
-                  <ul className="imagehost-gallery">
-                    {gallery.map((img) => (
-                      <li
-                        key={img.code}
-                        className={`imagehost-gallery-item ${
-                          selectedGalleryImage?.code === img.code ? 'is-selected' : ''
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setSelectedGalleryCode(img.code)}
-                          className="imagehost-gallery-thumb"
-                          aria-label={`Inspect ${img.originalName}`}
-                        >
-                          <img src={img.rawUrl} alt={img.originalName} loading="lazy" />
-                          <span className="imagehost-gallery-code">/{img.code}</span>
-                          <span className="imagehost-gallery-select">
-                            {selectedGalleryImage?.code === img.code ? 'selected' : 'inspect'}
-                          </span>
-                        </button>
-                        <div className="imagehost-gallery-meta">
-                          <span title={img.originalName}>{img.originalName}</span>
-                          <span>{formatBytes(img.size)} · {formatDateShort(img.uploadedAt)}</span>
-                        </div>
-                        <div className="imagehost-gallery-actions">
-                          <button
-                            type="button"
-                            className="imagehost-mini-btn"
-                            onClick={() => copyToClipboard(img.url)}
-                          >
-                            copy
-                          </button>
+                  {gallery.length > 0 && (
+                    <ul className="imagehost-gallery">
+                      {gallery.map((img) => (
+                        <li key={img.code} className="imagehost-gallery-item">
                           <a
-                            className="imagehost-mini-btn"
                             href={img.url}
                             target="_blank"
                             rel="noreferrer"
+                            className="imagehost-gallery-thumb"
+                            aria-label={`Open preview page for ${img.originalName}`}
                           >
-                            view
+                            <img src={img.rawUrl} alt={img.originalName} loading="lazy" />
+                            <span className="imagehost-gallery-code">/i/{img.code}</span>
+                            <span className="imagehost-gallery-open">open page</span>
                           </a>
-                          <button
-                            type="button"
-                            className="imagehost-mini-btn is-danger"
-                            onClick={() => requestDelete(img)}
-                            disabled={deletingCode === img.code}
-                          >
-                            {deletingCode === img.code ? 'borrando…' : 'delete'}
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                          <div className="imagehost-gallery-meta">
+                            <strong title={img.originalName}>{img.originalName}</strong>
+                            <code>GET /i/{img.code}</code>
+                            <div className="imagehost-gallery-facts">
+                              <span><em>size</em>{formatBytes(img.size)}</span>
+                              <span><em>uploaded</em>{formatDateShort(img.uploadedAt)}</span>
+                            </div>
+                          </div>
+                          <div className="imagehost-gallery-actions">
+                            <button
+                              type="button"
+                              className="imagehost-mini-btn"
+                              onClick={() => copyToClipboard(img.url)}
+                            >
+                              copy link
+                            </button>
+                            <a
+                              className="imagehost-mini-btn"
+                              href={img.rawUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              raw
+                            </a>
+                            <button
+                              type="button"
+                              className="imagehost-mini-btn is-danger"
+                              onClick={() => requestDelete(img)}
+                              disabled={deletingCode === img.code}
+                            >
+                              {deletingCode === img.code ? 'borrando…' : 'delete'}
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </section>
             </div>
           )}

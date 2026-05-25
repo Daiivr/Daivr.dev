@@ -2129,7 +2129,8 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
       margin-top: auto;
     }
     .raw-button,
-    .copy-button {
+    .copy-button,
+    .download-button {
       min-height: 37px;
     }
     .foot {
@@ -2156,6 +2157,36 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
     }
     .window-title span {
       display: none;
+    }
+  }
+  .primary-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .download-button {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    border: 1px solid rgba(57, 255, 138, 0.36);
+    background:
+      linear-gradient(180deg, rgba(57, 255, 138, 0.12), rgba(57, 255, 138, 0.03)),
+      rgba(0, 0, 0, 0.22);
+    color: var(--green);
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+    text-shadow: 0 0 8px rgba(57, 255, 138, 0.34);
+    text-transform: uppercase;
+  }
+  .download-button:hover {
+    box-shadow: 0 0 22px rgba(57, 255, 138, 0.17);
+    transform: translateY(-1px);
+  }
+  @media (max-width: 620px) {
+    .primary-actions {
+      grid-template-columns: 1fr;
     }
   }
 </style>
@@ -2241,6 +2272,7 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
           </div>
         </dl>
         <div class="primary-actions">
+          <a class="download-button" href="${escapeHtml(rawUrl)}?download=1" download="${escapeHtml(record.originalName)}">download</a>
           <a class="raw-button" href="${escapeHtml(rawUrl)}" target="_blank" rel="noreferrer">raw</a>
           <button class="copy-button" type="button" data-copy="${escapeHtml(ctx.url)}">copy</button>
         </div>
@@ -2268,20 +2300,359 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
 </html>`
 }
 
+function renderMissingPage(code, settings) {
+  const siteName = settings.siteName || 'daivr.dev'
+  const displayCode = code || 'unknown'
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Asset not found | ${escapeHtml(siteName)}</title>
+<meta name="theme-color" content="#00ffe5" />
+<style>
+  :root {
+    --cyan: #00ffe5;
+    --pink: #ff2bd6;
+    --green: #39ff8a;
+    --red: #ff476f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html,
+  body {
+    min-height: 100%;
+    margin: 0;
+  }
+  body {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: clamp(12px, 2vw, 24px);
+    background:
+      radial-gradient(760px 380px at 0% 0%, rgba(0, 255, 229, 0.11), transparent 66%),
+      radial-gradient(680px 400px at 100% 100%, rgba(255, 43, 214, 0.1), transparent 68%),
+      #02040b;
+    color: rgba(224, 235, 255, 0.94);
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(to bottom, transparent 0 2px, rgba(255, 255, 255, 0.019) 2px 3px),
+      linear-gradient(rgba(0, 255, 229, 0.027) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 229, 0.027) 1px, transparent 1px);
+    background-size: auto, 30px 30px, 30px 30px;
+    opacity: 0.64;
+  }
+  .missing-frame {
+    position: relative;
+    isolation: isolate;
+    width: min(94vw, 820px);
+    overflow: hidden;
+    border: 1px solid rgba(0, 255, 229, 0.32);
+    border-radius: 13px;
+    background:
+      linear-gradient(90deg, rgba(0, 255, 229, 0.055), transparent 42%, rgba(255, 43, 214, 0.05)),
+      rgba(2, 7, 17, 0.91);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+      0 30px 100px -40px rgba(0, 255, 229, 0.34),
+      0 30px 84px -45px rgba(255, 43, 214, 0.3);
+  }
+  .window-bar {
+    display: flex;
+    min-height: 38px;
+    align-items: center;
+    gap: 13px;
+    border-bottom: 1px solid rgba(0, 255, 229, 0.18);
+    background:
+      linear-gradient(90deg, rgba(0, 255, 229, 0.13), transparent 40%, rgba(255, 43, 214, 0.13)),
+      rgba(0, 0, 0, 0.2);
+    padding: 0 14px;
+    color: rgba(142, 159, 192, 0.82);
+    font-size: 0.53rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .window-controls {
+    display: inline-flex;
+    gap: 6px;
+    padding-right: 13px;
+    border-right: 1px solid rgba(0, 255, 229, 0.17);
+  }
+  .window-controls i {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: #ff5661;
+    box-shadow: 0 0 8px rgba(255, 86, 97, 0.5);
+  }
+  .window-controls i:nth-child(2) {
+    background: #ffc42f;
+    box-shadow: 0 0 8px rgba(255, 196, 47, 0.45);
+  }
+  .window-controls i:nth-child(3) {
+    background: #39ff8a;
+    box-shadow: 0 0 8px rgba(57, 255, 138, 0.45);
+  }
+  .window-name b { color: var(--cyan); }
+  .window-state {
+    margin-left: auto;
+    color: var(--red);
+  }
+  .missing-body {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr);
+    gap: clamp(18px, 4vw, 34px);
+    padding: clamp(22px, 5vw, 48px);
+  }
+  .missing-code {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 16px;
+    min-height: 268px;
+    border: 1px solid rgba(255, 71, 111, 0.27);
+    border-radius: 10px;
+    background:
+      linear-gradient(180deg, rgba(255, 71, 111, 0.09), transparent 52%),
+      rgba(0, 0, 0, 0.23);
+  }
+  .missing-code strong {
+    color: var(--red);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    text-shadow: 0 0 16px rgba(255, 71, 111, 0.48);
+  }
+  .missing-code span {
+    color: rgba(154, 170, 202, 0.72);
+    font-size: 0.48rem;
+    font-weight: 900;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+  .missing-copy {
+    display: grid;
+    align-content: center;
+    gap: 14px;
+  }
+  .missing-status {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 71, 111, 0.3);
+    border-radius: 5px;
+    background: rgba(255, 71, 111, 0.075);
+    color: var(--red);
+    font-size: 0.53rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    padding: 7px 9px;
+    text-transform: uppercase;
+  }
+  .missing-status::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+  }
+  .lookup {
+    overflow: hidden;
+    margin: 0;
+    border: 1px solid rgba(0, 255, 229, 0.15);
+    border-radius: 7px;
+    background: rgba(0, 0, 0, 0.26);
+    color: rgba(159, 255, 241, 0.86);
+    font-size: 0.62rem;
+    padding: 10px 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  h1 {
+    margin: 0;
+    color: rgba(239, 247, 255, 0.98);
+    font-size: clamp(1.6rem, 4vw, 2.25rem);
+    letter-spacing: -0.06em;
+    line-height: 1.06;
+  }
+  .missing-copy > p:not(.lookup) {
+    max-width: 47ch;
+    margin: 0;
+    color: rgba(155, 174, 207, 0.8);
+    font-size: 0.7rem;
+    line-height: 1.65;
+  }
+  .missing-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .missing-meta span {
+    display: inline-flex;
+    min-height: 28px;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(0, 255, 229, 0.15);
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.22);
+    color: rgba(206, 222, 247, 0.84);
+    font-size: 0.55rem;
+    padding: 0 9px;
+    text-transform: uppercase;
+  }
+  .missing-meta b {
+    color: var(--pink);
+    letter-spacing: 0.15em;
+  }
+  .missing-actions {
+    display: flex;
+    gap: 9px;
+    margin-top: 4px;
+  }
+  .missing-actions a {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 255, 229, 0.38);
+    border-radius: 7px;
+    background:
+      linear-gradient(180deg, rgba(0, 255, 229, 0.13), rgba(0, 255, 229, 0.035)),
+      rgba(0, 0, 0, 0.22);
+    color: var(--cyan);
+    font-size: 0.59rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    padding: 0 19px;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+  .missing-actions a:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 22px rgba(0, 255, 229, 0.16);
+  }
+  .missing-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    border-top: 1px solid rgba(0, 255, 229, 0.13);
+    padding: 12px 16px;
+    color: rgba(127, 146, 182, 0.76);
+    font-size: 0.5rem;
+    font-weight: 900;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+  }
+  .missing-foot strong {
+    color: var(--cyan);
+  }
+  @media (max-width: 580px) {
+    body {
+      overflow-y: auto;
+      padding: 0;
+    }
+    .missing-frame {
+      width: 100%;
+      min-height: 100dvh;
+      border-radius: 0;
+    }
+    .window-name {
+      display: none;
+    }
+    .missing-body {
+      grid-template-columns: 1fr;
+      padding: 18px 13px 24px;
+    }
+    .missing-code {
+      display: flex;
+      min-height: 60px;
+      justify-content: center;
+      gap: 13px;
+    }
+    .missing-code span {
+      writing-mode: initial;
+      transform: none;
+    }
+  }
+</style>
+</head>
+<body>
+  <main class="missing-frame">
+    <div class="window-bar" aria-hidden="true">
+      <span class="window-controls"><i></i><i></i><i></i></span>
+      <span class="window-name"><b>imagehost</b> // lookup terminal</span>
+      <span class="window-state">asset offline</span>
+    </div>
+    <section class="missing-body">
+      <aside class="missing-code" aria-hidden="true">
+        <strong>404</strong>
+        <span>route failed</span>
+      </aside>
+      <div class="missing-copy">
+        <span class="missing-status">asset unavailable</span>
+        <p class="lookup">$ imagehost open /i/${escapeHtml(displayCode)}</p>
+        <h1>Packet not found.</h1>
+        <p>This capture was deleted or the public link no longer points to a stored image.</p>
+        <div class="missing-meta">
+          <span><b>route</b>/i/${escapeHtml(displayCode)}</span>
+          <span><b>status</b>404</span>
+          <span><b>storage</b>purged</span>
+        </div>
+        <div class="missing-actions">
+          <a href="/">return home</a>
+        </div>
+      </div>
+    </section>
+    <footer class="missing-foot">
+      <span><strong>${escapeHtml(siteName)}</strong> / public asset registry</span>
+      <span>read only</span>
+    </footer>
+  </main>
+</body>
+</html>`
+}
+
 function handleLandingRequest(req, res, mode) {
   const code = sanitizeName(req.params.code || '').replace(/\..+$/, '')
-  if (!code) return res.status(404).send('Not found')
+  const settings = readSettings()
+  if (!code) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    return res.status(404).send(renderMissingPage('', settings))
+  }
 
   const db = readImages()
   const record = db.images.find((i) => i.code === code)
-  if (!record) return res.status(404).send('Not found')
+  if (!record) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    return res.status(404).send(renderMissingPage(code, settings))
+  }
 
   const filePath = path.join(UPLOAD_DIR, record.filename)
-  if (!fs.existsSync(filePath)) return res.status(404).send('File missing')
+  if (!fs.existsSync(filePath)) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    return res.status(404).send(renderMissingPage(code, settings))
+  }
 
   if (mode === 'raw') {
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
     res.setHeader('Content-Type', record.mimeType || 'application/octet-stream')
+    if (String(req.query.download || '') === '1') {
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${sanitizeName(record.originalName)}"`,
+      )
+    }
     return res.sendFile(filePath)
   }
 
@@ -2289,7 +2660,6 @@ function handleLandingRequest(req, res, mode) {
   record.views = (record.views || 0) + 1
   writeImages(db)
 
-  const settings = readSettings()
   const baseUrl = publicBaseUrl(req)
 
   // If the requester is Discordbot or another OG crawler, return the image
