@@ -1897,10 +1897,276 @@ ${author && authorUrl ? `<link rel="author" href="${escapeHtml(authorUrl)}" />` 
       bottom: 11px;
     }
   }
+
+  /* Public packet viewer: compact desktop viewport */
+  .media-shell::after {
+    content: none;
+  }
+  .frame::before {
+    content: none;
+    display: none;
+  }
+  .window-bar {
+    display: flex;
+    min-height: 36px;
+    align-items: center;
+    gap: 13px;
+    padding: 0 14px;
+    border-bottom: 1px solid rgba(0, 255, 229, 0.18);
+    background:
+      linear-gradient(90deg, rgba(0, 255, 229, 0.13), transparent 36%, rgba(255, 43, 214, 0.14)),
+      rgba(1, 7, 18, 0.62);
+    color: rgba(142, 159, 192, 0.84);
+    font-size: 0.5rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .window-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding-right: 13px;
+    border-right: 1px solid rgba(0, 255, 229, 0.17);
+  }
+  .window-controls i {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: #ff5661;
+    box-shadow: 0 0 8px rgba(255, 86, 97, 0.48);
+  }
+  .window-controls i:nth-child(2) {
+    background: #ffc42f;
+    box-shadow: 0 0 8px rgba(255, 196, 47, 0.46);
+  }
+  .window-controls i:nth-child(3) {
+    background: #39ff8a;
+    box-shadow: 0 0 8px rgba(57, 255, 138, 0.44);
+  }
+  .window-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+  }
+  .window-title b {
+    color: var(--cyan);
+    letter-spacing: 0.22em;
+  }
+  .window-title span {
+    color: rgba(139, 155, 188, 0.64);
+  }
+  .window-mode {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: auto;
+    color: rgba(137, 154, 185, 0.78);
+  }
+  .window-mode::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 9px rgba(57, 255, 138, 0.7);
+  }
+
+  @media (min-width: 841px) {
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      --packet-gutter: clamp(8px, 1.4vh, 14px);
+      padding: var(--packet-gutter);
+    }
+    .frame {
+      display: flex;
+      flex-direction: column;
+      width: min(98vw, 1380px);
+      max-width: min(98vw, 1380px);
+      height: calc(100dvh - (var(--packet-gutter) * 2));
+      max-height: calc(100dvh - (var(--packet-gutter) * 2));
+      min-height: 0;
+      border-radius: 12px;
+    }
+    .window-bar {
+      flex: 0 0 28px;
+      min-height: 28px;
+    }
+    .frame::after {
+      display: none;
+    }
+    .head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 0 0 auto;
+      min-height: 0;
+      gap: 14px;
+      padding: 9px 15px;
+    }
+    .head-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .head-label,
+    .head-brand small {
+      font-size: 0.46rem;
+    }
+    .head-brand .kicker,
+    .head-brand small {
+      padding-left: 12px;
+      border-left: 1px solid rgba(0, 255, 229, 0.14);
+    }
+    .head-brand small {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .head-brand .kicker::before {
+      height: 21px;
+    }
+    .head .meta span {
+      min-height: 21px;
+    }
+    .viewer {
+      flex: 1 1 auto;
+      min-height: 0;
+      grid-template-columns: 52px minmax(0, 1fr) minmax(270px, 302px);
+      gap: 10px;
+      padding: 10px;
+    }
+    .route-rail {
+      height: 100%;
+      min-height: 0;
+      padding: 10px 6px;
+    }
+    .route-rail strong {
+      width: 34px;
+      height: 34px;
+    }
+    .media-shell,
+    .info-panel {
+      height: 100%;
+      min-height: 0;
+    }
+    .media-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 9px;
+    }
+    .media-topline {
+      flex: 0 0 auto;
+      min-height: 25px;
+      padding: 0 5px 6px;
+    }
+    .media-readout {
+      flex: 0 0 auto;
+    }
+    .media-readout span {
+      min-height: 21px;
+      padding: 0 7px;
+    }
+    .img-wrap {
+      flex: 1 1 auto;
+      height: auto;
+      min-height: 0;
+      border-radius: 7px;
+    }
+    .img-wrap img {
+      max-width: calc(100% - 28px);
+      max-height: calc(100% - 28px);
+    }
+    .viewport-tag {
+      right: 12px;
+      bottom: 10px;
+      padding: 5px 7px;
+    }
+    .media-bottom {
+      flex: 0 0 auto;
+      min-height: 27px;
+      padding: 6px 3px 0;
+    }
+    .info-panel {
+      overflow: hidden;
+      align-content: start;
+      gap: 8px;
+      padding: 10px;
+    }
+    .inspector-label {
+      margin-bottom: 7px;
+    }
+    .packet-badge {
+      min-height: 21px;
+    }
+    .info-panel h1 {
+      margin: 8px 0 4px;
+      font-size: clamp(0.95rem, 1.35vw, 1.18rem);
+    }
+    .info-subtitle {
+      font-size: 0.58rem;
+    }
+    .packet-command {
+      padding: 7px 9px;
+    }
+    .info-grid {
+      gap: 6px;
+    }
+    .info-grid div {
+      min-height: 30px;
+      padding: 6px 7px;
+    }
+    .primary-actions {
+      gap: 7px;
+      margin-top: auto;
+    }
+    .raw-button,
+    .copy-button {
+      min-height: 37px;
+    }
+    .foot {
+      flex: 0 0 auto;
+      min-height: 0;
+      padding: 8px 14px 9px;
+    }
+    .foot a {
+      min-height: 26px;
+      padding: 0 9px;
+    }
+  }
+  @media (min-width: 841px) and (max-width: 1080px) {
+    .head-brand small,
+    .head .meta span:last-child {
+      display: none;
+    }
+  }
+  @media (max-width: 620px) {
+    .window-bar {
+      min-height: 32px;
+      gap: 10px;
+      padding: 0 10px;
+    }
+    .window-title span {
+      display: none;
+    }
+  }
 </style>
 </head>
 <body>
   <main class="frame" style="--accent: ${escapeHtml(accent)}; --packet-image: url('${escapeHtml(rawUrl)}');">
+    <div class="window-bar" aria-hidden="true">
+      <span class="window-controls"><i></i><i></i><i></i></span>
+      <span class="window-title"><b>imagehost</b><span>// asset viewport</span></span>
+      <span class="window-mode">read only</span>
+    </div>
     <div class="head">
       <div class="head-brand">
         <span class="head-label">public asset online</span>
